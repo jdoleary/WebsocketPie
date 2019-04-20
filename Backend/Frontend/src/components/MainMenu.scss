@@ -1,0 +1,21 @@
+@import "../Global.scss";
+body {
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    margin:0;
+}
+.screen {
+    background-color:#d8d8d8;
+    padding:$space;
+    height:100vh;
+    max-width:100vw;
+    box-sizing: border-box;
+    &.dead {
+        filter: grayscale(70%);
+    }
+}
+.server-status{
+    position: absolute;
+    bottom: $space;
+}

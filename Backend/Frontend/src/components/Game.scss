@@ -1,0 +1,86 @@
+
+@import "../Global.scss";
+.btn {
+    padding: $space $space*2;
+    margin:0 $space;
+    background-color:black;
+    text-align: center;
+    color:white;
+    border-radius: $borderRadius;
+    cursor: pointer;
+    &.disabled{
+        opacity: 0.7;
+    }
+}
+
+.player-row {
+    display:flex;
+    margin:$space;
+    align-items: center;
+    height:$space*6;
+    cursor:pointer;
+    border-radius: $borderRadius;
+    background-color:#5667ff;
+
+    &.disabled {
+        background-color:#aaa;
+        .name{
+            pointer-events:none;
+        }
+    }
+    &:hover{
+        box-shadow: 0px 3px 10px 0px rgba(0,0,0,0.75);
+    }
+
+    .icon {
+        margin:16px 0 16px 16px;
+    }
+
+    .name {
+        flex: 1;
+        height: 100%;
+        min-width: 200px;
+        display: flex;
+        align-items: center;
+        padding-left:$space;
+    }
+    &.dead {
+        outline: 2px solid black;
+    }
+
+}
+
+$card-width:90vw;
+$card-height-to-width-ratio: 1.55;
+// $card-width-to-height-ratio: 0.64285714286;
+$card-height:$card-width*$card-height-to-width-ratio;
+.card{
+    width:$card-width;
+    height:$card-height;
+
+    position:fixed;
+    top:50%;
+    margin-left:auto;
+    margin-right:auto;
+    margin-top: -$card-height/2;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color:#621414;
+    color:white;
+    transition: all 0.5s ease-out;
+    border-radius: 20px;
+    overflow:hidden;
+    &.dismissed {
+        top:auto;
+        bottom:100%;
+    }
+    video{
+        position:absolute;
+        z-index: -1;
+    }
+}
