@@ -23,3 +23,8 @@ Messages that CLIENTS should listen for:
 - Implement Client leave room
 - Should support rejoining if player disconnect
 - Room should enforce client type (game name) and version
+
+# How to Run
+`npm start`
+and 
+`node ./example/tryIt.js` in another process

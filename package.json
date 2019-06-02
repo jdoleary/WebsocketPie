@@ -7,8 +7,6 @@
     "test": "tape ./src/__tests__/**/*.js"
   },
   "dependencies": {
-    "express": "^4.16.4",
-    "socket.io": "^2.2.0",
     "ws": "^7.0.0"
   },
   "devDependencies": {
