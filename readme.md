@@ -7,24 +7,19 @@ Echo Server is a client-agnostic socket server, generally designed for turn-base
 - network.ts
     - Holds rooms, handles socket specifics
 - room.ts
-    - A group of clients and a single Game instance
-    - Manages all games messages for the room including resetting the game instance
-- game.ts
-    - Handles game messages (still agnostic to which game)
+    - A group of clients playing the same game
 
 # API
 network.ts provides the main socket API.
-Socket.io messages that SERVER is listening for:
-- 'data' : Data from one client, to be echoed to other client(s) in the same room
-- 'joinRoom' : When a client tries to join a room
-- 'resetRoom' : To be removed, for comepletely remakings a room.
-- 'leaveRoom' : TODO: When a client leaves a room
+Messages that SERVER is listening for:
+- {type: 'data'} : Data from one client, to be echoed to other client(s) in the same room
+- {type: 'joinRoom'} : When a client tries to join a room
 
-Socket.io messages that CLIENTS should listen for:
-- 'client-data' : Info about all clients connected to a room.  Useful for displaying the state of the room lobby for example.
-- 'data' : Data send from the server that is an echo of data that the server recieved from another client
+Messages that CLIENTS should listen for:
+- {type:'client'} : Info about all clients connected to a room.  Useful for displaying the state of the room lobby for example.
+- {type: ANYTHING ELSE} : Data send from the server that is an echo of data that the server recieved from another client.  This is up to the client to implement
 
 # Tasks
-- Should support rejoining if player disconnects
-- Design API
-- Use `ws` instead of socket.io
+- Implement Client leave room
+- Should support rejoining if player disconnect
+- Room should enforce client type (game name) and version

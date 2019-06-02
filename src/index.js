@@ -1,2 +1,2 @@
-import {startServer} from './network';
+const {startServer} = require('./network');
 startServer();
