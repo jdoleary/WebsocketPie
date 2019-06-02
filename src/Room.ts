@@ -57,6 +57,7 @@ export default class Room {
     this.emit('client-data', this.clients);
   }
   
+  // Emit the event name and data to all clients in a Room
   private emit(eventName:string, data:object){
     console.log(chalk.blue(`Room | emit: ${eventName}, ${JSON.stringify(data, null, 2)}`));
     this.io.to(this.name).emit(eventName, data);

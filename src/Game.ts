@@ -3,11 +3,9 @@ import { GameState, Player, SocketData} from './interfaces';
 
 export default class Game {
     state: GameState;
-    currentResultCardId: number;
     onGameEnded: ()=>void;
     emit: (name:string, data:object)=>void;
     constructor(onGameEnded:()=>void, emit:(name:string, data:object)=>void){
-        this.currentResultCardId = 0;
         this.state = {
             turn: 0,
             inProgress:false,

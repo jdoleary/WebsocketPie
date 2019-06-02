@@ -1,9 +1,20 @@
-# Game Lobby
-A node, socket.io game lobby that hosts the server and the frontend.  The frontend is contained inside of the server so that the server can host the frontend content.  This project is mainly a starter for **Turn-based js multiplayer games**
+# Info
+Echo Server is a client-agnostic socket server, generally designed for turn-based multiplayer games.  It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version.  Then messages are send from client to server, which echos the message to all other clients in the room.  In this way, the server doesn't care about the content of the game and can fascilitate any game (if latency allows).
 
-# Tech
-Typescript
-React
+# Files (abstract to specific)
+- index.ts
+    - Starts the Echo server.
+- network.ts
+    - Holds rooms, handles socket specifics
+- room.ts
+    - A group of clients and a single Game instance
+    - Manages all games messages for the room including resetting the game instance
+- game.ts
+    - Handles game messages (still agnostic to which game)
 
-# Develop
-Run parcel to automatically update the frontend with `npm start` from within `backend/frontend`.  However do not go to `localhost:1234` as it suggests, instead start the backend with `npm start` from `backend/` and it will server the html.  This is necessary so that the socket can connect
+# Tasks
+- Remove frontend (it should be in a separate repo)
+- Send client IDs along with echoed messages so that client can send messages to another specific client in the room
+- Remove all server side game logic
+- Should support rejoining if player disconnects
+- Design API
