@@ -25,8 +25,6 @@ Socket.io messages that CLIENTS should listen for:
 - 'data' : Data send from the server that is an echo of data that the server recieved from another client
 
 # Tasks
-- Remove frontend (it should be in a separate repo)
-- Send client IDs along with echoed messages so that client can send messages to another specific client in the room
-- Remove all server side game logic
 - Should support rejoining if player disconnects
 - Design API
+- Use `ws` instead of socket.io
