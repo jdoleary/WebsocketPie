@@ -25,7 +25,7 @@ class RoomManager {
         const room = this.rooms[roomProps.name] ? this.rooms[roomProps.name] : this.rooms[roomProps.name] = new Room(roomProps)
         // Add metadata to client object
         client._echoServer = { name, room }
-        return room.addClient(client);
+        return room.addClient(client, roomProps);
 
     }
     onData(client, msg) {

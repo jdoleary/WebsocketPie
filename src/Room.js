@@ -11,7 +11,10 @@ class Room {
     this.clients = [];
   }
   // client is a ws client object
-  addClient(client) {
+  addClient(client, roomProps) {
+    if(!(this.name == roomProps.name && this.app == roomProps.app && this.version == roomProps.version)){
+      return false
+    }
     const preExistingClient = this.getClient(client._echoServer && client._echoServer.name);
     // Add a new client if client doesn't already exist
     if (!preExistingClient) {
