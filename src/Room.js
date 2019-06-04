@@ -20,7 +20,7 @@ class Room {
     if (!preExistingClient) {
       this.clients.push(client);
       // Send the names of the clients to all clients in this room
-      this.emit({type:'client',clients:this.clients.map(c=>c.name)})
+      this.emit({type:'client',clients:this.clients.map(c=>c._echoServer.name)})
       return true
     }
   }
@@ -46,7 +46,7 @@ class Room {
   // Emit the event name and data to all clients in a Room
   emit(data) {
     console.log(chalk.blue(`Room | emit, ${JSON.stringify(data, null, 2)}`));
-    this.clients.forEach(c => c.send(data))
+    this.clients.forEach(c => c.send(JSON.stringify(data)))
   }
 
   getClient(name) {

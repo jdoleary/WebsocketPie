@@ -1,4 +1,4 @@
-const test = require('tape');
+const test = require('tape')
 const RoomManager = require('../RoomManager')
 
 const makeFakeWSClientObject = () => ({

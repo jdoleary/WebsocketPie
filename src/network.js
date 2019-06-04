@@ -11,20 +11,25 @@ function startServer() {
 
   wss.on('connection', client => {
     console.log(chalk.blue('a user connected'));
-    client.on('message', msg => {
-      switch (msg.type) {
-        case 'joinRoom':
-          rm.addClientToRoom(client, msg)
-          break
-        case 'data':
-          rm.onData(client, msg)
-          break
-        default:
-          console.log(chalk.yellow(`WARN: Message not understood: ${JSON.stringify(msg, null, 2)}`))
+    client.on('message', data => {
+      try {
+        const msg = JSON.parse(data)
+        switch (msg.type) {
+          case 'joinRoom':
+            rm.addClientToRoom(client, msg)
+            break
+          case 'data':
+            rm.onData(client, msg)
+            break
+          default:
+            console.log(chalk.yellow(`WARN: Message not understood: ${JSON.stringify(msg, null, 2)}`))
+        }
+      } catch (e) {
+        console.error(e)
       }
     })
   })
 }
 
 
-module.exports = {startServer}
+module.exports = { startServer }
