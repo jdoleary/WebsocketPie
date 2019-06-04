@@ -10,7 +10,8 @@
     "ws": "^7.0.0"
   },
   "devDependencies": {
-    "chalk": "^2.4.2"
+    "chalk": "^2.4.2",
+    "tape": "^4.10.2"
   },
   "author": "Jordan O'Leary",
   "license": "ISC",

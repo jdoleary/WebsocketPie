@@ -1,24 +1,27 @@
 const chalk = require('chalk')
 class Room {
-  constructor(name) {
+  constructor(properties) {
     // Room name
-    this.name = name;
+    this.name = properties.name;
+    // Room has a specific app name and version so only clients with the same
+    // app/version can join the same room
+    this.app = properties.app;
+    this.version = properties.version;
     // ws Client objects in this room
     this.clients = [];
   }
   // client is a ws client object
   addClient(client) {
-    console.log(chalk.blue(`Room | addClient ${JSON.stringify(client, null, 2)}`));
     const preExistingClient = this.getClient(client._echoServer && client._echoServer.name);
     // Add a new client if client doesn't already exist
     if (!preExistingClient) {
       this.clients.push(client);
       // Send the names of the clients to all clients in this room
       this.emit({type:'client',clients:this.clients.map(c=>c.name)})
+      return true
     }
   }
   removeClient(client) {
-    console.log(chalk.blue(`Room | removeClient ${JSON.stringify(client, null, 2)}`));
     const preExistingClient = this.getClient(client._echoServer && client._echoServer.name);
     if (preExistingClient) {
       const index = this.clients.indexOf(client)
@@ -39,7 +42,7 @@ class Room {
 
   // Emit the event name and data to all clients in a Room
   emit(data) {
-    console.log(chalk.blue(`Room | emit ${eventName}, ${JSON.stringify(data, null, 2)}`));
+    console.log(chalk.blue(`Room | emit, ${JSON.stringify(data, null, 2)}`));
     this.clients.forEach(c => c.send(data))
   }
 
