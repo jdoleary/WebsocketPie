@@ -12,8 +12,24 @@ Echo Server is a client-agnostic socket server, generally designed for turn-base
 # API
 network.ts provides the main socket API.
 Messages that SERVER is listening for:
-- {type: 'data'} : Data from one client, to be echoed to other client(s) in the same room
-- {type: 'joinRoom'} : When a client tries to join a room
+
+Data from one client, to be echoed to other client(s) in the same room
+``` js
+{type: 'data'} 
+```
+When a client tries to join a room
+``` js
+{
+    type: 'joinRoom',
+    name: 'string', // user handle
+    roomProps: {
+        name: 'string', // room name
+        app: 'string', // app name
+        version: 'string', // app version
+    }
+
+} 
+```
 
 Messages that CLIENTS should listen for:
 - {type:'client'} : Info about all clients connected to a room.  Useful for displaying the state of the room lobby for example.
@@ -22,7 +38,7 @@ Messages that CLIENTS should listen for:
 # Tasks
 - Implement Client leave room
 - Should support rejoining if player disconnect
-- Room should enforce client type (game name) and version
+    - https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
 
 # How to Run
 `npm start`
