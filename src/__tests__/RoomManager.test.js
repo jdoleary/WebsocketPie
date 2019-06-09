@@ -96,6 +96,9 @@ test('Client in same room recieved message', t => {
         app: 'Messagrrrrr',
         version: '1.0.0'
     }
+    // Mock Date:
+    const nowDate = (new Date(1234)).getTime()
+    Date.now = ()=>nowDate
     // Host room
     const bill = new FakeClient()
     rm.addClientToRoom(bill, { name: 'Bill', roomProps })
@@ -118,7 +121,10 @@ test('Client in same room recieved message', t => {
                 type: 'data',
                 content: 'Five Finger Palm Heart Exploding Technique',
                 damage: 9001,
-                _echoServer: { fromClient: 'Beatrice' }
+                _echoServer: { 
+                    fromClient: 'Beatrice',
+                    time: nowDate
+                }
             }
         ], 'Bill gets message from Beatrice')
     t.equal(goku.messages.length, 1, ' Assert that goku did not get the message because he is in a different room')

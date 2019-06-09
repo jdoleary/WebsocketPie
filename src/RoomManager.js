@@ -34,7 +34,8 @@ class RoomManager {
         if (this.rooms[room.name]) {
             // Send the name of the client sending the data along with the data
             msg._echoServer = {
-                fromClient: client._echoServer && client._echoServer.name
+                fromClient: client._echoServer && client._echoServer.name,
+                time: Date.now()
             }
             this.rooms[room.name].onData(msg);
         }
