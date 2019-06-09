@@ -1,4 +1,6 @@
 const chalk = require('chalk')
+const _get = require('lodash.get')
+
 const Room = require('./Room')
 
 
@@ -33,10 +35,10 @@ class RoomManager {
         const { room } = client && client._echoServer
         if (this.rooms[room.name]) {
             // Send the name of the client sending the data along with the data
-            msg._echoServer = {
-                fromClient: client._echoServer && client._echoServer.name,
+            msg._echoServer = Object.assign({}, msg._echoServer, {
+                fromClient: _get(client, '_echoServer.name'),
                 time: Date.now()
-            }
+            })
             this.rooms[room.name].onData(msg);
         }
 

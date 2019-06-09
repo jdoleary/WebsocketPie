@@ -1,5 +1,6 @@
 const chalk = require('chalk')
 const WebSocket = require('ws');
+const _get = require('lodash.get')
 
 const RoomManager = require('./RoomManager')
 function startServer() {
@@ -14,7 +15,7 @@ function startServer() {
     client.on('message', data => {
       try {
         const msg = JSON.parse(data)
-        switch (msg.type) {
+        switch (_get(msg,'_echoServer.type')) {
           case 'joinRoom':
             rm.addClientToRoom(client, msg)
             break

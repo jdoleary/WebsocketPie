@@ -20,7 +20,7 @@ class Room {
     if (!preExistingClient) {
       this.clients.push(client);
       // Send the names of the clients to all clients in this room
-      this.emit({type:'client',clients:this.clients.map(c=>c._echoServer.name)})
+      this.emit({_echoServer:{type:'client'},clients:this.clients.map(c=>c._echoServer.name)})
       return true
     }
   }
@@ -30,7 +30,7 @@ class Room {
       const index = this.clients.indexOf(client)
       this.clients.splice(index,1)
       // Send the names of the clients to all clients in this room
-      this.emit({type:'client',clients:this.clients.map(c=>c.name)})
+      this.emit({_echoServer:{type:'client'},clients:this.clients.map(c=>c.name)})
       return true
     } else {
       console.log(chalk.red(`Cannot remove client ${client._echoServer && client._echoServer.name}, client not found.`))

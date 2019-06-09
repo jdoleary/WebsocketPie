@@ -98,7 +98,7 @@ test('Client in same room recieved message', t => {
     }
     // Mock Date:
     const nowDate = (new Date(1234)).getTime()
-    Date.now = ()=>nowDate
+    Date.now = () => nowDate
     // Host room
     const bill = new FakeClient()
     rm.addClientToRoom(bill, { name: 'Bill', roomProps })
@@ -108,27 +108,29 @@ test('Client in same room recieved message', t => {
     rm.addClientToRoom(goku, { name: 'Goku', roomProps: { name: 'otherRoom', app: 'DBZ', version: 'infinity' } })
     // Pretent beatrice sends message through socket which would send it to the room manager:
     const message = {
-        type: 'data', // This is not tested here but would be used by network.js
         content: 'Five Finger Palm Heart Exploding Technique',
-        damage: 9001
+        damage: 9001,
+        _echoServer: {
+            type: 'data', // This is not tested here but would be used by network.js
+        }
     }
     rm.onData(beatrice, message)
     t.deepEqual(bill.messages,
         [
-            { type: 'client', clients: ['Bill'] },
-            { type: 'client', clients: ['Bill', 'Beatrice'] },
+            { _echoServer: { type: 'client' }, clients: ['Bill'] },
+            { _echoServer: { type: 'client' }, clients: ['Bill', 'Beatrice'] },
             {
-                type: 'data',
                 content: 'Five Finger Palm Heart Exploding Technique',
                 damage: 9001,
-                _echoServer: { 
+                _echoServer: {
+                    type: 'data',
                     fromClient: 'Beatrice',
                     time: nowDate
                 }
             }
         ], 'Bill gets message from Beatrice')
     t.equal(goku.messages.length, 1, ' Assert that goku did not get the message because he is in a different room')
-    t.equal(goku.messages[0].type, 'client', 'Only one message, that of Goku joining the room')
+    t.equal(goku.messages[0]._echoServer.type, 'client', 'Only one message, that of Goku joining the room')
     t.end()
 
 })
