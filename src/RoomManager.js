@@ -10,7 +10,7 @@ class RoomManager {
         // name is client's handle, roomProps.name is room name
         const { name, roomProps } = msg;
         // Guard on required props
-        if(!(name && roomProps.name && roomProps.app && roomProps.version)){
+        if (!(name && roomProps.name && roomProps.app && roomProps.version)) {
             console.log(chalk.red(`Err: required arguments: name, roomProps.name in ${JSON.stringify(msg, null, 2)}`))
             return false
         }
@@ -33,7 +33,9 @@ class RoomManager {
         const { room } = client && client._echoServer
         if (this.rooms[room.name]) {
             // Send the name of the client sending the data along with the data
-            msg._echoServer.fromClient = socket._echoServer && socket._echoServer.name
+            msg._echoServer = {
+                fromClient: client._echoServer && client._echoServer.name
+            }
             this.rooms[room.name].onData(msg);
         }
 

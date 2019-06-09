@@ -36,6 +36,11 @@ Messages that CLIENTS should listen for:
 - {type: ANYTHING ELSE} : Data send from the server that is an echo of data that the server recieved from another client.  This is up to the client to implement
 
 # Tasks
+- Integration.test.js
+    - Prove that messages get passed
+- Whisper messages
+- Send client ID with communication so clients have greater power on decision making,
+can't spoof who it's coming from
 - Implement Client leave room
 - Should support rejoining if player disconnect
     - https://github.com/websockets/ws#how-to-detect-and-close-broken-connections

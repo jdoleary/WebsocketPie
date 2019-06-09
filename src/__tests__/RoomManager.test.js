@@ -2,7 +2,7 @@ const test = require('tape')
 const RoomManager = require('../RoomManager')
 
 const makeFakeWSClientObject = () => ({
-    send:()=>{}
+    send: () => { }
 })
 
 test('Host Room', function (t) {
@@ -83,3 +83,46 @@ test('Do not let client join room with differing roomProps', function (t) {
     t.equal(actual, expected);
     t.end()
 });
+
+// Test messaging with fake client
+function FakeClient() {
+    this.messages = []
+    this.send = msg => this.messages.push(JSON.parse(msg))
+}
+test('Client in same room recieved message', t => {
+    const rm = new RoomManager()
+    const roomProps = {
+        name: 'MessageRoom',
+        app: 'Messagrrrrr',
+        version: '1.0.0'
+    }
+    // Host room
+    const bill = new FakeClient()
+    rm.addClientToRoom(bill, { name: 'Bill', roomProps })
+    const beatrice = new FakeClient()
+    rm.addClientToRoom(beatrice, { name: 'Beatrice', roomProps })
+    const goku = new FakeClient()
+    rm.addClientToRoom(goku, { name: 'Goku', roomProps: { name: 'otherRoom', app: 'DBZ', version: 'infinity' } })
+    // Pretent beatrice sends message through socket which would send it to the room manager:
+    const message = {
+        type: 'data', // This is not tested here but would be used by network.js
+        content: 'Five Finger Palm Heart Exploding Technique',
+        damage: 9001
+    }
+    rm.onData(beatrice, message)
+    t.deepEqual(bill.messages,
+        [
+            { type: 'client', clients: ['Bill'] },
+            { type: 'client', clients: ['Bill', 'Beatrice'] },
+            {
+                type: 'data',
+                content: 'Five Finger Palm Heart Exploding Technique',
+                damage: 9001,
+                _echoServer: { fromClient: 'Beatrice' }
+            }
+        ], 'Bill gets message from Beatrice')
+    t.equal(goku.messages.length, 1, ' Assert that goku did not get the message because he is in a different room')
+    t.equal(goku.messages[0].type, 'client', 'Only one message, that of Goku joining the room')
+    t.end()
+
+})
