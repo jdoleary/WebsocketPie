@@ -43,6 +43,13 @@ class RoomManager {
         }
 
     }
+    onDisconnect(client){
+      const room = _get(client, '_echoServer.room')
+      // If client belongs to a room, leave room when connection closes
+      if(room){
+        room.removeClient(client)
+      }
+    }
 }
 
 module.exports = RoomManager

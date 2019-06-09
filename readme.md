@@ -42,6 +42,7 @@ Messages that CLIENTS should listen for:
 
 # Tasks
 - Whisper messages
+- Investigate 2 users connecting for one page
 - Implement Client leave room
 - Should support rejoining if player disconnect
     - https://github.com/websockets/ws#how-to-detect-and-close-broken-connections

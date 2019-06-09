@@ -29,6 +29,9 @@ function startServer() {
         console.error(e)
       }
     })
+    client.on('close', () => {
+      rm.onDisconnect(client)
+    })
   })
 }
 
