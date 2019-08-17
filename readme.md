@@ -1,25 +1,33 @@
-# Info
+# Echo Server
+
+## Info
+
 Echo Server is a client-agnostic web socket server, generally designed for turn-based multiplayer games.  It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version.  Then messages are send from client to server, which echos the message to all other clients in the room.  In this way, the server doesn't care about the content of the game and can fascilitate any game (if latency allows).
 
-# Files (abstract to specific)
-- index.js
-    - Starts the Echo server.
-- Network.js
-    - Handles socket specifics, parses JSON
-- RoomManager.js
-    - Holds rooms, handles adding clients to rooms, passes on data to room with metadata
-- Room.js
-    - A group of clients playing the same game
+## Files (abstract to specific)
 
-# API
+- index.js
+  - Starts the Echo server.
+- Network.js
+  - Handles socket specifics, parses JSON
+- RoomManager.js
+  - Holds rooms, handles adding clients to rooms, passes on data to room with metadata
+- Room.js
+  - A group of clients playing the same game
+
+## API
+
 network.ts provides the main socket API.
 Messages that SERVER is listening for:
 
 Data from one client, to be echoed to other client(s) in the same room
+
 ``` js
 {_echoServer: {type: 'data'}}
 ```
+
 When a client tries to join a room
+
 ``` js
 {
     name: 'string', // user handle
@@ -33,16 +41,17 @@ When a client tries to join a room
 
     }
 
-} 
+}
 ```
 
 Messages that CLIENTS should listen for:
+
 - {_echoServer: {type:'client'}} : Info about all clients connected to a room.  Useful for displaying the state of the room lobby for example.
 - ANYTHING ELSE : Data send from the server that is an echo of data that the server recieved from another client.  This is up to the client to implement
 
-# Tasks
+## Tasks
+
 - Whisper messages
 - Investigate 2 users connecting for one page
 - Implement Client leave room
-- Should support rejoining if player disconnect
-    - https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
+- [Should support rejoining if player disconnect](https://github.com/websockets/ws#how-to-detect-and-close-broken-connections)
