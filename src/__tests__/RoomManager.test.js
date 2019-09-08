@@ -14,7 +14,7 @@ test('Host Room', function (t) {
     }
     const didSucceed = rm.addClientToRoom(makeFakeWSClientObject(), { name: 'Bill', roomProps })
 
-    t.equal(rm.rooms[roomProps.name].clients[0]._echoServer.name, 'Bill');
+    t.equal(rm.rooms[roomProps.name].clients[0].name, 'Bill');
     t.equal(didSucceed, true)
     t.end()
 });
@@ -30,7 +30,7 @@ test('Join Room', function (t) {
     // New client join room
     const didSucceed = rm.addClientToRoom(makeFakeWSClientObject(), { name: 'Beatrice', roomProps })
 
-    t.equal(rm.rooms[roomProps.name].clients[1]._echoServer.name, 'Beatrice');
+    t.equal(rm.rooms[roomProps.name].clients[1].name, 'Beatrice');
     t.equal(didSucceed, true)
     t.end()
 });
@@ -56,7 +56,7 @@ test('Limit joining to 1 room at a time', function (t) {
     rm.addClientToRoom(clientBeatrice, { name: 'Beatrice', roomProps: room2Props })
 
     t.equal(rm.rooms[roomProps.name].clients.length, 1);
-    t.equal(rm.rooms[room2Props.name].clients[0]._echoServer.name, 'Beatrice');
+    t.equal(rm.rooms[room2Props.name].clients[0].name, 'Beatrice');
     t.end()
 });
 test('Do not let client join room with differing roomProps', function (t) {
@@ -108,29 +108,30 @@ test('Client in same room recieved message', t => {
     rm.addClientToRoom(goku, { name: 'Goku', roomProps: { name: 'otherRoom', app: 'DBZ', version: 'infinity' } })
     // Pretent beatrice sends message through socket which would send it to the room manager:
     const message = {
-        content: 'Five Finger Palm Heart Exploding Technique',
-        damage: 9001,
-        _echoServer: {
-            type: 'data', // This is not tested here but would be used by network.js
+        type: 'data', // This is not tested here but would be used by network.js
+        payload: {
+            content: 'Five Finger Palm Heart Exploding Technique',
+            damage: 9001,
         }
     }
     rm.onData(beatrice, message)
     t.deepEqual(bill.messages,
         [
-            { _echoServer: { type: 'client' }, clients: ['Bill'] },
-            { _echoServer: { type: 'client' }, clients: ['Bill', 'Beatrice'] },
+            { type: 'client', clients: ['Bill'] },
+            { type: 'client', clients: ['Bill', 'Beatrice'] },
             {
-                content: 'Five Finger Palm Heart Exploding Technique',
-                damage: 9001,
-                _echoServer: {
-                    type: 'data',
-                    fromClient: 'Beatrice',
-                    time: nowDate
+                type: 'data',
+                fromClient: 'Beatrice',
+                time: nowDate,
+                payload: {
+                    content: 'Five Finger Palm Heart Exploding Technique',
+                    damage: 9001,
+
                 }
             }
         ], 'Bill gets message from Beatrice')
     t.equal(goku.messages.length, 1, ' Assert that goku did not get the message because he is in a different room')
-    t.equal(goku.messages[0]._echoServer.type, 'client', 'Only one message, that of Goku joining the room')
+    t.equal(goku.messages[0].type, 'client', 'Only one message, that of Goku joining the room')
     t.end()
 
 })

@@ -23,23 +23,23 @@ Messages that SERVER is listening for:
 Data from one client, to be echoed to other client(s) in the same room
 
 ``` js
-{_echoServer: {type: 'data'}}
+{
+    type: 'data',
+    payload: <client defined payload>
+}
 ```
 
 When a client tries to join a room
 
 ``` js
 {
-    name: 'string', // user handle
+    type: 'joinRoom',
+    name: string, // The name of the user who sent the message 
     roomProps: {
-        name: 'string', // room name
-        app: 'string', // app name
-        version: 'string', // app version
+        name: string, // room name
+        app: string, // app name
+        version: string, // app version
     },
-    _echoServer: {
-        type: 'joinRoom',
-
-    }
 
 }
 ```

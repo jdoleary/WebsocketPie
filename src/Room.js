@@ -1,4 +1,5 @@
 const chalk = require('chalk')
+const log = require('./Log')
 class Room {
   constructor(properties) {
     // Room name
@@ -15,42 +16,43 @@ class Room {
     if(!(this.name == roomProps.name && this.app == roomProps.app && this.version == roomProps.version)){
       return false
     }
-    const preExistingClient = this.getClient(client._echoServer && client._echoServer.name);
+    const preExistingClient = this.getClient(client.name);
     // Add a new client if client doesn't already exist
     if (!preExistingClient) {
       this.clients.push(client);
       // Send the names of the clients to all clients in this room
-      this.emit({_echoServer:{type:'client'},clients:this.clients.map(c=>c._echoServer.name)})
+      this.emit({type:'client',clients:this.clients.map(c=>c.name)})
       return true
     }
   }
   removeClient(client) {
-    const preExistingClient = this.getClient(client._echoServer && client._echoServer.name);
+    const preExistingClient = this.getClient(client && client.name);
     if (preExistingClient) {
       const index = this.clients.indexOf(client)
       this.clients.splice(index,1)
       // Send the names of the clients to all clients in this room
-      this.emit({_echoServer:{type:'client'},clients:this.clients.map(c=>c.name)})
+      this.emit({type:'client',clients:this.clients.map(c=>c.name)})
       return true
     } else {
-      console.log(chalk.red(`Cannot remove client ${client._echoServer && client._echoServer.name}, client not found.`))
+      log(chalk.red(`Cannot remove client ${client && client.name}, client not found.`))
       return false
     }
 
   }
   onData(data) {
-    console.log(chalk.blue(`Room | onData ${JSON.stringify(data, null, 2)}`));
+    log(chalk.blue(`Room | onData ${JSON.stringify(data, null, 2)}`));
     this.emit(data)
   }
 
   // Emit the event name and data to all clients in a Room
   emit(data) {
-    console.log(chalk.blue(`Room | emit, ${JSON.stringify(data, null, 2)}`));
+    log(chalk.blue(`Room | emit, ${JSON.stringify(data, null, 2)}`));
+    log('clients', this.clients)
     this.clients.forEach(c => c.send(JSON.stringify(data)))
   }
 
   getClient(name) {
-    return this.clients.find(c => c._echoServer && c._echoServer.name === name);
+    return this.clients.find(c => c && c.name === name);
   }
 }
 
