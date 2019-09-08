@@ -18,7 +18,7 @@ Echo Server is a client-agnostic web socket server, generally designed for turn-
 ## API
 
 network.ts provides the main socket API.
-Messages that SERVER is listening for:
+Messages that server recieves from the clients:
 
 Data from one client, to be echoed to other client(s) in the same room
 
@@ -44,14 +44,35 @@ When a client tries to join a room
 }
 ```
 
-Messages that CLIENTS should listen for:
+Messages that clients recieve from the server:
 
-- {_echoServer: {type:'client'}} : Info about all clients connected to a room.  Useful for displaying the state of the room lobby for example.
-- ANYTHING ELSE : Data send from the server that is an echo of data that the server recieved from another client.  This is up to the client to implement
+Client:  Info about all clients connected to a room.  Useful for displaying the state of the room lobby for example.
+
+```js
+{
+    type:'client',
+    clients: ['Neo', 'Trinity', 'Morpheus']
+}
+```
+
+Data : Data send from the server that is an echo of data that the server recieved from another client.  This is up to the client to implement
+
+```js
+{
+    type: 'data',
+    fromClient: 'Trinity',
+    time: 1567963601131, // millis since epoch
+    payload: {
+        // client defined
+        // This is the magic of echo server that allows it to be client agnostic
+    }
+}
+```
 
 ## Tasks
 
 - Whisper messages
+- Support for client uuids
 - Investigate 2 users connecting for one page
 - Implement Client leave room
 - [Should support rejoining if player disconnect](https://github.com/websockets/ws#how-to-detect-and-close-broken-connections)
