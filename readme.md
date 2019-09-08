@@ -15,10 +15,7 @@ Echo Server is a client-agnostic web socket server, generally designed for turn-
 - Room.js
   - A group of clients playing the same game
 
-## API
-
-network.ts provides the main socket API.
-Messages that server recieves from the clients:
+## API: from client to server
 
 Data from one client, to be echoed to other client(s) in the same room
 
@@ -44,7 +41,7 @@ When a client tries to join a room
 }
 ```
 
-Messages that clients recieve from the server:
+## API: from server to client
 
 Client:  Info about all clients connected to a room.  Useful for displaying the state of the room lobby for example.
 
