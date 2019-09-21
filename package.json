@@ -4,6 +4,7 @@
   "main": "./src/index.js",
   "scripts": {
     "start": "node ./src/index.js",
+    "ngrok": "ngrok http 8080",
     "test": "set NODE_ENV=test&& tape ./src/__tests__/**/*.js"
   },
   "dependencies": {
