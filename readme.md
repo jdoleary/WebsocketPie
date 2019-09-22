@@ -31,8 +31,7 @@ When a client tries to join a room
 ``` js
 {
     type: 'joinRoom',
-    name: string, // The name of the user who sent the message 
-    roomProps: {
+    room: {
         name: string, // room name
         app: string, // app name
         version: string, // app version
@@ -43,12 +42,25 @@ When a client tries to join a room
 
 ## API: from server to client
 
-Client:  Info about all clients connected to a room.  Useful for displaying the state of the room lobby for example.
+Server Assigned Data: Info send to the user after they connect to the server. Useful for informing the client about who they are in the system.
 
 ```js
 {
-    type:'client',
-    clients: ['Neo', 'Trinity', 'Morpheus']
+    type: 'serverAssignedData',
+    clientUuid: 'f0d8368d-85e2-54fb-73c4-2d60374295e3'
+}
+```
+
+Clients In Room: Info about all clients connected to a room. Useful for displaying the state of the room lobby for example.
+
+```js
+{
+    type: 'clientsInRoom',
+    clients: [
+      'c1d8be08-b5ba-4547-a284-aeacedc7fdcc',
+      '386e7b01-22e5-4394-91ae-50866cfef5c9',
+      'f0d8368d-85e2-54fb-73c4-2d60374295e3',
+    ]
 }
 ```
 
@@ -57,7 +69,7 @@ Data : Data send from the server that is an echo of data that the server recieve
 ```js
 {
     type: 'data',
-    fromClient: 'Trinity',
+    clientUuid: 'c1d8be08-b5ba-4547-a284-aeacedc7fdcc', // the client that sent the message
     time: 1567963601131, // millis since epoch
     payload: {
         // client defined

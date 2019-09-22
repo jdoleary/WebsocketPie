@@ -1,59 +1,54 @@
-const chalk = require('chalk')
-
-const log = require('./Log')
-const Room = require('./Room')
-
+const chalk = require('chalk');
+const log = require('./Log');
+const Room = require('./Room');
 
 class RoomManager {
-    constructor() {
-        this.rooms = {}
-    }
-    addClientToRoom(client, msg) {
-        // name is client's handle, roomProps.name is room name
-        const { name, roomProps } = msg;
-        // Guard on required props
-        if (!(name && roomProps.name && roomProps.app && roomProps.version)) {
-            log(chalk.red(`Err: required arguments: name, roomProps.name in ${JSON.stringify(msg, null, 2)}`))
-            return false
-        }
+  constructor() {
+    this.rooms = {};
+  }
 
-        log(chalk.blue(`${JSON.stringify(name)} addClientToRoom: ${roomProps.name}`));
-        if (client && client.room && client.room.removeClient) {
-            // If client is attempting to join a room but already belongs to a room,
-            // remove client from previous room
-            client.room.removeClient(client)
-        }
-        // Get existing room or host new room:
-        const room = this.rooms[roomProps.name] ? this.rooms[roomProps.name] : this.rooms[roomProps.name] = new Room(roomProps)
-        // Add metadata to client object
-        client = Object.assign(client, { name, room })
-        return room.addClient(client, roomProps);
+  addClientToRoom(client, room) {
+    if (!(room.name && room.app && room.version)) {
+      throw new Error(`Err: missing required room values: name, app, or version in ${JSON.stringify(msg, null, 2)}`);
+    }
+    log(chalk.blue(`adding client ${client.uuid} to room ${room.name}`));
+    // If client is attempting to join a room but already belongs to a room,
+    // remove client from previous room
+    if (client.room) {
+      client.room.removeClient(client);
+      delete client.room;
+    }
+    // Get existing room or host new room:
+    if (!this.rooms[room.name]) {
+      this.rooms[room.name] = new Room({
+        name: room.name,
+        app: room.app,
+        version: room.version,
+      });
+    }
+    let room = this.rooms[room.name];
+    // Add metadata to client object
+    client = Object.assign(client, { room });
+    room.addClient(client);
+  }
 
+  onData(client, msg) {
+    if (!client.room) {
+      throw new Error('Err: cannot echo data from a client who is not a member of any room');
     }
-    onData(client, msg) {
-        if(!client || !client.room){
-            return
-        }
-        const { room } = client
-        if (this.rooms[room.name]) {
-            // Send the name of the client sending the data along with the data
-            this.rooms[room.name].onData({
-                type: 'data',
-                fromClient: client.name,
-                time: Date.now(),
-                // The only information that carries over from clients message is the payload
-                payload: msg.payload
-            });
-        }
+    const room = this.rooms[client.room.name];
+    if (!room) {
+      throw new Error('Err: client room does not exist on the server');
+    }
+    room.onData(msg);
+  }
 
+  onDisconnect(client) {
+    const { room } = client;
+    if (room) {
+      room.removeClient(client);
     }
-    onDisconnect(client){
-      const room = client.room
-      // If client belongs to a room, leave room when connection closes
-      if(room){
-        room.removeClient(client)
-      }
-    }
+  }
 }
 
-module.exports = RoomManager
+module.exports = RoomManager;
