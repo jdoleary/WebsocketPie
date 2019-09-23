@@ -44,6 +44,7 @@ function startServer() {
 
     // Setup websocket event listeners.
     client.on('message', data => {
+      log(chalk.blue(`client ${clientUuid} sent message: ${data}`));
       try {
         const msg = JSON.parse(data);
         switch (msg.type) {

@@ -26,10 +26,10 @@ class RoomManager {
         version: room.version,
       });
     }
-    let room = this.rooms[room.name];
+    let roomInstance = this.rooms[room.name];
     // Add metadata to client object
-    client = Object.assign(client, { room });
-    room.addClient(client);
+    client = Object.assign(client, { room: roomInstance });
+    roomInstance.addClient(client);
   }
 
   onData(client, msg) {

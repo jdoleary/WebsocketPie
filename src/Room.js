@@ -14,7 +14,6 @@ class Room {
   // Emit the event name and data to all clients in a Room
   emit(data) {
     log(chalk.blue(`Room | emit, ${JSON.stringify(data, null, 2)}`));
-    log('clients', this.clients);
     this.clients.forEach(c => c.send(JSON.stringify(data)));
   }
 
@@ -31,19 +30,17 @@ class Room {
   }
 
   addClient(client) {
-    if (this.clientIsCurrentlyInRoom(client)) {
-      return;
+    if (!this.clientIsCurrentlyInRoom(client)) {
+      this.clients.push(client);
     }
-    this.clients.push(client);
     this.emitClientsInRoom();
   }
 
   removeClient(client) {
-    if (!this.clientIsCurrentlyInRoom(client)) {
-      return;
+    if (this.clientIsCurrentlyInRoom(client)) {
+      const index = this.clients.indexOf(client);
+      this.clients.splice(index, 1);
     }
-    const index = this.clients.indexOf(client);
-    this.clients.splice(index, 1);
     this.emitClientsInRoom();
   }
 
