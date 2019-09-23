@@ -60,7 +60,8 @@ Clients In Room: Info about all clients connected to a room. Useful for displayi
       'c1d8be08-b5ba-4547-a284-aeacedc7fdcc',
       '386e7b01-22e5-4394-91ae-50866cfef5c9',
       'f0d8368d-85e2-54fb-73c4-2d60374295e3',
-    ]
+    ],
+    time: 1567963601131, // millis since epoch
 }
 ```
 

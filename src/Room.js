@@ -22,6 +22,7 @@ class Room {
     this.emit({
       type: 'clientsInRoom',
       clients: this.clients.map(c => c.uuid),
+      time: Date.now(),
     });
   }
 
