@@ -5,5 +5,11 @@ module.exports =  {
   parserOptions:  {
     ecmaVersion:  2017,
   },
-  plugins: ["prettier"],
+  plugins: ["filenames", "prettier"],
+  rules: {
+    // Prefer snake_case unless there is a default export.
+    "filenames/match-regex": [2, "^[a-z_]+$", true],
+    // If there is a default export, the filename must match it.
+    "filenames/match-exported": 2
+  }
 };

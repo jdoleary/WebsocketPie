@@ -1,5 +1,5 @@
 const chalk = require('chalk');
-const log = require('./Log');
+const log = require('./log');
 
 class Room {
   constructor(properties) {
