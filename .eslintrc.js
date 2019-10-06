@@ -8,7 +8,8 @@ module.exports =  {
   plugins: ["filenames", "prettier"],
   rules: {
     // Prefer snake_case unless there is a default export.
-    "filenames/match-regex": [2, "^[a-z_]+$", true],
+    // If the file contains ".test" it can be named anything.
+    "filenames/match-regex": [2, "^([a-z_]+|.*.test)$", true],
     // If there is a default export, the filename must match it.
     "filenames/match-exported": 2
   }

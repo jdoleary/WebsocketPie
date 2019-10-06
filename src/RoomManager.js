@@ -28,7 +28,7 @@ class RoomManager {
   addClientToRoom({ client, name, roomInfo }) {
     if (!(client && name && roomInfo)) {
       log(chalk.red(`ERR: Cannot add client to room, missing "client", "name", and/or "roomInfo"`));
-      return;
+      return false;
     }
     if (client.room) {
       this.removeClientFromCurrentRoom(client);
@@ -36,17 +36,18 @@ class RoomManager {
     const room = this.findOrMakeRoom(roomInfo);
     if (!room) {
       log(chalk.red(`ERR: Cannot add client to room, unable to find or make room`));
-      return;
+      return false;
     }
     log(chalk.blue(`Adding client to room`));
     client = Object.assign(client, { name, room });
     room.addClient(client);
+    return true;
   }
 
   emitToClientRoom({ client, message }) {
     if (!(client && client.room && message)) {
       log(chalk.red(`ERR: Cannot emit to room, missing "client", "client.room", or "message"`));
-      return;
+      return false;
     }
     log(chalk.blue(`Emitting message to client room`));
     const { room } = client;
@@ -54,6 +55,7 @@ class RoomManager {
       client,
       message,
     });
+    return true;
   }
 
   removeClientFromCurrentRoom(client) {

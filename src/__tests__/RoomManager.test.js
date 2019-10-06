@@ -5,134 +5,153 @@ const makeFakeWSClientObject = () => ({
   send: () => {},
 });
 
-test('Host Room', function(t) {
+test('findOrMakeRoom', t => {
   const rm = new RoomManager();
-  const roomProps = {
+  /* Verify that findOrMakeRoom return undefined if arguments are missing. */
+  const r1 = rm.findOrMakeRoom({});
+  t.equal(r1, undefined);
+  const r2 = rm.findOrMakeRoom({ name: 'AlphaRoom', version: '1.0.0' });
+  t.equal(r2, undefined);
+  t.equal(rm.rooms.length, 0);
+  const r3 = rm.findOrMakeRoom({ app: 'StealthEmUp', version: '1.0.0' });
+  t.equal(r3, undefined);
+  t.equal(rm.rooms.length, 0);
+  const r4 = rm.findOrMakeRoom({ app: 'StealthEmUp', name: 'AlphaRoom' });
+  t.equal(r4, undefined);
+  t.equal(rm.rooms.length, 0);
+  const r5 = rm.findOrMakeRoom({ app: 'StealthEmUp' });
+  t.equal(r5, undefined);
+  t.equal(rm.rooms.length, 0);
+  const r6 = rm.findOrMakeRoom({ name: 'AlphaRoom' });
+  t.equal(r6, undefined);
+  t.equal(rm.rooms.length, 0);
+  const r7 = rm.findOrMakeRoom({ version: '1.0.0' });
+  t.equal(r7, undefined);
+  t.equal(rm.rooms.length, 0);
+  /* Verify that a new room is created when all arguments are present. */
+  const roomInfo = {
+    app: 'StealthEmUp',
     name: 'AlphaRoom',
-    app: 'StealthEmUp',
-    version: '2.3.1',
-  };
-  const didSucceed = rm.addClientToRoom(makeFakeWSClientObject(), { name: 'Bill', roomProps });
-
-  t.equal(rm.rooms[roomProps.name].clients[0].name, 'Bill');
-  t.equal(didSucceed, true);
-  t.end();
-});
-test('Join Room', function(t) {
-  const rm = new RoomManager();
-  const roomProps = {
-    name: 'AlphaRoom',
-    app: 'StealthEmUp',
-    version: '2.3.1',
-  };
-  // Host room
-  rm.addClientToRoom(makeFakeWSClientObject(), { name: 'Bill', roomProps });
-  // New client join room
-  const didSucceed = rm.addClientToRoom(makeFakeWSClientObject(), { name: 'Beatrice', roomProps });
-
-  t.equal(rm.rooms[roomProps.name].clients[1].name, 'Beatrice');
-  t.equal(didSucceed, true);
-  t.end();
-});
-test('Limit joining to 1 room at a time', function(t) {
-  const rm = new RoomManager();
-  const roomProps = {
-    name: 'AlphaRoom',
-    app: 'StealthEmUp',
-    version: '2.3.1',
-  };
-  // Host room
-  rm.addClientToRoom(makeFakeWSClientObject(), { name: 'Bill', roomProps });
-  // New client join room
-  const clientBeatrice = makeFakeWSClientObject();
-  rm.addClientToRoom(clientBeatrice, { name: 'Beatrice', roomProps });
-
-  const room2Props = {
-    name: 'GammaRoom',
-    app: 'StealthEmUp',
-    version: '2.3.1',
-  };
-  // Client 2 change rooms
-  rm.addClientToRoom(clientBeatrice, { name: 'Beatrice', roomProps: room2Props });
-
-  t.equal(rm.rooms[roomProps.name].clients.length, 1);
-  t.equal(rm.rooms[room2Props.name].clients[0].name, 'Beatrice');
-  t.end();
-});
-test('Do not let client join room with differing roomProps', function(t) {
-  const rm = new RoomManager();
-  const roomProps = {
-    name: 'AlphaRoom',
-    app: 'StealthEmUp',
-    version: '2.3.1',
-  };
-  // Host room
-  rm.addClientToRoom(makeFakeWSClientObject(), { name: 'Bill', roomProps });
-
-  const room2Props = {
-    name: roomProps.name,
-    app: roomProps.app,
-    version: 'differentVersion',
-  };
-  // Client 2 join room with wrong version
-  const clientBeatrice = makeFakeWSClientObject();
-  const actual = rm.addClientToRoom(clientBeatrice, { name: 'Beatrice', roomProps: room2Props });
-  const expected = false;
-
-  t.equal(rm.rooms[roomProps.name].clients.length, 1);
-  t.equal(actual, expected);
-  t.end();
-});
-
-// Test messaging with fake client
-function FakeClient() {
-  this.messages = [];
-  this.send = msg => this.messages.push(JSON.parse(msg));
-}
-test('Client in same room recieved message', t => {
-  const rm = new RoomManager();
-  const roomProps = {
-    name: 'MessageRoom',
-    app: 'Messagrrrrr',
     version: '1.0.0',
   };
-  // Mock Date:
-  const nowDate = new Date(1234).getTime();
-  Date.now = () => nowDate;
-  // Host room
-  const bill = new FakeClient();
-  rm.addClientToRoom(bill, { name: 'Bill', roomProps });
-  const beatrice = new FakeClient();
-  rm.addClientToRoom(beatrice, { name: 'Beatrice', roomProps });
-  const goku = new FakeClient();
-  rm.addClientToRoom(goku, { name: 'Goku', roomProps: { name: 'otherRoom', app: 'DBZ', version: 'infinity' } });
-  // Pretent beatrice sends message through socket which would send it to the room manager:
-  const message = {
-    type: 'data', // This is not tested here but would be used by network.js
-    payload: {
-      content: 'Five Finger Palm Heart Exploding Technique',
-      damage: 9001,
-    },
+  const r8 = rm.findOrMakeRoom(roomInfo);
+  t.notEqual(r8, undefined);
+  t.equal(r8.app, roomInfo.app);
+  t.equal(r8.name, roomInfo.name);
+  t.equal(r8.version, roomInfo.version);
+  t.equal(rm.rooms.length, 1);
+  t.equal(rm.rooms[0].app, roomInfo.app);
+  t.equal(rm.rooms[0].name, roomInfo.name);
+  t.equal(rm.rooms[0].version, roomInfo.version);
+  /* Verify an existing room is returned if it matches arguments. */
+  const r9 = rm.findOrMakeRoom(roomInfo);
+  t.notEqual(r9, undefined);
+  t.equal(r9.app, roomInfo.app);
+  t.equal(r9.name, roomInfo.name);
+  t.equal(r9.version, roomInfo.version);
+  t.equal(rm.rooms.length, 1);
+
+  t.end();
+});
+
+test('addClientToRoom', t => {
+  const rm = new RoomManager();
+  const client = makeFakeWSClientObject();
+  const name = 'Client';
+  const roomInfo = {
+    app: 'StealthEmUp',
+    name: 'AlphaRoom',
+    version: '1.0.0',
   };
-  rm.onData(beatrice, message);
-  t.deepEqual(
-    bill.messages,
-    [
-      { type: 'client', clients: ['Bill'] },
-      { type: 'client', clients: ['Bill', 'Beatrice'] },
-      {
-        type: 'data',
-        fromClient: 'Beatrice',
-        time: nowDate,
-        payload: {
-          content: 'Five Finger Palm Heart Exploding Technique',
-          damage: 9001,
-        },
-      },
-    ],
-    'Bill gets message from Beatrice',
-  );
-  t.equal(goku.messages.length, 1, ' Assert that goku did not get the message because he is in a different room');
-  t.equal(goku.messages[0].type, 'client', 'Only one message, that of Goku joining the room');
+  /* Verify a client is not added if arguments are missing. */
+  const r1 = rm.addClientToRoom({});
+  t.equal(r1, false);
+  t.equal(client.room, undefined);
+  t.equal(rm.rooms.length, 0);
+  const r2 = rm.addClientToRoom({ client });
+  t.equal(r2, false);
+  t.equal(client.room, undefined);
+  t.equal(rm.rooms.length, 0);
+  const r3 = rm.addClientToRoom({ name });
+  t.equal(r3, false);
+  t.equal(client.room, undefined);
+  t.equal(rm.rooms.length, 0);
+  const r4 = rm.addClientToRoom({ roomInfo });
+  t.equal(r4, false);
+  t.equal(client.room, undefined);
+  t.equal(rm.rooms.length, 0);
+  const r5 = rm.addClientToRoom({ name, roomInfo });
+  t.equal(r5, false);
+  t.equal(client.room, undefined);
+  t.equal(rm.rooms.length, 0);
+  const r6 = rm.addClientToRoom({ client, roomInfo });
+  t.equal(r6, false);
+  t.equal(client.room, undefined);
+  t.equal(rm.rooms.length, 0);
+  const r7 = rm.addClientToRoom({ client, name });
+  t.equal(r7, false);
+  t.equal(client.room, undefined);
+  t.equal(rm.rooms.length, 0);
+  /* Verify the client <-> room link is established if all arguments are present. */
+  const r8 = rm.addClientToRoom({ client, name, roomInfo });
+  t.equal(r8, true);
+  t.notEqual(client.room, undefined);
+  t.equal(client.room.app, roomInfo.app);
+  t.equal(client.room.name, roomInfo.name);
+  t.equal(client.room.version, roomInfo.version);
+  t.equal(rm.rooms.length, 1);
+  t.equal(rm.rooms[0].app, roomInfo.app);
+  t.equal(rm.rooms[0].name, roomInfo.name);
+  t.equal(rm.rooms[0].version, roomInfo.version);
+  t.equal(rm.rooms[0].clients.length, 1);
+  t.equal(rm.rooms[0].clients[0].name, name);
+
+  t.end();
+});
+
+test('emitToClientRoom', t => {
+  const rm = new RoomManager();
+  const client = makeFakeWSClientObject();
+  const message = 'anything';
+  /* Verify that missing arguments return false. */
+  const r1 = rm.emitToClientRoom({});
+  t.equal(r1, false);
+  const r2 = rm.emitToClientRoom({ client });
+  t.equal(r2, false);
+  const r3 = rm.emitToClientRoom({ message });
+  t.equal(r3, false);
+  /* Verify that client not in room returns false. */
+  const r4 = rm.emitToClientRoom({ client, message });
+  t.equal(r4, false);
+  // Client is in a room, should return true.
+  const name = 'Client';
+  const roomInfo = {
+    app: 'StealthEmUp',
+    name: 'AlphaRoom',
+    version: '1.0.0',
+  };
+  rm.addClientToRoom({ client, name, roomInfo });
+  const r5 = rm.emitToClientRoom({ client, message });
+  t.equal(r5, true);
+
+  t.end();
+});
+
+test('removeClientFromCurrentRoom', t => {
+  const rm = new RoomManager();
+  const client = makeFakeWSClientObject();
+  const name = 'Client';
+  const roomInfo = {
+    app: 'StealthEmUp',
+    name: 'AlphaRoom',
+    version: '1.0.0',
+  };
+  rm.addClientToRoom({ client, name, roomInfo });
+  t.equal(client.name, name);
+  t.notEqual(client.room, undefined);
+  rm.removeClientFromCurrentRoom(client);
+  t.equal(client.name, undefined);
+  t.equal(client.room, undefined);
+
   t.end();
 });
