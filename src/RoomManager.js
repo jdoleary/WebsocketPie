@@ -8,7 +8,7 @@ class RoomManager {
     this.addClientToRoom = this.addClientToRoom.bind(this);
     this.emitToClientRoom = this.emitToClientRoom.bind(this);
     this.removeClientFromCurrentRoom = this.removeClientFromCurrentRoom.bind(this);
-    this.rooms = {};
+    this.rooms = [];
   }
 
   findOrMakeRoom({ app, name, version }) {
@@ -16,11 +16,13 @@ class RoomManager {
       log(chalk.red(`ERR: Cannot find or make room, missing "app", "name" and/or "version"`));
       return;
     }
-    const roomKey = `${app}-${version}-${name}`;
-    if (!this.rooms[roomKey]) {
-      this.rooms[roomKey] = new Room({ app, name, version });
+    const existingRoom = this.rooms.find(room => room.app === app && room.name === name && room.version === version);
+    if (existingRoom) {
+      return existingRoom;
     }
-    return this.rooms[roomKey];
+    const newRoom = new Room({ app, name, version });
+    this.rooms.push(newRoom);
+    return newRoom;
   }
 
   addClientToRoom({ client, name, roomInfo }) {
