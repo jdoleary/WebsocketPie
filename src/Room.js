@@ -39,8 +39,9 @@ class Room {
     this.clients.push(client);
     this.emit({
       clients: this.getClientsSafeToEmit(),
+      clientThatJoined: client.name,
       time: Date.now(),
-      type: 'client',
+      type: 'clientJoinedRoom',
     });
   }
 
@@ -53,8 +54,9 @@ class Room {
     this.clients.splice(clientIndex, 1);
     this.emit({
       clients: this.getClientsSafeToEmit(),
+      clientThatLeft: client.name,
       time: Date.now(),
-      type: 'client',
+      type: 'clientLeftRoom',
     });
   }
 }
