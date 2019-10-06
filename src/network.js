@@ -1,6 +1,6 @@
 const chalk = require('chalk');
 const WebSocket = require('ws');
-const log = require('./Log');
+const log = require('./log');
 const RoomManager = require('./RoomManager');
 
 function startServer() {
