@@ -1,2 +1,2 @@
-const {startServer} = require('./network');
+const { startServer } = require('./network');
 startServer();
