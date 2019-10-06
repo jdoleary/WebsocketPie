@@ -40,6 +40,14 @@ Data from one client, to be echoed to other client(s) in the same room
 }
 ```
 
+When a client tries to leave a room
+
+```js
+{
+  type: 'leaveRoom',
+}
+```
+
 ## API: from server to client
 
 Client joined room: Info about a client that just joined a room, and all clients connected to a room.
