@@ -4,53 +4,66 @@ const Room = require('./Room');
 
 class RoomManager {
   constructor() {
+    this.findOrMakeRoom = this.findOrMakeRoom.bind(this);
+    this.addClientToRoom = this.addClientToRoom.bind(this);
+    this.emitToClientRoom = this.emitToClientRoom.bind(this);
+    this.removeClientFromCurrentRoom = this.removeClientFromCurrentRoom.bind(this);
     this.rooms = {};
   }
-  addClientToRoom(client, msg) {
-    // name is client's handle, roomProps.name is room name
-    const { name, roomProps } = msg;
-    // Guard on required props
-    if (!(name && roomProps.name && roomProps.app && roomProps.version)) {
-      log(chalk.red(`Err: required arguments: name, roomProps.name in ${JSON.stringify(msg, null, 2)}`));
-      return false;
-    }
 
-    log(chalk.blue(`${JSON.stringify(name)} addClientToRoom: ${roomProps.name}`));
-    if (client && client.room && client.room.removeClient) {
-      // If client is attempting to join a room but already belongs to a room,
-      // remove client from previous room
-      client.room.removeClient(client);
-    }
-    // Get existing room or host new room:
-    const room = this.rooms[roomProps.name]
-      ? this.rooms[roomProps.name]
-      : (this.rooms[roomProps.name] = new Room(roomProps));
-    // Add metadata to client object
-    client = Object.assign(client, { name, room });
-    return room.addClient(client, roomProps);
-  }
-  onData(client, msg) {
-    if (!client || !client.room) {
+  findOrMakeRoom({ app, name, version }) {
+    if (!(app && name && version)) {
+      log(chalk.red(`ERR: Cannot find or make room, missing "app", "name" and/or "version"`));
       return;
     }
-    const { room } = client;
-    if (this.rooms[room.name]) {
-      // Send the name of the client sending the data along with the data
-      this.rooms[room.name].onData({
-        type: 'data',
-        fromClient: client.name,
-        time: Date.now(),
-        // The only information that carries over from clients message is the payload
-        payload: msg.payload,
-      });
+    const roomKey = `${app}-${version}-${name}`;
+    if (!this.rooms[roomKey]) {
+      this.rooms[roomKey] = new Room({ app, name, version });
     }
+    return this.rooms[roomKey];
   }
-  onDisconnect(client) {
-    const room = client.room;
-    // If client belongs to a room, leave room when connection closes
-    if (room) {
-      room.removeClient(client);
+
+  addClientToRoom({ client, name, roomInfo }) {
+    if (!(client && name && roomInfo)) {
+      log(chalk.red(`ERR: Cannot add client to room, missing "client", "name", and/or "roomInfo"`));
+      return;
     }
+    if (client.room) {
+      this.removeClientFromCurrentRoom(client);
+    }
+    const room = this.findOrMakeRoom(roomInfo);
+    if (!room) {
+      log(chalk.red(`ERR: Cannot add client to room, unable to find or make room`));
+      return;
+    }
+    log(chalk.blue(`Adding client to room`));
+    client = Object.assign(client, { name, room });
+    room.addClient(client);
+  }
+
+  emitToClientRoom({ client, message }) {
+    if (!(client && client.room && message)) {
+      log(chalk.red(`ERR: Cannot emit to room, missing "client", "client.room", or "message"`));
+      return;
+    }
+    log(chalk.blue(`Emitting message to client room`));
+    const { room } = client;
+    room.emitMessageFromClient({
+      client,
+      message,
+    });
+  }
+
+  removeClientFromCurrentRoom(client) {
+    const { room } = client;
+    if (!room) {
+      return;
+    }
+    log(chalk.blue(`Removing client from room`));
+    room.removeClient(client);
+    // Remove data added while joining room.
+    delete client.name;
+    delete client.room;
   }
 }
 
