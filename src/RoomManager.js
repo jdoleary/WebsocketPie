@@ -4,10 +4,6 @@ const Room = require('./Room');
 
 class RoomManager {
   constructor() {
-    this.findOrMakeRoom = this.findOrMakeRoom.bind(this);
-    this.addClientToRoom = this.addClientToRoom.bind(this);
-    this.emitToClientRoom = this.emitToClientRoom.bind(this);
-    this.removeClientFromCurrentRoom = this.removeClientFromCurrentRoom.bind(this);
     this.rooms = [];
   }
 

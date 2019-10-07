@@ -3,12 +3,6 @@ const log = require('./log');
 
 class Room {
   constructor({ app, name, version }) {
-    this.emit = this.emit.bind(this);
-    this.emitMessageFromClient = this.emitMessageFromClient.bind(this);
-    this.getClientIndex = this.getClientIndex.bind(this);
-    this.getClientsSafeToEmit = this.getClientsSafeToEmit.bind(this);
-    this.addClient = this.addClient.bind(this);
-    this.removeClient = this.removeClient.bind(this);
     this.app = app;
     this.clients = [];
     this.name = name;
