@@ -13,11 +13,12 @@ class Room {
     this.clients.forEach(c => c.send(JSON.stringify(data)));
   }
 
-  emitMessageFromClient({ client, message }) {
+  echoMessageFromClient({ client, message }) {
     const messageWithAdditionalData = {
       ...message,
       fromClient: client.name,
       time: Date.now(),
+      type: 'echoedToRoom',
     };
     this.emit(messageWithAdditionalData);
   }

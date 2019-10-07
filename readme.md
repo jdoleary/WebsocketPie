@@ -35,7 +35,7 @@ Data from one client, to be echoed to other client(s) in the same room
 
 ```js
 {
-  type: 'emitToRoom',
+  type: 'echoToRoom',
   payload: <client defined payload>
 }
 ```
@@ -56,7 +56,7 @@ Data : Data send from the server that is an echo of data that the server recieve
 
 ```js
 {
-  type: 'emitToRoom',
+  type: 'echoedToRoom',
   fromClient: 'Trinity',
   time: 1567963601131, // millis since epoch
   payload: {

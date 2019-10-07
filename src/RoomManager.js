@@ -40,14 +40,14 @@ class RoomManager {
     return true;
   }
 
-  emitToClientRoom({ client, message }) {
+  echoToClientRoom({ client, message }) {
     if (!(client && client.room && message)) {
-      log(chalk.red(`ERR: Cannot emit to room, missing "client", "client.room", or "message"`));
+      log(chalk.red(`ERR: Cannot echo to room, missing "client", "client.room", or "message"`));
       return false;
     }
-    log(chalk.blue(`Emitting message to client room`));
+    log(chalk.blue(`Echoing message to client room`));
     const { room } = client;
-    room.emitMessageFromClient({
+    room.echoMessageFromClient({
       client,
       message,
     });

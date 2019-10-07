@@ -18,8 +18,8 @@ function startServer({ port }) {
             const { name, roomInfo } = message;
             roomManager.addClientToRoom({ client, name, roomInfo });
             break;
-          case 'emitToRoom':
-            roomManager.emitToClientRoom({ client, message });
+          case 'echoToRoom':
+            roomManager.echoToClientRoom({ client, message });
             break;
           default:
             log(chalk.yellow(`WARN: Message not understood: ${JSON.stringify(message, null, 2)}`));
