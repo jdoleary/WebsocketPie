@@ -34,6 +34,7 @@ function startServer({ port }) {
     });
   });
   log(`Websocket server is listening on *:${port}`);
+  return webSocketServer;
 }
 
 module.exports = { startServer };
