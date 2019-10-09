@@ -18,7 +18,7 @@ function startServer({ port }) {
             const { name, roomInfo } = message;
             roomManager.addClientToRoom({ client, name, roomInfo });
             break;
-          case 'echoToRoom':
+          case 'data':
             roomManager.echoToClientRoom({ client, message });
             break;
           default:

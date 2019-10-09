@@ -18,7 +18,6 @@ class Room {
       ...message,
       fromClient: client.name,
       time: Date.now(),
-      type: 'echoedToRoom',
     };
     this.emit(messageWithAdditionalData);
   }
