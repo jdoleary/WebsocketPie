@@ -3,36 +3,38 @@ const WebSocket = require('ws');
 const log = require('./log');
 const RoomManager = require('./RoomManager');
 
-function startServer() {
-  const port = process.env.PORT || 8080;
-  const wss = new WebSocket.Server({ port });
-  log(`Running Echo Server v${process.env.npm_package_version}.  Listening on *:${port}`);
+const roomManager = new RoomManager();
 
-  const rm = new RoomManager();
-
-  wss.on('connection', client => {
-    log(chalk.blue('a user connected'));
+function startServer({ port }) {
+  const webSocketServer = new WebSocket.Server({ port });
+  webSocketServer.on('connection', client => {
+    log(chalk.blue('A user connected'));
     client.on('message', data => {
+      log(chalk.blue('A client sent a message'));
       try {
-        const msg = JSON.parse(data);
-        switch (msg.type) {
+        const message = JSON.parse(data);
+        switch (message.type) {
           case 'joinRoom':
-            rm.addClientToRoom(client, msg);
+            const { name, roomInfo } = message;
+            roomManager.addClientToRoom({ client, name, roomInfo });
             break;
           case 'data':
-            rm.onData(client, msg);
+            roomManager.echoToClientRoom({ client, message });
             break;
           default:
-            log(chalk.yellow(`WARN: Message not understood: ${JSON.stringify(msg, null, 2)}`));
+            log(chalk.yellow(`WARN: Message not understood: ${JSON.stringify(message, null, 2)}`));
         }
       } catch (e) {
         console.error(e);
       }
     });
     client.on('close', () => {
-      rm.onDisconnect(client);
+      log(chalk.blue('A user disconnected'));
+      roomManager.removeClientFromCurrentRoom(client);
     });
   });
+  log(`Websocket server is listening on *:${port}`);
+  return webSocketServer;
 }
 
 module.exports = { startServer };
