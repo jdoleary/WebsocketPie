@@ -280,7 +280,107 @@ test('Sending messages within a room', { timeout }, async t => {
   t.end();
 });
 
-/* TODO: after #8 is merged, add a test for what happens when clients leave rooms. */
+test('Clients leaving a room', { timeout }, async t => {
+  t.comment('client1 is opening a connection...');
+  const client1 = await connectTestClient();
+
+  t.comment('client1 is joining a room...');
+  const jr1 = JSON.stringify({
+    type: 'joinRoom',
+    name: 'Naruto',
+    roomInfo: {
+      app: 'Ninja Clash',
+      version: '1.0.0',
+      name: 'Leaf Village',
+    },
+  });
+  client1.webSocket.send(jr1);
+
+  t.comment('client2 is opening a connection...');
+  const client2 = await connectTestClient();
+
+  t.comment('client2 is joining a room...');
+  const jr2 = JSON.stringify({
+    type: 'joinRoom',
+    name: 'Sasuke',
+    roomInfo: {
+      app: 'Ninja Clash',
+      version: '1.0.0',
+      name: 'Leaf Village',
+    },
+  });
+  client2.webSocket.send(jr2);
+
+  t.comment('client3 is opening a connection...');
+  const client3 = await connectTestClient();
+
+  t.comment('client3 is joining a room with a different app...');
+  const jr3 = JSON.stringify({
+    type: 'joinRoom',
+    name: 'Sakura',
+    roomInfo: {
+      app: 'Ninja Clash 2',
+      version: '1.0.0',
+      name: 'Leaf Village',
+    },
+  });
+  client3.webSocket.send(jr3);
+
+  t.comment('client4 is opening a connection...');
+  const client4 = await connectTestClient();
+
+  t.comment('client4 is joining a room with a different version...');
+  const jr4 = JSON.stringify({
+    type: 'joinRoom',
+    name: 'Kakashi',
+    roomInfo: {
+      app: 'Ninja Clash',
+      version: '1.0.1',
+      name: 'Leaf Village',
+    },
+  });
+  client4.webSocket.send(jr4);
+
+  t.comment('client5 is opening a connection...');
+  const client5 = await connectTestClient();
+
+  t.comment('client5 is joining a room with a different name...');
+  const jr5 = JSON.stringify({
+    type: 'joinRoom',
+    name: 'Orochimaru',
+    roomInfo: {
+      app: 'Ninja Clash',
+      version: '1.0.0',
+      name: 'Sound Village',
+    },
+  });
+  client5.webSocket.send(jr5);
+
+  t.comment('test that clients do not get messages for clients leaving other rooms...');
+  const lr = JSON.stringify({
+    type: 'leaveRoom',
+  });
+  client3.webSocket.send(lr);
+  client4.webSocket.send(lr);
+  client5.webSocket.send(lr);
+
+  t.comment('give clients 1 and 2 a moment to (not) receive messages...');
+  await delay(wsTransmissionDelay);
+  t.equal(client1.messages.length, 2, 'client1 should not have received a message');
+  t.equal(client2.messages.length, 1, 'client2 should not have received a message');
+
+  t.comment('test that clients receives a message for cleints leaving the same room...');
+  client1.expectMessages(1);
+  client2.webSocket.send(lr);
+  await client1.expectedMessagesReceived;
+
+  t.equal(client1.messages.length, 3, 'client1 should receive a message');
+  t.equal(client1.messages[2].type, 'client', 'client1 should receive a client message');
+  t.equal(Array.isArray(client1.messages[2].clients), true, 'client1 should receive an array of clients');
+  t.equal(client1.messages[2].clients.length, 1, 'client1 should know one client is in the room');
+
+  t.end();
+});
 
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', t => {
