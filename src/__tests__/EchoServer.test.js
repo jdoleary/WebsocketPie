@@ -55,6 +55,9 @@ function connectTestClient() {
   });
 }
 
+// General timeout for async tests
+const timeout = 5000
+
 /* This method is less precise than using .expectMessages / .expectedMessagesReceived.
 It is intended for circumstances where we want to validate a client DIDN'T receive a message. */
 const wsTransmissionDelay = 100; // ms
@@ -68,7 +71,7 @@ test('Setup', t => {
   t.end();
 });
 
-test('Clients joining a room', async t => {
+test('Clients joining a room', {timeout}, async t => {
   t.comment('client1 is opening a connection...');
   const client1 = await connectTestClient();
 
@@ -173,7 +176,7 @@ test('Clients joining a room', async t => {
   t.end();
 });
 
-test('Sending messages within a room', async t => {
+test('Sending messages within a room', {timeout}, async t => {
   t.comment('client1 is opening a connection...');
   const client1 = await connectTestClient();
 
