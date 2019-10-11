@@ -370,14 +370,15 @@ test('Clients leaving a room', { timeout }, async t => {
   t.equal(client2.messages.length, 1, 'client2 should not have received a message');
 
   t.comment('test that clients receives a message for cleints leaving the same room...');
+  client1.clearMessages();
   client1.expectMessages(1);
   client2.webSocket.send(lr);
   await client1.expectedMessagesReceived;
 
-  t.equal(client1.messages.length, 3, 'client1 should receive a message');
-  t.equal(client1.messages[2].type, 'client', 'client1 should receive a client message');
-  t.equal(Array.isArray(client1.messages[2].clients), true, 'client1 should receive an array of clients');
-  t.equal(client1.messages[2].clients.length, 1, 'client1 should know one client is in the room');
+  t.equal(client1.messages.length, 1, 'client1 should receive a message');
+  t.equal(client1.messages[0].type, 'client', 'client1 should receive a client message');
+  t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
+  t.equal(client1.messages[0].clients.length, 1, 'client1 should know one client is in the room');
 
   t.end();
 });
