@@ -42,12 +42,24 @@ Data from one client, to be echoed to other client(s) in the same room
 
 ## API: from server to client
 
-Client: Info about all clients connected to a room. Useful for displaying the state of the room lobby for example.
+Client joined room: Info about a client that just joined a room, and all clients connected to a room.
 
 ```js
 {
-  type: 'client',
+  type: 'clientJoinedRoom',
   clients: ['Neo', 'Trinity', 'Morpheus'],
+  clientThatJoined: 'Neo',
+  time: 1567963601131, // millis since epoch
+}
+```
+
+Client left room: Info about a client that just left a room, and all clients still connected to a room.
+
+```js
+{
+  type: 'clientLeftRoom',
+  clients: ['Trinity', 'Morpheus'],
+  clientThatLeft: 'Neo',
   time: 1567963601131, // millis since epoch
 }
 ```
