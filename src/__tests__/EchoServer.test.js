@@ -357,6 +357,8 @@ test('Clients leaving a room', { timeout }, async t => {
   client5.webSocket.send(jr5);
 
   t.comment('test that clients do not get messages for clients leaving other rooms...');
+  client1.clearMessages();
+  client2.clearMessages();
   const lr = JSON.stringify({
     type: 'leaveRoom',
   });
@@ -366,17 +368,17 @@ test('Clients leaving a room', { timeout }, async t => {
 
   t.comment('give clients 1 and 2 a moment to (not) receive messages...');
   await delay(wsTransmissionDelay);
-  t.equal(client1.messages.length, 2, 'client1 should not have received a message');
-  t.equal(client2.messages.length, 1, 'client2 should not have received a message');
+  t.equal(client1.messages.length, 0, 'client1 should not have received a message');
+  t.equal(client2.messages.length, 0, 'client2 should not have received a message');
 
   t.comment('test that clients receives a message for cleints leaving the same room...');
-  client1.clearMessages();
   client1.expectMessages(1);
   client2.webSocket.send(lr);
   await client1.expectedMessagesReceived;
 
   t.equal(client1.messages.length, 1, 'client1 should receive a message');
-  t.equal(client1.messages[0].type, 'client', 'client1 should receive a client message');
+  t.equal(client1.messages[0].type, 'clientLeftRoom', 'client1 should receive a client message');
+  t.equal(client1.messages[0].clientThatLeft, 'Sasuke', "client1 should see client2's name as the client that left");
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
   t.equal(client1.messages[0].clients.length, 1, 'client1 should know one client is in the room');
 

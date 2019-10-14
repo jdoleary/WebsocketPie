@@ -23,6 +23,7 @@ function startServer({ port }) {
             break;
           case 'leaveRoom':
             roomManager.removeClientFromCurrentRoom(client);
+            break;
           default:
             log(chalk.yellow(`WARN: Message not understood: ${JSON.stringify(message, null, 2)}`));
         }
