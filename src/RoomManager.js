@@ -1,6 +1,7 @@
 const chalk = require('chalk');
 const log = require('./log');
 const Room = require('./Room');
+const { fuzzyMatchRooms } = require('./util');
 
 class RoomManager {
   constructor() {
@@ -64,6 +65,15 @@ class RoomManager {
     // Remove data added while joining room.
     delete client.name;
     delete client.room;
+  }
+
+  getRooms({ client, roomInfo }) {
+    client.send(
+      JSON.stringify({
+        type: 'rooms',
+        rooms: fuzzyMatchRooms(this.rooms, roomInfo),
+      }),
+    );
   }
 }
 
