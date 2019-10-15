@@ -385,6 +385,102 @@ test('Clients leaving a room', { timeout }, async t => {
   t.end();
 });
 
+test('getRooms should return an array of rooms with room info', { timeout }, async t => {
+  t.comment('client1 is opening a connection...');
+  const client1 = await connectTestClient();
+  const jr1 = JSON.stringify({
+    type: 'joinRoom',
+    name: 'Neo',
+    roomInfo: {
+      app: 'The Matrix',
+      version: '1.0.0',
+      name: 'The Subway',
+    },
+  });
+  t.comment('client1 is making a room');
+  client1.webSocket.send(jr1);
+  t.comment('client2 is opening a connection...');
+  const client2 = await connectTestClient();
+  const realWorld1 = {
+    app: 'The Real World',
+    version: '1.0.0',
+    name: 'The Nebuchadnezzar',
+  };
+  const jr2 = JSON.stringify({
+    type: 'joinRoom',
+    name: 'Trinity',
+    roomInfo: realWorld1,
+  });
+  t.comment('client2 is making a room');
+  client2.webSocket.send(jr2);
+
+  t.comment('client3 is opening a connection...');
+  const client3 = await connectTestClient();
+  const realWorld2 = {
+    app: 'The Real World',
+    version: '1.2.0',
+    name: 'The Nebuchadnezzar',
+  };
+
+  const jr3 = JSON.stringify({
+    type: 'joinRoom',
+    name: 'Morpheus',
+    roomInfo: realWorld2,
+  });
+  t.comment('client3 is making a room');
+  client3.webSocket.send(jr3);
+
+  t.comment('Mr Smith is opening a connection...');
+  const clientSmith = await connectTestClient();
+  t.comment('clientSmith sends getRooms message');
+  const gr1 = JSON.stringify({
+    type: 'getRooms',
+    roomInfo: {
+      app: 'The Real World',
+      name: 'The Nebuchadnezzar',
+    },
+  });
+  clientSmith.webSocket.send(gr1);
+
+  clientSmith.clearMessages();
+  clientSmith.expectMessages(1);
+  await clientSmith.expectedMessagesReceived;
+
+  t.equal(clientSmith.messages.length, 1, 'clientSmith should receive a message');
+  t.equal(clientSmith.messages[0].type, 'rooms', 'clientSmith should receive a rooms message');
+  t.deepEqual(
+    clientSmith.messages[0],
+    {
+      type: 'rooms',
+      rooms: [realWorld1, realWorld2],
+    },
+    "clientSmith should see only the rooms in  'The Real World', none in 'The Matrix'",
+  );
+
+  t.comment('clientSmith sends getRooms message with specific version string');
+  const gr2 = JSON.stringify({
+    type: 'getRooms',
+    // roomInfo in this 'getRooms' is identical to realWorld1 so it will filter on each property
+    roomInfo: realWorld1,
+  });
+  clientSmith.webSocket.send(gr2);
+
+  clientSmith.clearMessages();
+  clientSmith.expectMessages(1);
+  await clientSmith.expectedMessagesReceived;
+  t.equal(clientSmith.messages.length, 1, 'clientSmith should receive a message');
+  t.equal(clientSmith.messages[0].type, 'rooms', 'clientSmith should receive a rooms message');
+  t.deepEqual(
+    clientSmith.messages[0],
+    {
+      type: 'rooms',
+      rooms: [realWorld1],
+    },
+    "clientSmith should see only the one room in  'The Real World' that matches the name, app, and version",
+  );
+  t.end();
+});
+
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', t => {
   webSocketServer.close();
