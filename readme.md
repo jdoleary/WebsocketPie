@@ -48,6 +48,23 @@ When a client tries to leave a room
 }
 ```
 
+When a client wants information on rooms
+
+```js
+{
+  type: 'getRooms',
+  roomInfo: {
+    // The exact name of the app
+    app: 'THPS2X',
+    // The exact name of the room
+    name: 'Tag at school',
+    // A SEMVER (preferably) version number or a substring of a version number.
+    // Allows for fuzzy matching on Major and Minor versions
+    version: '1.2.0'
+  }
+}
+```
+
 ## API: from server to client
 
 Client joined room: Info about a client that just joined a room, and all clients connected to a room.
