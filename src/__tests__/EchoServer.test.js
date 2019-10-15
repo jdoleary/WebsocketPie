@@ -418,7 +418,7 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
   const client3 = await connectTestClient();
   const realWorld2 = {
     app: 'The Real World',
-    version: '1.2.0',
+    version: '1.0.1',
     name: 'The Nebuchadnezzar',
   };
 
@@ -437,7 +437,7 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
     type: 'getRooms',
     roomInfo: {
       app: 'The Real World',
-      name: 'The Nebuchadnezzar',
+      version: '1.0',
     },
   });
   clientSmith.webSocket.send(gr1);
@@ -454,7 +454,7 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
       type: 'rooms',
       rooms: [realWorld1, realWorld2],
     },
-    "clientSmith should see only the rooms in  'The Real World', none in 'The Matrix'",
+    "clientSmith should see only the rooms in  'The Real World' with a version string starting with 1.0",
   );
 
   t.comment('clientSmith sends getRooms message with specific version string');

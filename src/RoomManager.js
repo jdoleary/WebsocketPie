@@ -1,6 +1,7 @@
 const chalk = require('chalk');
 const log = require('./log');
 const Room = require('./Room');
+const { fuzzyMatchRooms } = require('./util');
 
 class RoomManager {
   constructor() {
@@ -67,25 +68,10 @@ class RoomManager {
   }
 
   getRooms({ client, roomInfo }) {
-    // Find rooms that match roomInfo
-    const foundRooms = this.rooms
-      .filter(r => {
-        // Filters on app, name and version but does not require any of them
-        return (
-          (roomInfo.app ? r.app === roomInfo.app : true) &&
-          (roomInfo.name ? r.name === roomInfo.name : true) &&
-          // Allow for fuzzy version matching
-          // ex: '1.0' should match '1.0.1'
-          (roomInfo.version ? r.version.startsWith(roomInfo.version) : true)
-        );
-      })
-      // Only return the properties that are expected for the 'rooms' message
-      // This prevents the stringify 'circular structure' error
-      .map(r => ({ app: r.app, name: r.name, version: r.version }));
     client.send(
       JSON.stringify({
         type: 'rooms',
-        rooms: foundRooms,
+        rooms: fuzzyMatchRooms(this.rooms, roomInfo),
       }),
     );
   }
