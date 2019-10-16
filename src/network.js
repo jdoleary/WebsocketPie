@@ -2,21 +2,29 @@ const chalk = require('chalk');
 const WebSocket = require('ws');
 const log = require('./log');
 const RoomManager = require('./RoomManager');
+const uuidv4 = require('uuid/v4');
 
 const roomManager = new RoomManager();
 
 function startServer({ port }) {
   const webSocketServer = new WebSocket.Server({ port });
   webSocketServer.on('connection', client => {
-    log(chalk.blue('A user connected'));
+    const clientId = uuidv4();
+    client = Object.assign(client, { id: clientId });
+    log(chalk.blue(`Client ${clientId} connected`));
+    client.send(
+      JSON.stringify({
+        type: 'serverAssignedData',
+        clientId,
+      }),
+    );
     client.on('message', data => {
-      log(chalk.blue('A client sent a message'));
+      log(chalk.blue(`Client ${client.id} sent a message`));
       try {
         const message = JSON.parse(data);
         switch (message.type) {
           case 'joinRoom':
-            const { name, roomInfo } = message;
-            roomManager.addClientToRoom({ client, name, roomInfo });
+            roomManager.addClientToRoom({ client, roomInfo: message.roomInfo });
             break;
           case 'data':
             roomManager.echoToClientRoom({ client, message });
@@ -35,7 +43,7 @@ function startServer({ port }) {
       }
     });
     client.on('close', () => {
-      log(chalk.blue('A user disconnected'));
+      log(chalk.blue(`Client ${client.id} disconnected`));
       roomManager.removeClientFromCurrentRoom(client);
     });
   });

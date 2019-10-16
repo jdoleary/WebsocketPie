@@ -12,9 +12,34 @@ const port = process.env.PORT || 8080;
 const wsUrl = `ws://localhost:${port}`;
 let webSocketServer;
 
-function TestClient(webSocket) {
+function TestClient() {
   this.clearMessages = () => {
     this.messages.splice(0, this.messages.length);
+  };
+  this.connect = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        this.webSocket = new WebSocket(wsUrl);
+        this.webSocket.on('message', data => {
+          const message = JSON.parse(data);
+          this.messages.push(message);
+          if (this.resolveExpectedMessages) {
+            this.numExpectedMessagesReceived += 1;
+            if (this.numExpectedMessagesReceived >= this.numExpectedMessagesBeforeResolve) {
+              this.resolveExpectedMessages();
+              this.numExpectedMessagesBeforeResolve = 0;
+              this.numExpectedMessagesReceived = 0;
+              this.resolveExpectedMessages = undefined;
+            }
+          }
+        });
+        this.webSocket.on('open', () => {
+          resolve();
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
   };
   this.expectedMessagesReceived = undefined; /* can become a promise that tests can await */
   this.messages = [];
@@ -28,34 +53,7 @@ function TestClient(webSocket) {
     this.numExpectedMessagesBeforeResolve = numMessages;
     this.numExpectedMessagesReceived = 0;
   };
-  this.webSocket = webSocket;
-  this.webSocket.on('message', data => {
-    const message = JSON.parse(data);
-    this.messages.push(message);
-    if (this.resolveExpectedMessages) {
-      this.numExpectedMessagesReceived += 1;
-      if (this.numExpectedMessagesReceived >= this.numExpectedMessagesBeforeResolve) {
-        this.resolveExpectedMessages();
-        this.numExpectedMessagesBeforeResolve = 0;
-        this.numExpectedMessagesReceived = 0;
-        this.resolveExpectedMessages = undefined;
-      }
-    }
-  });
-}
-
-function connectTestClient() {
-  return new Promise((resolve, reject) => {
-    try {
-      const webSocket = new WebSocket(wsUrl);
-      webSocket.on('open', () => {
-        const testClient = new TestClient(webSocket);
-        resolve(testClient);
-      });
-    } catch (e) {
-      reject(e);
-    }
-  });
+  this.webSocket = undefined; /* set using connect() */
 }
 
 // General timeout for async tests
@@ -74,14 +72,31 @@ test('Setup', t => {
   t.end();
 });
 
+test('Connection', { timeout }, async t => {
+  t.comment('client1 is opening a connection...');
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+  t.equal(client1.messages.length, 1, 'client1 should have received a message');
+  t.equal(client1.messages[0].type, 'serverAssignedData', 'client1 should have received a serverAssignedData message');
+  t.notEqual(client1.messages[0].clientId, undefined, 'client1 should received a clientId');
+  t.end();
+});
+
 test('Clients joining a room', { timeout }, async t => {
   t.comment('client1 is opening a connection...');
-  const client1 = await connectTestClient();
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+  const client1Id = client1.messages[0].clientId;
+
   t.comment('client1 is joining a room...');
+  client1.clearMessages();
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
     type: 'joinRoom',
-    name: 'Goku',
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
@@ -90,22 +105,27 @@ test('Clients joining a room', { timeout }, async t => {
   });
   client1.webSocket.send(jr1);
   await client1.expectedMessagesReceived;
-
   t.equal(client1.messages.length, 1, 'client1 should receive a message');
   t.equal(client1.messages[0].type, 'clientJoinedRoom', 'client1 should receive a client message');
-  t.equal(client1.messages[0].clientThatJoined, 'Goku', 'client1 should see their name as their joining client');
+  t.equal(client1.messages[0].clientThatJoined, client1Id, 'client1 should see their id as the joining client');
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
   t.equal(client1.messages[0].clients.length, 1, 'client1 should know one client is in the room');
+  t.equal(client1.messages[0].clients.includes(client1Id), true, 'client1 should see their id in the array of clients');
 
   t.comment('client2 is opening a connection...');
-  const client2 = await connectTestClient();
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+  const client2Id = client2.messages[0].clientId;
+
   t.comment('client2 is joining a room...');
   client1.clearMessages();
+  client2.clearMessages();
   client1.expectMessages(1);
   client2.expectMessages(1);
   const jr2 = JSON.stringify({
     type: 'joinRoom',
-    name: 'Vegeta',
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
@@ -113,32 +133,47 @@ test('Clients joining a room', { timeout }, async t => {
     },
   });
   client2.webSocket.send(jr2);
-  await client1.expectedMessagesReceived;
 
+  await client1.expectedMessagesReceived;
   t.equal(client1.messages.length, 1, 'client1 should receive a message');
   t.equal(client1.messages[0].type, 'clientJoinedRoom', 'client1 should receive a client message');
-  t.equal(client1.messages[0].clientThatJoined, 'Vegeta', "client1 should see the joining client's name");
+  t.equal(client1.messages[0].clientThatJoined, client2Id, "client1 should see the joining client's id");
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
   t.equal(client1.messages[0].clients.length, 2, 'client1 should know that two clients are in the room');
+  t.equal(client1.messages[0].clients.includes(client1Id), true, 'client1 should see their id in the array of clients');
+  t.equal(
+    client1.messages[0].clients.includes(client2Id),
+    true,
+    "client1 should see client2's id in the array of clients",
+  );
 
   await client2.expectedMessagesReceived;
-
   t.equal(client2.messages.length, 1, 'client2 should receive a message');
   t.equal(client2.messages[0].type, 'clientJoinedRoom', 'client2 should receive a client message');
-  t.equal(client2.messages[0].clientThatJoined, 'Vegeta', 'client1 should see their name as the joining client');
+  t.equal(client2.messages[0].clientThatJoined, client2Id, 'client12should see their id as the joining client');
   t.equal(Array.isArray(client2.messages[0].clients), true, 'client2 should receive an array of clients');
   t.equal(client2.messages[0].clients.length, 2, 'client2 should know that two clients are in the room');
+  t.equal(
+    client2.messages[0].clients.includes(client1Id),
+    true,
+    "client2 should see client1's id in the array of clients",
+  );
+  t.equal(client2.messages[0].clients.includes(client2Id), true, 'client1 should see their id in the array of clients');
 
   t.comment('test that clients 1 and 2 do not receive messages for other clients joining rooms they are not in...');
   client1.clearMessages();
   client2.clearMessages();
 
   t.comment('client3 is opening a connection...');
-  const client3 = await connectTestClient();
+  const client3 = new TestClient();
+  client3.expectMessages(1);
+  await client3.connect();
+  await client3.expectedMessagesReceived;
+
   t.comment('client3 is joining a room with a different app...');
+  client3.expectMessages(1);
   const jr3 = JSON.stringify({
     type: 'joinRoom',
-    name: 'Omega Shenron',
     roomInfo: {
       app: 'DBGT',
       version: '1.0.0',
@@ -146,13 +181,18 @@ test('Clients joining a room', { timeout }, async t => {
     },
   });
   client3.webSocket.send(jr3);
+  await client3.expectedMessagesReceived;
 
   t.comment('client4 is opening a connection...');
-  const client4 = await connectTestClient();
+  const client4 = new TestClient();
+  client4.expectMessages(1);
+  await client4.connect();
+  await client4.expectedMessagesReceived;
+
   t.comment('client4 is joining a room with a different version...');
+  client4.expectMessages(1);
   const jr4 = JSON.stringify({
     type: 'joinRoom',
-    name: 'Freeza',
     roomInfo: {
       app: 'DBZ',
       version: '1.0.1',
@@ -160,13 +200,18 @@ test('Clients joining a room', { timeout }, async t => {
     },
   });
   client4.webSocket.send(jr4);
+  await client4.expectedMessagesReceived;
 
   t.comment('client5 is opening a connection...');
-  const client5 = await connectTestClient();
+  const client5 = new TestClient();
+  client5.expectMessages(1);
+  await client5.connect();
+  await client5.expectedMessagesReceived;
+
   t.comment('client5 is joining a room with a different name...');
+  client5.expectMessages(1);
   const jr5 = JSON.stringify({
     type: 'joinRoom',
-    name: 'Krillin',
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
@@ -174,6 +219,7 @@ test('Clients joining a room', { timeout }, async t => {
     },
   });
   client5.webSocket.send(jr5);
+  await client5.expectedMessagesReceived;
 
   t.comment('give clients 1 and 2 a moment to (not) receive messages...');
   await delay(wsTransmissionDelay);
@@ -186,11 +232,16 @@ test('Clients joining a room', { timeout }, async t => {
 
 test('Sending messages within a room', { timeout }, async t => {
   t.comment('client1 is opening a connection...');
-  const client1 = await connectTestClient();
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+  const client1Id = client1.messages[0].clientId;
+
   t.comment('client1 is joining a room...');
+  client1.expectMessages(1);
   const jr1 = JSON.stringify({
     type: 'joinRoom',
-    name: 'Peter Parker',
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
@@ -198,13 +249,18 @@ test('Sending messages within a room', { timeout }, async t => {
     },
   });
   client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
 
   t.comment('client2 is opening a connection...');
-  const client2 = await connectTestClient();
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+
   t.comment('ws2 is joining a room...');
+  client2.expectMessages(1);
   const jr2 = JSON.stringify({
     type: 'joinRoom',
-    name: 'Gwen Stacy',
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
@@ -212,13 +268,18 @@ test('Sending messages within a room', { timeout }, async t => {
     },
   });
   client2.webSocket.send(jr2);
+  await client2.expectedMessagesReceived;
 
   t.comment('client3 is opening a connection...');
-  const client3 = await connectTestClient();
+  const client3 = new TestClient();
+  client3.expectMessages(1);
+  await client3.connect();
+  await client3.expectedMessagesReceived;
+
   t.comment('client3 is joining a room with a different app...');
+  client3.expectMessages(1);
   const jr3 = JSON.stringify({
     type: 'joinRoom',
-    name: 'Miles Morales',
     roomInfo: {
       app: 'Ultimate Spiderman',
       version: '1.0.0',
@@ -226,13 +287,18 @@ test('Sending messages within a room', { timeout }, async t => {
     },
   });
   client3.webSocket.send(jr3);
+  await client3.expectedMessagesReceived;
 
   t.comment('client4 is opening a connection...');
-  const client4 = await connectTestClient();
+  const client4 = new TestClient();
+  client4.expectMessages(1);
+  await client4.connect();
+  await client4.expectedMessagesReceived;
+
   t.comment('client4 is joining a room with a different version...');
+  client4.expectMessages(1);
   const jr4 = JSON.stringify({
     type: 'joinRoom',
-    name: 'MJ',
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.1',
@@ -240,13 +306,18 @@ test('Sending messages within a room', { timeout }, async t => {
     },
   });
   client4.webSocket.send(jr4);
+  await client4.expectedMessagesReceived;
 
   t.comment('client5 is opening a connection...');
-  const client5 = await connectTestClient();
+  const client5 = new TestClient();
+  client5.expectMessages(1);
+  await client5.connect();
+  await client5.expectedMessagesReceived;
+
   t.comment('client5 is joining a room with a different name...');
+  client5.expectMessages(1);
   const jr5 = JSON.stringify({
     type: 'joinRoom',
-    name: 'Green Goblin',
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
@@ -254,11 +325,16 @@ test('Sending messages within a room', { timeout }, async t => {
     },
   });
   client5.webSocket.send(jr5);
-
-  t.comment('give the clients a moment to connect...');
-  await delay(wsTransmissionDelay);
+  await client5.expectedMessagesReceived;
 
   t.comment('client1 is sending a message to their room...');
+  client1.clearMessages();
+  client2.clearMessages();
+  client3.clearMessages();
+  client4.clearMessages();
+  client5.clearMessages();
+  client1.expectMessages(1);
+  client2.expectMessages(1);
   const payload = {
     test: 'value',
   };
@@ -268,23 +344,37 @@ test('Sending messages within a room', { timeout }, async t => {
   });
   client1.webSocket.send(d1);
 
-  t.comment('give the clients a moment to receive (or not receive) the message...');
+  await client1.expectedMessagesReceived;
+  t.equal(client1.messages[0].type, 'data', 'client1 should receive a data message');
+  t.deepEqual(client1.messages[0].payload, payload, 'client1 should receive the right payload');
+  t.equal(client1.messages[0].fromClient, client1Id, 'client1 should see who sent the message');
+  t.notEqual(client1.messages[0].time, undefined, 'client1 should receive a timestamp');
+
+  await client2.expectedMessagesReceived;
+  t.equal(client2.messages[0].type, 'data', 'client2 should receive a data message');
+  t.deepEqual(client2.messages[0].payload, payload, 'client2 should receive the right payload');
+  t.equal(client2.messages[0].fromClient, client1Id, 'client2 should see who sent the message');
+  t.notEqual(client2.messages[0].time, undefined, 'client2 should receive a timestamp');
+
+  t.comment('give clients 3, 4, and 5 a moment to not receive the message...');
   await delay(wsTransmissionDelay);
 
-  t.notEqual(client1.messages.find(m => m.type === 'data'), undefined, 'client1 should receive a message');
-  t.notEqual(client2.messages.find(m => m.type === 'data'), undefined, 'client2 should receive a message');
-  t.equal(client3.messages.find(m => m.type === 'data'), undefined, 'client3 should not receive a message');
-  t.equal(client4.messages.find(m => m.type === 'data'), undefined, 'client4 should not receive a message');
-  t.equal(client5.messages.find(m => m.type === 'data'), undefined, 'client5 should not receive a message');
+  t.equal(client3.messages.length, 0, 'client3 should not receive a message');
+  t.equal(client4.messages.length, 0, 'client4 should not receive a message');
+  t.equal(client5.messages.length, 0, 'client5 should not receive a message');
 
   t.end();
 });
 
 test('Clients leaving a room', { timeout }, async t => {
   t.comment('client1 is opening a connection...');
-  const client1 = await connectTestClient();
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
 
   t.comment('client1 is joining a room...');
+  client1.expectMessages(1);
   const jr1 = JSON.stringify({
     type: 'joinRoom',
     name: 'Naruto',
@@ -295,11 +385,17 @@ test('Clients leaving a room', { timeout }, async t => {
     },
   });
   client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
 
   t.comment('client2 is opening a connection...');
-  const client2 = await connectTestClient();
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+  const client2Id = client2.messages[0].clientId;
 
   t.comment('client2 is joining a room...');
+  client2.expectMessages(1);
   const jr2 = JSON.stringify({
     type: 'joinRoom',
     name: 'Sasuke',
@@ -310,11 +406,16 @@ test('Clients leaving a room', { timeout }, async t => {
     },
   });
   client2.webSocket.send(jr2);
+  await client2.expectedMessagesReceived;
 
   t.comment('client3 is opening a connection...');
-  const client3 = await connectTestClient();
+  const client3 = new TestClient();
+  client3.expectMessages(1);
+  await client3.connect();
+  await client3.expectedMessagesReceived;
 
   t.comment('client3 is joining a room with a different app...');
+  client3.expectMessages(1);
   const jr3 = JSON.stringify({
     type: 'joinRoom',
     name: 'Sakura',
@@ -325,11 +426,16 @@ test('Clients leaving a room', { timeout }, async t => {
     },
   });
   client3.webSocket.send(jr3);
+  await client3.expectedMessagesReceived;
 
   t.comment('client4 is opening a connection...');
-  const client4 = await connectTestClient();
+  const client4 = new TestClient();
+  client4.expectMessages(1);
+  await client4.connect();
+  await client4.expectedMessagesReceived;
 
   t.comment('client4 is joining a room with a different version...');
+  client4.expectMessages(1);
   const jr4 = JSON.stringify({
     type: 'joinRoom',
     name: 'Kakashi',
@@ -340,11 +446,16 @@ test('Clients leaving a room', { timeout }, async t => {
     },
   });
   client4.webSocket.send(jr4);
+  await client4.expectedMessagesReceived;
 
   t.comment('client5 is opening a connection...');
-  const client5 = await connectTestClient();
+  const client5 = new TestClient();
+  client5.expectMessages(1);
+  await client5.connect();
+  await client5.expectedMessagesReceived;
 
   t.comment('client5 is joining a room with a different name...');
+  client5.expectMessages(1);
   const jr5 = JSON.stringify({
     type: 'joinRoom',
     name: 'Orochimaru',
@@ -355,6 +466,7 @@ test('Clients leaving a room', { timeout }, async t => {
     },
   });
   client5.webSocket.send(jr5);
+  await client5.expectedMessagesReceived;
 
   t.comment('test that clients do not get messages for clients leaving other rooms...');
   client1.clearMessages();
@@ -366,19 +478,19 @@ test('Clients leaving a room', { timeout }, async t => {
   client4.webSocket.send(lr);
   client5.webSocket.send(lr);
 
-  t.comment('give clients 1 and 2 a moment to (not) receive messages...');
+  t.comment('give clients 1 and 2 a moment to not receive messages...');
   await delay(wsTransmissionDelay);
   t.equal(client1.messages.length, 0, 'client1 should not have received a message');
   t.equal(client2.messages.length, 0, 'client2 should not have received a message');
 
-  t.comment('test that clients receives a message for cleints leaving the same room...');
+  t.comment('test that clients receives a message for clients leaving the same room...');
   client1.expectMessages(1);
   client2.webSocket.send(lr);
   await client1.expectedMessagesReceived;
 
   t.equal(client1.messages.length, 1, 'client1 should receive a message');
   t.equal(client1.messages[0].type, 'clientLeftRoom', 'client1 should receive a client message');
-  t.equal(client1.messages[0].clientThatLeft, 'Sasuke', "client1 should see client2's name as the client that left");
+  t.equal(client1.messages[0].clientThatLeft, client2Id, 'client1 should see client2 as the client that left');
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
   t.equal(client1.messages[0].clients.length, 1, 'client1 should know one client is in the room');
 
@@ -387,7 +499,12 @@ test('Clients leaving a room', { timeout }, async t => {
 
 test('getRooms should return an array of rooms with room info', { timeout }, async t => {
   t.comment('client1 is opening a connection...');
-  const client1 = await connectTestClient();
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+
+  t.comment('client1 is making a room');
   const jr1 = JSON.stringify({
     type: 'joinRoom',
     name: 'Neo',
@@ -397,10 +514,17 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
       name: 'The Subway',
     },
   });
-  t.comment('client1 is making a room');
+  client1.expectMessages(1);
   client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
   t.comment('client2 is opening a connection...');
-  const client2 = await connectTestClient();
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+
+  t.comment('client2 is making a room');
   const realWorld1 = {
     app: 'The Real World',
     version: '1.0.0',
@@ -411,28 +535,40 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
     name: 'Trinity',
     roomInfo: realWorld1,
   });
-  t.comment('client2 is making a room');
+  client2.expectMessages(1);
   client2.webSocket.send(jr2);
+  await client2.expectedMessagesReceived;
 
   t.comment('client3 is opening a connection...');
-  const client3 = await connectTestClient();
+  const client3 = new TestClient();
+  client3.expectMessages(1);
+  await client3.connect();
+  await client3.expectedMessagesReceived;
+
+  t.comment('client3 is making a room');
   const realWorld2 = {
     app: 'The Real World',
     version: '1.0.1',
     name: 'The Nebuchadnezzar',
   };
-
   const jr3 = JSON.stringify({
     type: 'joinRoom',
     name: 'Morpheus',
     roomInfo: realWorld2,
   });
-  t.comment('client3 is making a room');
+  client3.expectMessages(1);
   client3.webSocket.send(jr3);
+  await client3.expectedMessagesReceived;
 
   t.comment('Mr Smith is opening a connection...');
-  const clientSmith = await connectTestClient();
+  const clientSmith = new TestClient();
+  clientSmith.expectMessages(1);
+  await clientSmith.connect();
+  await clientSmith.expectedMessagesReceived;
+
   t.comment('clientSmith sends getRooms message');
+  clientSmith.clearMessages();
+  clientSmith.expectMessages(1);
   const gr1 = JSON.stringify({
     type: 'getRooms',
     roomInfo: {
@@ -441,12 +577,7 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
     },
   });
   clientSmith.webSocket.send(gr1);
-
-  clientSmith.clearMessages();
-  clientSmith.expectMessages(1);
   await clientSmith.expectedMessagesReceived;
-
-  t.equal(clientSmith.messages.length, 1, 'clientSmith should receive a message');
   t.equal(clientSmith.messages[0].type, 'rooms', 'clientSmith should receive a rooms message');
   t.deepEqual(
     clientSmith.messages[0],
@@ -458,17 +589,15 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
   );
 
   t.comment('clientSmith sends getRooms message with specific version string');
+  clientSmith.clearMessages();
+  clientSmith.expectMessages(1);
   const gr2 = JSON.stringify({
     type: 'getRooms',
     // roomInfo in this 'getRooms' is identical to realWorld1 so it will filter on each property
     roomInfo: realWorld1,
   });
   clientSmith.webSocket.send(gr2);
-
-  clientSmith.clearMessages();
-  clientSmith.expectMessages(1);
   await clientSmith.expectedMessagesReceived;
-  t.equal(clientSmith.messages.length, 1, 'clientSmith should receive a message');
   t.equal(clientSmith.messages[0].type, 'rooms', 'clientSmith should receive a rooms message');
   t.deepEqual(
     clientSmith.messages[0],

@@ -22,7 +22,6 @@ When a client tries to join a room
 ```js
 {
   type: 'joinRoom',
-  name: string, // The name of the user who sent the message
   roomInfo: {
     name: string, // room name
     app: string, // app name
@@ -67,13 +66,25 @@ When a client wants information on rooms
 
 ## API: from server to client
 
+Server assigned data: Info sent to a client that just connected to the server.
+
+```js
+{
+  type: 'serverAssignedData',
+  clientId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
+}
+```
+
 Client joined room: Info about a client that just joined a room, and all clients connected to a room.
 
 ```js
 {
   type: 'clientJoinedRoom',
-  clients: ['Neo', 'Trinity', 'Morpheus'],
-  clientThatJoined: 'Neo',
+  clients: [
+    '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+    '123e4567-e89b-12d3-a456-426655440000'
+  ],
+  clientThatJoined: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
   time: 1567963601131, // millis since epoch
 }
 ```
@@ -83,8 +94,10 @@ Client left room: Info about a client that just left a room, and all clients sti
 ```js
 {
   type: 'clientLeftRoom',
-  clients: ['Trinity', 'Morpheus'],
-  clientThatLeft: 'Neo',
+  clients: [
+    '123e4567-e89b-12d3-a456-426655440000'
+  ],
+  clientThatLeft: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
   time: 1567963601131, // millis since epoch
 }
 ```
@@ -94,7 +107,7 @@ Data : Data send from the server that is an echo of data that the server recieve
 ```js
 {
   type: 'data',
-  fromClient: 'Trinity',
+  fromClient: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
   time: 1567963601131, // millis since epoch
   payload: {
     // client defined
