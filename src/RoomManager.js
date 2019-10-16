@@ -22,9 +22,9 @@ class RoomManager {
     return newRoom;
   }
 
-  addClientToRoom({ client, name, roomInfo }) {
-    if (!(client && name && roomInfo)) {
-      log(chalk.red(`ERR: Cannot add client to room, missing "client", "name", and/or "roomInfo"`));
+  addClientToRoom({ client, roomInfo }) {
+    if (!(client && roomInfo)) {
+      log(chalk.red(`ERR: Cannot add client to room, missing "client", and/or "roomInfo"`));
       return false;
     }
     if (client.room) {
@@ -35,8 +35,12 @@ class RoomManager {
       log(chalk.red(`ERR: Cannot add client to room, unable to find or make room`));
       return false;
     }
-    log(chalk.blue(`Adding client to room`));
-    client = Object.assign(client, { name, room });
+    log(
+      chalk.blue(
+        `Adding client ${client.id} to room: (app: ${room.app}, version: ${room.version}, name: ${room.name})`,
+      ),
+    );
+    client = Object.assign(client, { room });
     room.addClient(client);
     return true;
   }
@@ -46,7 +50,7 @@ class RoomManager {
       log(chalk.red(`ERR: Cannot echo to room, missing "client", "client.room", or "message"`));
       return false;
     }
-    log(chalk.blue(`Echoing message to client room`));
+    log(chalk.blue(`Echoing message to client ${client.id} room`));
     const { room } = client;
     room.echoMessageFromClient({
       client,
@@ -60,10 +64,9 @@ class RoomManager {
     if (!room) {
       return;
     }
-    log(chalk.blue(`Removing client from room`));
+    log(chalk.blue(`Removing client ${client.id} from current room`));
     room.removeClient(client);
     // Remove data added while joining room.
-    delete client.name;
     delete client.room;
   }
 

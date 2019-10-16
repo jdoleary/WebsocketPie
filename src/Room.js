@@ -16,18 +16,18 @@ class Room {
   echoMessageFromClient({ client, message }) {
     const messageWithAdditionalData = {
       ...message,
-      fromClient: client.name,
+      fromClient: client.id,
       time: Date.now(),
     };
     this.emit(messageWithAdditionalData);
   }
 
   getClientIndex(client) {
-    return this.clients.findIndex(c => c.name === client.name);
+    return this.clients.findIndex(c => c.id === client.id);
   }
 
   getClientsSafeToEmit() {
-    return this.clients.map(c => c.name);
+    return this.clients.map(c => c.id);
   }
 
   addClient(client) {
@@ -39,7 +39,7 @@ class Room {
     this.clients.push(client);
     this.emit({
       clients: this.getClientsSafeToEmit(),
-      clientThatJoined: client.name,
+      clientThatJoined: client.id,
       time: Date.now(),
       type: 'clientJoinedRoom',
     });
@@ -54,7 +54,7 @@ class Room {
     this.clients.splice(clientIndex, 1);
     this.emit({
       clients: this.getClientsSafeToEmit(),
-      clientThatLeft: client.name,
+      clientThatLeft: client.id,
       time: Date.now(),
       type: 'clientLeftRoom',
     });
