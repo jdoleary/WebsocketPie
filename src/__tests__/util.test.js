@@ -47,3 +47,18 @@ test('fuzzyMatchRooms should match rooms by fuzzy version', t => {
   t.deepEqual(foundRooms, [willMatch, willMatch2]);
   t.end();
 });
+
+test('Returns all rooms if roomInfo is undefined', t => {
+  const rooms = [
+    new Room({ app: 'app1', name: 'name1', version: '1.0.0' }),
+    new Room({ app: 'app1', name: 'name2', version: '1.0.4' }),
+    new Room({ app: 'app2', name: 'name2', version: '2.0.0' }),
+  ];
+  const foundRooms = fuzzyMatchRooms(rooms, undefined);
+  // Remove the clients array for the sake of comparison
+  for (let room of rooms) {
+    delete room.clients;
+  }
+  t.deepEqual(foundRooms, rooms);
+  t.end();
+});
