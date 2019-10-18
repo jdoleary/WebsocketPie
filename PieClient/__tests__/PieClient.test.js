@@ -67,7 +67,8 @@ test('Connection', { timeout }, async t => {
   t.comment('Opening a connection...');
   const messages = [];
   let messagesRecieved = 0;
-  let expectMessages = 0;
+  // Promise will resolve only when number of expected messages have been received
+  const expectMessages = 5;
   let resolveMessages;
   let resolveConnected;
   const connectedPromise = new Promise(res => {
@@ -77,7 +78,6 @@ test('Connection', { timeout }, async t => {
     resolveMessages = res;
   });
   function receiveMessage(message) {
-    console.log('TCL: receiveMessage -> message', message);
     if (message.type === 'connectInfo' && message.connected) {
       resolveConnected();
     }
@@ -87,7 +87,6 @@ test('Connection', { timeout }, async t => {
       resolveMessages();
     }
   }
-  expectMessages = 3;
   const pieClient = new PieClient({
     wsUri,
     onData: receiveMessage,
@@ -112,17 +111,37 @@ test('Connection', { timeout }, async t => {
   pieClient.joinRoom(roomInfo);
 
   t.comment('Get Rooms');
-  // pieClient.getRooms();
+  pieClient.getRooms();
 
   t.comment('send arbitrary client payload');
-  // pieClient.sendData({ pie: 'is so good' });
+  pieClient.sendData({ pie: 'is so good' });
 
   // Wait for all messages to be recieved
   await allMessagesReceivedPromise;
-  t.deepEqual(messages[0], { type: 'connectInfo', connected: true, msg: 'Opened connection to ws://localhost:8080' });
-  t.equal(messages[1].type, 'serverAssignedData');
-  t.equal(messages[2].type, 'clientJoinedRoom');
-  console.log(messages);
+
+  t.deepEqual(
+    messages[0],
+    { type: 'connectInfo', connected: true, msg: 'Opened connection to ws://localhost:8080' },
+    'Got connectInfo',
+  );
+  t.equal(messages[1].type, 'serverAssignedData', 'Got  serverAssignedData');
+  const myUUID = messages[1].clientId;
+  t.equal(messages[2].type, 'clientJoinedRoom', 'Got clientJoinedRoom');
+  t.equal(messages[2].clientThatJoined, myUUID, 'clientJoinedRoom is me');
+  t.deepEqual(messages[3], {
+    type: 'rooms',
+    rooms: [roomInfo],
+  });
+  delete messages[4].time;
+  t.deepEqual(
+    messages[4],
+    {
+      type: 'data',
+      payload: { pie: 'is so good' },
+      fromClient: myUUID,
+    },
+    'Got data',
+  );
 
   t.end();
 });
