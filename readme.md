@@ -115,12 +115,3 @@ Data : Data send from the server that is an echo of data that the server recieve
   }
 }
 ```
-
-## Tasks
-
-- Whisper messages
-- Support for client uuids
-- Client ordering for authority (if one user's client needs to make a decision)
-- Investigate 2 users connecting for one page
-- Implement Client leave room
-- [Should support rejoining if player disconnect](https://github.com/websockets/ws#how-to-detect-and-close-broken-connections)
