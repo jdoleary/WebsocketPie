@@ -1,5 +1,7 @@
 const chalk = require('chalk');
+
 const log = require('./log');
+const MessageTypes = require('../../messageTypes');
 
 class Room {
   constructor({ app, name, version }) {
@@ -36,7 +38,7 @@ class Room {
       clients: this.getClientsSafeToEmit(),
       clientThatChanged: client.id,
       time: Date.now(),
-      type: 'clientPresenceChanged',
+      type: MessageTypes.CLIENT_PRESENCE_CHANGED,
       present,
     });
   }

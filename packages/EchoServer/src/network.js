@@ -1,8 +1,10 @@
 const chalk = require('chalk');
 const WebSocket = require('ws');
+const uuidv4 = require('uuid/v4');
+
+const MessageTypes = require('../../messageTypes');
 const log = require('./log');
 const RoomManager = require('./RoomManager');
-const uuidv4 = require('uuid/v4');
 
 const roomManager = new RoomManager();
 
@@ -23,16 +25,16 @@ function startServer({ port }) {
       try {
         const message = JSON.parse(data);
         switch (message.type) {
-          case 'joinRoom':
+          case MessageTypes.JOIN_ROOM:
             roomManager.addClientToRoom({ client, roomInfo: message.roomInfo });
             break;
-          case 'data':
+          case MessageTypes.DATA:
             roomManager.echoToClientRoom({ client, message });
             break;
-          case 'leaveRoom':
+          case MessageTypes.LEAVE_ROOM:
             roomManager.removeClientFromCurrentRoom(client);
             break;
-          case 'getRooms':
+          case MessageTypes.GET_ROOMS:
             roomManager.getRooms({ client, roomInfo: message.roomInfo });
             break;
           default:

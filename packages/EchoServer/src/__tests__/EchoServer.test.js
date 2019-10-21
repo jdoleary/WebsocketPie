@@ -5,8 +5,10 @@ What we care about is that FROM A CLIENT'S PERSPECTIVE,
 the echo server's API matches what's expected. */
 
 const test = require('tape');
-const { startServer } = require('../network');
 const WebSocket = require('ws');
+
+const MessageTypes = require('../../../messageTypes');
+const { startServer } = require('../network');
 
 const port = process.env.PORT || 8080;
 const wsUrl = `ws://localhost:${port}`;
@@ -96,7 +98,7 @@ test('Clients joining a room', { timeout }, async t => {
   client1.clearMessages();
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
@@ -106,7 +108,7 @@ test('Clients joining a room', { timeout }, async t => {
   client1.webSocket.send(jr1);
   await client1.expectedMessagesReceived;
   t.equal(client1.messages.length, 1, 'client1 should receive a message');
-  t.equal(client1.messages[0].type, 'clientPresenceChanged', 'client1 should receive a client message');
+  t.equal(client1.messages[0].type, MessageTypes.CLIENT_PRESENCE_CHANGED, 'client1 should receive a client message');
   t.equal(client1.messages[0].clientThatChanged, client1Id, 'client1 should see their id as the joining client');
   t.equal(client1.messages[0].present, true, 'client joined room, so present should be true');
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
@@ -126,7 +128,7 @@ test('Clients joining a room', { timeout }, async t => {
   client1.expectMessages(1);
   client2.expectMessages(1);
   const jr2 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
@@ -137,7 +139,7 @@ test('Clients joining a room', { timeout }, async t => {
 
   await client1.expectedMessagesReceived;
   t.equal(client1.messages.length, 1, 'client1 should receive a message');
-  t.equal(client1.messages[0].type, 'clientPresenceChanged', 'client1 should receive a client message');
+  t.equal(client1.messages[0].type, MessageTypes.CLIENT_PRESENCE_CHANGED, 'client1 should receive a client message');
   t.equal(client1.messages[0].clientThatChanged, client2Id, "client1 should see the joining client's id");
   t.equal(client1.messages[0].present, true, 'client1 should be present in room');
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
@@ -151,7 +153,7 @@ test('Clients joining a room', { timeout }, async t => {
 
   await client2.expectedMessagesReceived;
   t.equal(client2.messages.length, 1, 'client2 should receive a message');
-  t.equal(client2.messages[0].type, 'clientPresenceChanged', 'client2 should receive a client message');
+  t.equal(client2.messages[0].type, MessageTypes.CLIENT_PRESENCE_CHANGED, 'client2 should receive a client message');
   t.equal(client2.messages[0].clientThatChanged, client2Id, 'client2  should see their id as the joining client');
   t.equal(client2.messages[0].present, true, 'client2 should be present in room');
   t.equal(Array.isArray(client2.messages[0].clients), true, 'client2 should receive an array of clients');
@@ -176,7 +178,7 @@ test('Clients joining a room', { timeout }, async t => {
   t.comment('client3 is joining a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     roomInfo: {
       app: 'DBGT',
       version: '1.0.0',
@@ -195,7 +197,7 @@ test('Clients joining a room', { timeout }, async t => {
   t.comment('client4 is joining a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.1',
@@ -214,7 +216,7 @@ test('Clients joining a room', { timeout }, async t => {
   t.comment('client5 is joining a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
@@ -244,7 +246,7 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client1 is joining a room...');
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
@@ -263,7 +265,7 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('ws2 is joining a room...');
   client2.expectMessages(1);
   const jr2 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
@@ -282,7 +284,7 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client3 is joining a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     roomInfo: {
       app: 'Ultimate Spiderman',
       version: '1.0.0',
@@ -301,7 +303,7 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client4 is joining a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.1',
@@ -320,7 +322,7 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client5 is joining a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
@@ -342,19 +344,19 @@ test('Sending messages within a room', { timeout }, async t => {
     test: 'value',
   };
   const d1 = JSON.stringify({
-    type: 'data',
+    type: MessageTypes.DATA,
     payload,
   });
   client1.webSocket.send(d1);
 
   await client1.expectedMessagesReceived;
-  t.equal(client1.messages[0].type, 'data', 'client1 should receive a data message');
+  t.equal(client1.messages[0].type, MessageTypes.DATA, 'client1 should receive a data message');
   t.deepEqual(client1.messages[0].payload, payload, 'client1 should receive the right payload');
   t.equal(client1.messages[0].fromClient, client1Id, 'client1 should see who sent the message');
   t.notEqual(client1.messages[0].time, undefined, 'client1 should receive a timestamp');
 
   await client2.expectedMessagesReceived;
-  t.equal(client2.messages[0].type, 'data', 'client2 should receive a data message');
+  t.equal(client2.messages[0].type, MessageTypes.DATA, 'client2 should receive a data message');
   t.deepEqual(client2.messages[0].payload, payload, 'client2 should receive the right payload');
   t.equal(client2.messages[0].fromClient, client1Id, 'client2 should see who sent the message');
   t.notEqual(client2.messages[0].time, undefined, 'client2 should receive a timestamp');
@@ -379,7 +381,7 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client1 is joining a room...');
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     name: 'Naruto',
     roomInfo: {
       app: 'Ninja Clash',
@@ -400,7 +402,7 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client2 is joining a room...');
   client2.expectMessages(1);
   const jr2 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     name: 'Sasuke',
     roomInfo: {
       app: 'Ninja Clash',
@@ -420,7 +422,7 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client3 is joining a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     name: 'Sakura',
     roomInfo: {
       app: 'Ninja Clash 2',
@@ -440,7 +442,7 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client4 is joining a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     name: 'Kakashi',
     roomInfo: {
       app: 'Ninja Clash',
@@ -460,7 +462,7 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client5 is joining a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     name: 'Orochimaru',
     roomInfo: {
       app: 'Ninja Clash',
@@ -475,7 +477,7 @@ test('Clients leaving a room', { timeout }, async t => {
   client1.clearMessages();
   client2.clearMessages();
   const lr = JSON.stringify({
-    type: 'leaveRoom',
+    type: MessageTypes.LEAVE_ROOM,
   });
   client3.webSocket.send(lr);
   client4.webSocket.send(lr);
@@ -492,7 +494,7 @@ test('Clients leaving a room', { timeout }, async t => {
   await client1.expectedMessagesReceived;
 
   t.equal(client1.messages.length, 1, 'client1 should receive a message');
-  t.equal(client1.messages[0].type, 'clientPresenceChanged', 'client1 should receive a client message');
+  t.equal(client1.messages[0].type, MessageTypes.CLIENT_PRESENCE_CHANGED, 'client1 should receive a client message');
   t.equal(client1.messages[0].clientThatChanged, client2Id, 'client1 should see client2 as the client that left');
   t.equal(client1.messages[0].present, false, 'client1 is no longer present in the room');
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
@@ -510,7 +512,7 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
 
   t.comment('client1 is making a room');
   const jr1 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     name: 'Neo',
     roomInfo: {
       app: 'The Matrix',
@@ -535,7 +537,7 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
     name: 'The Nebuchadnezzar',
   };
   const jr2 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     name: 'Trinity',
     roomInfo: realWorld1,
   });
@@ -556,7 +558,7 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
     name: 'The Nebuchadnezzar',
   };
   const jr3 = JSON.stringify({
-    type: 'joinRoom',
+    type: MessageTypes.JOIN_ROOM,
     name: 'Morpheus',
     roomInfo: realWorld2,
   });
@@ -574,7 +576,7 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
   clientSmith.clearMessages();
   clientSmith.expectMessages(1);
   const gr1 = JSON.stringify({
-    type: 'getRooms',
+    type: MessageTypes.GET_ROOMS,
     roomInfo: {
       app: 'The Real World',
       version: '1.0',
@@ -596,8 +598,8 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
   clientSmith.clearMessages();
   clientSmith.expectMessages(1);
   const gr2 = JSON.stringify({
-    type: 'getRooms',
-    // roomInfo in this 'getRooms' is identical to realWorld1 so it will filter on each property
+    type: MessageTypes.GET_ROOMS,
+    // roomInfo in this MessageTypes.GET_ROOMS is identical to realWorld1 so it will filter on each property
     roomInfo: realWorld1,
   });
   clientSmith.webSocket.send(gr2);
