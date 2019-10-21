@@ -106,8 +106,9 @@ test('Clients joining a room', { timeout }, async t => {
   client1.webSocket.send(jr1);
   await client1.expectedMessagesReceived;
   t.equal(client1.messages.length, 1, 'client1 should receive a message');
-  t.equal(client1.messages[0].type, 'clientJoinedRoom', 'client1 should receive a client message');
-  t.equal(client1.messages[0].clientThatJoined, client1Id, 'client1 should see their id as the joining client');
+  t.equal(client1.messages[0].type, 'clientPresenceChanged', 'client1 should receive a client message');
+  t.equal(client1.messages[0].clientThatChanged, client1Id, 'client1 should see their id as the joining client');
+  t.equal(client1.messages[0].present, true, 'client joined room, so present should be true');
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
   t.equal(client1.messages[0].clients.length, 1, 'client1 should know one client is in the room');
   t.equal(client1.messages[0].clients.includes(client1Id), true, 'client1 should see their id in the array of clients');
@@ -136,8 +137,9 @@ test('Clients joining a room', { timeout }, async t => {
 
   await client1.expectedMessagesReceived;
   t.equal(client1.messages.length, 1, 'client1 should receive a message');
-  t.equal(client1.messages[0].type, 'clientJoinedRoom', 'client1 should receive a client message');
-  t.equal(client1.messages[0].clientThatJoined, client2Id, "client1 should see the joining client's id");
+  t.equal(client1.messages[0].type, 'clientPresenceChanged', 'client1 should receive a client message');
+  t.equal(client1.messages[0].clientThatChanged, client2Id, "client1 should see the joining client's id");
+  t.equal(client1.messages[0].present, true, 'client1 should be present in room');
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
   t.equal(client1.messages[0].clients.length, 2, 'client1 should know that two clients are in the room');
   t.equal(client1.messages[0].clients.includes(client1Id), true, 'client1 should see their id in the array of clients');
@@ -149,8 +151,9 @@ test('Clients joining a room', { timeout }, async t => {
 
   await client2.expectedMessagesReceived;
   t.equal(client2.messages.length, 1, 'client2 should receive a message');
-  t.equal(client2.messages[0].type, 'clientJoinedRoom', 'client2 should receive a client message');
-  t.equal(client2.messages[0].clientThatJoined, client2Id, 'client12should see their id as the joining client');
+  t.equal(client2.messages[0].type, 'clientPresenceChanged', 'client2 should receive a client message');
+  t.equal(client2.messages[0].clientThatChanged, client2Id, 'client2  should see their id as the joining client');
+  t.equal(client2.messages[0].present, true, 'client2 should be present in room');
   t.equal(Array.isArray(client2.messages[0].clients), true, 'client2 should receive an array of clients');
   t.equal(client2.messages[0].clients.length, 2, 'client2 should know that two clients are in the room');
   t.equal(
@@ -489,8 +492,9 @@ test('Clients leaving a room', { timeout }, async t => {
   await client1.expectedMessagesReceived;
 
   t.equal(client1.messages.length, 1, 'client1 should receive a message');
-  t.equal(client1.messages[0].type, 'clientLeftRoom', 'client1 should receive a client message');
-  t.equal(client1.messages[0].clientThatLeft, client2Id, 'client1 should see client2 as the client that left');
+  t.equal(client1.messages[0].type, 'clientPresenceChanged', 'client1 should receive a client message');
+  t.equal(client1.messages[0].clientThatChanged, client2Id, 'client1 should see client2 as the client that left');
+  t.equal(client1.messages[0].present, false, 'client1 is no longer present in the room');
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
   t.equal(client1.messages[0].clients.length, 1, 'client1 should know one client is in the room');
 
