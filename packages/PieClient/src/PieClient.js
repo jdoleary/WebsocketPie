@@ -10,47 +10,68 @@ onInfo: a callback to send information about the connection
 onError: a callback to send error messages
 */
 
-const env = {
-  development: 'development',
-  production: 'production',
-};
 class PieClient {
-  constructor({ env, wsUri, onData, onInfo, onError }) {
+  constructor({ env, wsUri, onData, onError, onServerAssignedData, onClientPresenceChanged, onRooms, onConnectInfo }) {
     this.env = env;
     this.wsUri = wsUri;
     this.onData = onData;
-    this.onInfo = onInfo;
     this.onError = onError;
+    this.onServerAssignedData = onServerAssignedData;
+    this.onClientPresenceChanged = onClientPresenceChanged;
+    this.onRooms = onRooms;
+    this.onConnectInfo = onConnectInfo;
     this.connected = false;
 
     this.ws = new WebSocket(wsUri);
     this.ws.on('message', data => {
       try {
         const message = JSON.parse(data);
-        if (message.type === 'data') {
-          this.onData(message);
-        } else {
-          this.onInfo(message);
+        switch (message.type) {
+          case MessageType.Data:
+            this.onData(message);
+            break;
+          case MessageType.ServerAssignedData:
+            if (this.onServerAssignedData) {
+              this.onServerAssignedData(message);
+            }
+            break;
+          case MessageType.ClientPresenceChanged:
+            if (this.onClientPresenceChanged) {
+              this.onClientPresenceChanged(message);
+            }
+            break;
+          case MessageType.Rooms:
+            if (this.onRooms) {
+              this.onRooms(message);
+            }
+            break;
+          default:
+            console.error(`Message of type ${message.type} not recognized!`);
         }
       } catch (e) {
+        console.error(e);
         this.onError(e);
       }
     });
     this.ws.on('open', () => {
       this.connected = true;
-      this.onInfo({
-        type: MessageType.ConnectInfo,
-        connected: this.connected,
-        msg: `Opened connection to ${this.wsUri}`,
-      });
+      if (this.onConnectInfo) {
+        this.onConnectInfo({
+          type: MessageType.ConnectInfo,
+          connected: this.connected,
+          msg: `Opened connection to ${this.wsUri}`,
+        });
+      }
     });
     this.ws.on('close', () => {
       this.connected = false;
-      this.onInfo({
-        type: MessageType.ConnectInfo,
-        connected: this.connected,
-        msg: `Connection to ${this.wsUri} closed.`,
-      });
+      if (this.onConnectInfo) {
+        this.onConnectInfo({
+          type: MessageType.ConnectInfo,
+          connected: this.connected,
+          msg: `Connection to ${this.wsUri} closed.`,
+        });
+      }
     });
   }
   joinRoom(roomInfo) {

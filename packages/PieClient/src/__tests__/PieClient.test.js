@@ -79,19 +79,26 @@ test('Connection', { timeout }, async t => {
     resolveMessages = res;
   });
   function receiveMessage(message) {
-    if (message.type === MessageType.ConnectInfo && message.connected) {
-      resolveConnected();
-    }
     messages.push(message);
     messagesRecieved++;
     if (messagesRecieved >= expectMessages) {
       resolveMessages();
     }
   }
+  function onConnectInfo(message) {
+    messages.push(message);
+    messagesRecieved++;
+    if (message.connected) {
+      resolveConnected();
+    }
+  }
   const pieClient = new PieClient({
     wsUri,
     onData: receiveMessage,
-    onInfo: receiveMessage,
+    onRooms: receiveMessage,
+    onClientPresenceChanged: receiveMessage,
+    onServerAssignedData: receiveMessage,
+    onConnectInfo: onConnectInfo,
     onError: err => {
       console.log('ERROR:', err);
     },
@@ -117,7 +124,7 @@ test('Connection', { timeout }, async t => {
   t.comment('send arbitrary client payload');
   pieClient.sendData({ pie: 'is so good' });
 
-  // Wait for all messages to be recieved
+  t.comment('Wait for all messages to be recieved');
   await allMessagesReceivedPromise;
 
   t.deepEqual(
