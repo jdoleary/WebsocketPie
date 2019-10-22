@@ -70,7 +70,7 @@ Server assigned data: Info sent to a client that just connected to the server.
 
 ```js
 {
-  type: 'serverAssignedData',
+  type: MessageType.ServerAssignedData,
   clientId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
 }
 ```

@@ -80,7 +80,11 @@ test('Connection', { timeout }, async t => {
   await client1.connect();
   await client1.expectedMessagesReceived;
   t.equal(client1.messages.length, 1, 'client1 should have received a message');
-  t.equal(client1.messages[0].type, 'serverAssignedData', 'client1 should have received a serverAssignedData message');
+  t.equal(
+    client1.messages[0].type,
+    MessageType.ServerAssignedData,
+    'client1 should have received a serverAssignedData message',
+  );
   t.notEqual(client1.messages[0].clientId, undefined, 'client1 should received a clientId');
   t.end();
 });

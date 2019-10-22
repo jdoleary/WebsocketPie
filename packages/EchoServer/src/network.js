@@ -15,7 +15,7 @@ function startServer({ port }) {
     log(chalk.blue(`Client ${clientId} connected`));
     client.send(
       JSON.stringify({
-        type: 'serverAssignedData',
+        type: MessageType.ServerAssignedData,
         clientId,
       }),
     );
