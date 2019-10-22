@@ -12,7 +12,7 @@ function fuzzyMatchRooms(rooms, roomInfo) {
           (roomInfo.version ? r.version.startsWith(roomInfo.version) : true)
         );
       })
-      // Only return the properties that are expected for the 'rooms' message
+      // Only return the properties that are expected for the MessageType.Rooms message
       // This prevents the stringify 'circular structure' error
       .map(r => ({ app: r.app, name: r.name, version: r.version }))
   );
