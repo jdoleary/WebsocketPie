@@ -3,8 +3,9 @@ Integration tests for the PieClient
 */
 
 const test = require('tape');
-const PieClient = require('../index');
-const { startServer } = require('../../src/network');
+const PieClient = require('../PieClient');
+const { startServer } = require('../../../EchoServer/src/network');
+const MessageType = require('../../../common/MessageType');
 
 const port = process.env.PORT || 8080;
 const wsUri = `ws://localhost:${port}`;
@@ -78,7 +79,7 @@ test('Connection', { timeout }, async t => {
     resolveMessages = res;
   });
   function receiveMessage(message) {
-    if (message.type === 'connectInfo' && message.connected) {
+    if (message.type === MessageType.ConnectInfo && message.connected) {
       resolveConnected();
     }
     messages.push(message);
@@ -121,22 +122,23 @@ test('Connection', { timeout }, async t => {
 
   t.deepEqual(
     messages[0],
-    { type: 'connectInfo', connected: true, msg: 'Opened connection to ws://localhost:8080' },
+    { type: MessageType.ConnectInfo, connected: true, msg: 'Opened connection to ws://localhost:8080' },
     'Got connectInfo',
   );
-  t.equal(messages[1].type, 'serverAssignedData', 'Got  serverAssignedData');
+  t.equal(messages[1].type, MessageType.ServerAssignedData, 'Got  serverAssignedData');
   const myUUID = messages[1].clientId;
-  t.equal(messages[2].type, 'clientJoinedRoom', 'Got clientJoinedRoom');
-  t.equal(messages[2].clientThatJoined, myUUID, 'clientJoinedRoom is me');
+  t.equal(messages[2].type, MessageType.ClientPresenceChanged, 'Client presence changed');
+  t.equal(messages[2].present, true, 'Client joined room');
+  t.equal(messages[2].clientThatChanged, myUUID, 'client  that changed is me');
   t.deepEqual(messages[3], {
-    type: 'rooms',
+    type: MessageType.Rooms,
     rooms: [roomInfo],
   });
   delete messages[4].time;
   t.deepEqual(
     messages[4],
     {
-      type: 'data',
+      type: MessageType.Data,
       payload: { pie: 'is so good' },
       fromClient: myUUID,
     },

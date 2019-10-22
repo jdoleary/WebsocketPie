@@ -1,4 +1,5 @@
 const WebSocket = require('ws');
+const MessageType = require('../../common/MessageType');
 
 /*
 env: 'development' | 'production'
@@ -37,18 +38,26 @@ class PieClient {
     });
     this.ws.on('open', () => {
       this.connected = true;
-      this.onInfo({ type: 'connectInfo', connected: this.connected, msg: `Opened connection to ${this.wsUri}` });
+      this.onInfo({
+        type: MessageType.ConnectInfo,
+        connected: this.connected,
+        msg: `Opened connection to ${this.wsUri}`,
+      });
     });
     this.ws.on('close', () => {
       this.connected = false;
-      this.onInfo({ type: 'connectInfo', connected: this.connected, msg: `Connection to ${this.wsUri} closed.` });
+      this.onInfo({
+        type: MessageType.ConnectInfo,
+        connected: this.connected,
+        msg: `Connection to ${this.wsUri} closed.`,
+      });
     });
   }
   joinRoom(roomInfo) {
     if (this.connected) {
       this.ws.send(
         JSON.stringify({
-          type: 'joinRoom',
+          type: MessageType.JoinRoom,
           roomInfo,
         }),
       );
@@ -60,7 +69,7 @@ class PieClient {
     if (this.connected) {
       this.ws.send(
         JSON.stringify({
-          type: 'leaveRoom',
+          type: MessageType.LeaveRoom,
         }),
       );
     } else {
@@ -71,7 +80,7 @@ class PieClient {
     if (this.connected) {
       this.ws.send(
         JSON.stringify({
-          type: 'getRooms',
+          type: MessageType.GetRooms,
           roomInfo,
         }),
       );
@@ -83,7 +92,7 @@ class PieClient {
     if (this.connected) {
       this.ws.send(
         JSON.stringify({
-          type: 'data',
+          type: MessageType.Data,
           payload,
         }),
       );
