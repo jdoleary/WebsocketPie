@@ -21,7 +21,7 @@ When a client tries to join a room
 
 ```js
 {
-  type: MessageTypes.JOIN_ROOM,
+  type: MessageType.joinRoom,
   roomInfo: {
     name: string, // room name
     app: string, // app name
@@ -34,7 +34,7 @@ Data from one client, to be echoed to other client(s) in the same room
 
 ```js
 {
-  type: MessageTypes.DATA,
+  type: MessageType.Data,
   payload: <client defined payload>
 }
 ```
@@ -43,7 +43,7 @@ When a client tries to leave a room
 
 ```js
 {
-  type: MessageTypes.LEAVE_ROOM,
+  type: MessageType.LeaveRoom,
 }
 ```
 
@@ -51,7 +51,7 @@ When a client wants information on rooms
 
 ```js
 {
-  type: MessageTypes.GET_ROOMS,
+  type: MessageType.GetRooms,
   roomInfo: {
     // The exact name of the app
     app: 'THPS2X',
@@ -79,7 +79,7 @@ Client joined / left room: Info about a client that just joined a room, and all 
 
 ```js
 {
-  type: MessageTypes.CLIENT_PRESENCE_CHANGED,
+  type: MessageType.ClientPresenceChanged,
   clients: [
     '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
     '123e4567-e89b-12d3-a456-426655440000'
@@ -96,7 +96,7 @@ Data : Data send from the server that is an echo of data that the server recieve
 
 ```js
 {
-  type: MessageTypes.DATA,
+  type: MessageType.Data,
   fromClient: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
   time: 1567963601131, // millis since epoch
   payload: {
