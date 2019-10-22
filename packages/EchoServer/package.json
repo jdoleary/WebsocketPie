@@ -4,8 +4,7 @@
   "main": "./src/index.js",
   "scripts": {
     "start": "node ./src/index.js",
-    "ngrok": "ngrok http 8080",
-    "test": "NODE_ENV=test tape ./packages/EchoServer/src/__tests__/**/*.js"
+    "test": "tape ./src/__tests__/**/*.js"
   },
   "dependencies": {
     "lodash.get": "^4.4.2",
@@ -21,7 +20,12 @@
     "prettier": "^1.18.2",
     "tape": "^4.10.2"
   },
-  "author": "Jordan O'Leary",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdoleary/EchoServer.git"
+  },
+  "author": "Jordan O'Leary / Matt Sweda",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "homepage": "https://github.com/jdoleary/EchoServer#readme"
 }
