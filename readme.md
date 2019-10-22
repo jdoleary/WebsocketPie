@@ -21,7 +21,7 @@ When a client tries to join a room
 
 ```js
 {
-  type: MessageType.joinRoom,
+  type: MessageType.JoinRoom,
   roomInfo: {
     name: string, // room name
     app: string, // app name
@@ -103,6 +103,15 @@ Data : Data send from the server that is an echo of data that the server recieve
     // client defined
     // This is the magic of echo server that allows it to be client agnostic
   }
+}
+```
+
+Rooms: A filtered list of rooms on the server.
+
+```js
+{
+  type: MessageType.Rooms,
+  rooms: []
 }
 ```
 

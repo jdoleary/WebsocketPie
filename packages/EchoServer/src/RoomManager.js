@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const log = require('./log');
+const MessageType = require('../../common/MessageType');
 const Room = require('./Room');
 const { fuzzyMatchRooms } = require('./util');
 
@@ -73,7 +74,7 @@ class RoomManager {
   getRooms({ client, roomInfo }) {
     client.send(
       JSON.stringify({
-        type: 'rooms',
+        type: MessageType.Rooms,
         rooms: fuzzyMatchRooms(this.rooms, roomInfo),
       }),
     );

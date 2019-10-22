@@ -24,7 +24,7 @@ function startServer({ port }) {
       try {
         const message = JSON.parse(data);
         switch (message.type) {
-          case MessageType.joinRoom:
+          case MessageType.JoinRoom:
             roomManager.addClientToRoom({ client, roomInfo: message.roomInfo });
             break;
           case MessageType.Data:
