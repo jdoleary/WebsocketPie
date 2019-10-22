@@ -21,7 +21,7 @@ When a client tries to join a room
 
 ```js
 {
-  type: 'joinRoom',
+  type: MessageType.JoinRoom,
   roomInfo: {
     name: string, // room name
     app: string, // app name
@@ -34,7 +34,7 @@ Data from one client, to be echoed to other client(s) in the same room
 
 ```js
 {
-  type: 'data',
+  type: MessageType.Data,
   payload: <client defined payload>
 }
 ```
@@ -43,7 +43,7 @@ When a client tries to leave a room
 
 ```js
 {
-  type: 'leaveRoom',
+  type: MessageType.LeaveRoom,
 }
 ```
 
@@ -51,7 +51,7 @@ When a client wants information on rooms
 
 ```js
 {
-  type: 'getRooms',
+  type: MessageType.GetRooms,
   roomInfo: {
     // The exact name of the app
     app: 'THPS2X',
@@ -70,35 +70,25 @@ Server assigned data: Info sent to a client that just connected to the server.
 
 ```js
 {
-  type: 'serverAssignedData',
+  type: MessageType.ServerAssignedData,
   clientId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
 }
 ```
 
-Client joined room: Info about a client that just joined a room, and all clients connected to a room.
+Client joined / left room: Info about a client that just joined a room, and all clients connected to a room.
 
 ```js
 {
-  type: 'clientJoinedRoom',
+  type: MessageType.ClientPresenceChanged,
   clients: [
     '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
     '123e4567-e89b-12d3-a456-426655440000'
   ],
-  clientThatJoined: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-  time: 1567963601131, // millis since epoch
-}
-```
-
-Client left room: Info about a client that just left a room, and all clients still connected to a room.
-
-```js
-{
-  type: 'clientLeftRoom',
-  clients: [
-    '123e4567-e89b-12d3-a456-426655440000'
-  ],
-  clientThatLeft: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-  time: 1567963601131, // millis since epoch
+  clientThatChanged: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+  // true if client joined room (is now present in room), false if client left room (is no longer present in room)
+  present: true,
+  // millis since epoch
+  time: 1567963601131,
 }
 ```
 
@@ -106,7 +96,7 @@ Data : Data send from the server that is an echo of data that the server recieve
 
 ```js
 {
-  type: 'data',
+  type: MessageType.Data,
   fromClient: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
   time: 1567963601131, // millis since epoch
   payload: {
@@ -115,3 +105,21 @@ Data : Data send from the server that is an echo of data that the server recieve
   }
 }
 ```
+
+Rooms: A filtered list of rooms on the server.
+
+```js
+{
+  type: MessageType.Rooms,
+  rooms: []
+}
+```
+
+## Tasks
+
+- Whisper messages
+- Support for client uuids
+- Client ordering for authority (if one user's client needs to make a decision)
+- Investigate 2 users connecting for one page
+- Implement Client leave room
+- [Should support rejoining if player disconnect](https://github.com/websockets/ws#how-to-detect-and-close-broken-connections)

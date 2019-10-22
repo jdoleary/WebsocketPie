@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const log = require('./log');
+const MessageType = require('../../common/MessageType');
 
 class Room {
   constructor({ app, name, version }) {
@@ -30,6 +31,17 @@ class Room {
     return this.clients.map(c => c.id);
   }
 
+  // For internal use only
+  _clientPresenceChanged(client, present) {
+    this.emit({
+      clients: this.getClientsSafeToEmit(),
+      clientThatChanged: client.id,
+      time: Date.now(),
+      type: MessageType.ClientPresenceChanged,
+      present,
+    });
+  }
+
   addClient(client) {
     const clientIndex = this.getClientIndex(client);
     if (clientIndex !== -1) {
@@ -37,12 +49,7 @@ class Room {
       return;
     }
     this.clients.push(client);
-    this.emit({
-      clients: this.getClientsSafeToEmit(),
-      clientThatJoined: client.id,
-      time: Date.now(),
-      type: 'clientJoinedRoom',
-    });
+    this._clientPresenceChanged(client, true);
   }
 
   removeClient(client) {
@@ -52,12 +59,7 @@ class Room {
       return;
     }
     this.clients.splice(clientIndex, 1);
-    this.emit({
-      clients: this.getClientsSafeToEmit(),
-      clientThatLeft: client.id,
-      time: Date.now(),
-      type: 'clientLeftRoom',
-    });
+    this._clientPresenceChanged(client, false);
   }
 }
 
