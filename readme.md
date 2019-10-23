@@ -4,17 +4,6 @@
 
 Echo Server is a client-agnostic web socket server, generally designed for turn-based multiplayer games. It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version. Then messages are send from client to server, which echos the message to all other clients in the room. In this way, the server doesn't care about the content of the game and can fascilitate any game (if latency allows).
 
-## Files (abstract to specific)
-
-- index.js
-  - Starts the Echo server.
-- network.js
-  - Handles socket specifics, parses JSON
-- RoomManager.js
-  - Holds rooms, handles adding clients to rooms, passes on data to room with metadata
-- Room.js
-  - A group of clients playing the same game
-
 ## API: from client to server
 
 When a client tries to join a room
@@ -115,11 +104,12 @@ Rooms: A filtered list of rooms on the server.
 }
 ```
 
-## Tasks
+## Dev Ops
 
-- Whisper messages
-- Support for client uuids
-- Client ordering for authority (if one user's client needs to make a decision)
-- Investigate 2 users connecting for one page
-- Implement Client leave room
-- [Should support rejoining if player disconnect](https://github.com/websockets/ws#how-to-detect-and-close-broken-connections)
+### Push Image to ECR
+
+This is set up with AWS Codebuild. Go to codebuild and manually `Start build`
+
+### Deploy Image on ECS
+
+TBD
