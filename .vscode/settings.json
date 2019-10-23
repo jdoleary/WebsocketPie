@@ -1,5 +1,8 @@
 {
   "eslint.autoFixOnSave": true,
+  "eslint.options": {
+    "configFile": "./.eslintrc.js"
+  },
   "eslint.validate": [
     {
       "language": "javascript",
@@ -8,6 +11,6 @@
   ],
   "editor.formatOnSave": true,
   "[javascript]": {
-    "editor.formatOnSave": false
-  }
+    "editor.formatOnSave": true
+  },
 }
