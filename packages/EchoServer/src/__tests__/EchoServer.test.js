@@ -6,7 +6,7 @@ the echo server's API matches what's expected. */
 
 const test = require('tape');
 const WebSocket = require('ws');
-const MessageType = require('../../../common/MessageType');
+const MessageType = require('../MessageType');
 const { startServer } = require('../network');
 
 const port = process.env.PORT || 8080;
