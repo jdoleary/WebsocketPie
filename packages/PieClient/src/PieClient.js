@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const MessageType = require('../../common/MessageType');
+const MessageType = require('./MessageType');
 
 /*
 env: 'development' | 'production'

@@ -1,6 +1,6 @@
 const chalk = require('chalk');
 const log = require('./log');
-const MessageType = require('../../common/MessageType');
+const MessageType = require('./MessageType');
 
 class Room {
   constructor({ app, name, version }) {

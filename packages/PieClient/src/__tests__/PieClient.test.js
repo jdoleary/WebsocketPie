@@ -5,7 +5,7 @@ Integration tests for the PieClient
 const test = require('tape');
 const PieClient = require('../PieClient');
 const { startServer } = require('../../../EchoServer/src/network');
-const MessageType = require('../../../common/MessageType');
+const MessageType = require('../MessageType');
 
 const port = process.env.PORT || 8080;
 const wsUri = `ws://localhost:${port}`;
