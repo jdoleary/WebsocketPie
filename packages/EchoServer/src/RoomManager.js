@@ -9,18 +9,28 @@ class RoomManager {
     this.rooms = [];
   }
 
-  findOrMakeRoom({ app, name, version }) {
+  getRoom({ app, name, version }) {
     if (!(app && name && version)) {
-      log(chalk.red(`ERR: Cannot find or make room, missing "app", "name" and/or "version"`));
-      return;
+      return {err:`Cannot find or make room, missing some or all required args "app", "name" and/or "version" in getRoom({app:${app}, name:${name}, version:${version}})`};
     }
     const existingRoom = this.rooms.find(room => room.app === app && room.name === name && room.version === version);
     if (existingRoom) {
-      return existingRoom;
+      return {room:existingRoom};
+    }else{
+      return {room:null};
     }
-    const newRoom = new Room({ app, name, version });
+  }
+  hostRoom({client, roomInfo}){
+    const {room:preExistingRoom} = this.getRoom(roomInfo)
+    if(preExistingRoom){
+      return {err:'Cannot make new room, room already exists'}
+    }
+    // Make the room
+    const newRoom = new Room(roomInfo);
     this.rooms.push(newRoom);
-    return newRoom;
+    // The host should implicitly join the room
+    this.addClientToRoom({client, roomInfo});
+    return {room:newRoom};
   }
 
   addClientToRoom({ client, roomInfo }) {
@@ -31,7 +41,7 @@ class RoomManager {
     if (client.room) {
       this.removeClientFromCurrentRoom(client);
     }
-    const room = this.findOrMakeRoom(roomInfo);
+    const {room} = this.getRoom(roomInfo);
     if (!room) {
       log(chalk.red(`ERR: Cannot add client to room, unable to find or make room`));
       return false;
