@@ -101,7 +101,7 @@ test('Clients joining a room', { timeout }, async t => {
   client1.clearMessages();
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
@@ -181,7 +181,7 @@ test('Clients joining a room', { timeout }, async t => {
   t.comment('client3 is hosting a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'DBGT',
       version: '1.0.0',
@@ -200,7 +200,7 @@ test('Clients joining a room', { timeout }, async t => {
   t.comment('client4 is hosting a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.1',
@@ -219,7 +219,7 @@ test('Clients joining a room', { timeout }, async t => {
   t.comment('client5 is hosting a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
@@ -249,7 +249,7 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client1 is hosting a room...');
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
@@ -287,7 +287,7 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client3 is hosting a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'Ultimate Spiderman',
       version: '1.0.0',
@@ -306,7 +306,7 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client4 is hosting a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.1',
@@ -325,7 +325,7 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client5 is hosting a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
@@ -384,7 +384,7 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client1 is hosting a room...');
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     name: 'Naruto',
     roomInfo: {
       app: 'Ninja Clash',
@@ -425,7 +425,7 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client3 is Hosting a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     name: 'Sakura',
     roomInfo: {
       app: 'Ninja Clash 2',
@@ -445,7 +445,7 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client4 is hosting a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     name: 'Kakashi',
     roomInfo: {
       app: 'Ninja Clash',
@@ -465,7 +465,7 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client5 is hosting a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     name: 'Orochimaru',
     roomInfo: {
       app: 'Ninja Clash',
@@ -515,7 +515,7 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
 
   t.comment('client1 is hosting a room');
   const jr1 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     name: 'Neo',
     roomInfo: {
       app: 'The Matrix',
@@ -540,7 +540,7 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
     name: 'The Nebuchadnezzar',
   };
   const jr2 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     name: 'Trinity',
     roomInfo: realWorld1,
   });
@@ -561,7 +561,7 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
     name: 'The Nebuchadnezzar',
   };
   const jr3 = JSON.stringify({
-    type: MessageType.HostRoom,
+    type: MessageType.MakeRoom,
     name: 'Morpheus',
     roomInfo: realWorld2,
   });

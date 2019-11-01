@@ -22,7 +22,7 @@ class RoomManager {
       return { room: null };
     }
   }
-  hostRoom({ client, roomInfo }) {
+  MakeRoom({ client, roomInfo }) {
     const { room: preExistingRoom } = this.getRoom(roomInfo);
     if (preExistingRoom) {
       return { err: 'Cannot make new room, room already exists' };

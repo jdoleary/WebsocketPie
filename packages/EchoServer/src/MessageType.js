@@ -6,7 +6,7 @@ const MessageType = {
   ClientPresenceChanged: 'ClientPresenceChanged',
   ServerAssignedData: 'ServerAssignedData',
   // Client to Server:
-  HostRoom: 'HostRoom',
+  MakeRoom: 'MakeRoom',
   JoinRoom: 'JoinRoom',
   LeaveRoom: 'LeaveRoom',
   GetRooms: 'GetRooms',

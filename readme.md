@@ -10,7 +10,7 @@ When a client tries to host a room
 
 ```js
 {
-  type: MessageType.HostRoom,
+  type: MessageType.MakeRoom,
   roomInfo: {
     name: string, // room name
     app: string, // app name
