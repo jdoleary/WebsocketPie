@@ -6,6 +6,19 @@ Echo Server is a client-agnostic web socket server, generally designed for turn-
 
 ## API: from client to server
 
+When a client tries to host a room
+
+```js
+{
+  type: MessageType.HostRoom,
+  roomInfo: {
+    name: string, // room name
+    app: string, // app name
+    version: string, // app version
+  },
+}
+```
+
 When a client tries to join a room
 
 ```js
