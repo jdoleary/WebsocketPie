@@ -104,6 +104,25 @@ Rooms: A filtered list of rooms on the server.
 }
 ```
 
+## Developing with an unpublished pie-client
+
+1. Navigate to packages/PieClient and run `npm link`
+2. Navigate to your client application and run `npm link pie-client`
+
+```
+jdo@DESKTOP-OFKI8CH MINGW64 ~/git/echo-server/packages/PieClient
+$ npm link
+added 155 packages from 96 contributors and audited 247 packages in 16.358s
+found 0 vulnerabilities
+
+C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git\echo-server\packages\PieClient
+
+jdo@DESKTOP-OFKI8CH MINGW64 ~/git/what-bus-driver
+$ npm link pie-client
+C:\Users\jdo\git\what-bus-driver\node_modules\pie-client -> C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git -> C:\Users\jdo\git\echo-server\packages\PieClient
+
+```
+
 ## Dev Ops
 
 ### Push Image to ECR
