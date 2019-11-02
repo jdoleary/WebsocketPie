@@ -1,5 +1,5 @@
 {
-  "name": "pieclient",
+  "name": "pie-client",
   "version": "0.1.0",
   "description": "A client for connecting to, sending and receiving messages from an echo server instance",
   "scripts": {
