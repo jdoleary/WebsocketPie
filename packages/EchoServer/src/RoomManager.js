@@ -17,13 +17,13 @@ class RoomManager {
     }
     const existingRoom = this.rooms.find(room => room.app === app && room.name === name && room.version === version);
     if (existingRoom) {
-      return { room: existingRoom };
+      return existingRoom;
     } else {
-      return { room: null };
+      return;
     }
   }
   MakeRoom({ client, roomInfo }) {
-    const { room: preExistingRoom } = this.getRoom(roomInfo);
+    const preExistingRoom = this.getRoom(roomInfo);
     if (preExistingRoom) {
       throw new Error('Cannot make new room, room already exists');
     }
@@ -42,7 +42,7 @@ class RoomManager {
     if (client.room) {
       this.removeClientFromCurrentRoom(client);
     }
-    const { room } = this.getRoom(roomInfo);
+    const room = this.getRoom(roomInfo);
     if (!room) {
       throw new Error(`Cannot add client to room, unable to find or make room`);
     }
