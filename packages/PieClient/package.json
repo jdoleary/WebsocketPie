@@ -18,12 +18,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jdoleary/EchoServer.git"
+    "url": "git+https://github.com/jdoleary/PieServer.git"
   },
   "author": "Jordan O'Leary / Matt Sweda",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jdoleary/EchoServer/issues"
+    "url": "https://github.com/jdoleary/PieServer/issues"
   },
-  "homepage": "https://github.com/jdoleary/EchoServer#readme"
+  "homepage": "https://github.com/jdoleary/PieServer#readme"
 }
