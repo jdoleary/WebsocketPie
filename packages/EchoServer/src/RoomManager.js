@@ -11,9 +11,9 @@ class RoomManager {
 
   getRoom({ app, name, version }) {
     if (!(app && name && version)) {
-      return {
-        err: `Cannot find or make room, missing some or all required args "app", "name" and/or "version" in getRoom({app:${app}, name:${name}, version:${version}})`,
-      };
+      throw new Error(
+        `Cannot find or make room, missing some or all required args "app", "name" and/or "version" in getRoom({app:${app}, name:${name}, version:${version}})`,
+      );
     }
     const existingRoom = this.rooms.find(room => room.app === app && room.name === name && room.version === version);
     if (existingRoom) {
@@ -25,7 +25,7 @@ class RoomManager {
   MakeRoom({ client, roomInfo }) {
     const { room: preExistingRoom } = this.getRoom(roomInfo);
     if (preExistingRoom) {
-      return { err: 'Cannot make new room, room already exists' };
+      throw new Error('Cannot make new room, room already exists');
     }
     // Make the room
     const newRoom = new Room(roomInfo);
@@ -37,16 +37,14 @@ class RoomManager {
 
   addClientToRoom({ client, roomInfo }) {
     if (!(client && roomInfo)) {
-      log(chalk.red(`ERR: Cannot add client to room, missing "client", and/or "roomInfo"`));
-      return false;
+      throw new Error('Cannot add client to room, missing "client", and/or "roomInfo"');
     }
     if (client.room) {
       this.removeClientFromCurrentRoom(client);
     }
     const { room } = this.getRoom(roomInfo);
     if (!room) {
-      log(chalk.red(`ERR: Cannot add client to room, unable to find or make room`));
-      return false;
+      throw new Error(`Cannot add client to room, unable to find or make room`);
     }
     log(
       chalk.blue(
@@ -55,13 +53,11 @@ class RoomManager {
     );
     client = Object.assign(client, { room });
     room.addClient(client);
-    return true;
   }
 
   echoToClientRoom({ client, message }) {
     if (!(client && client.room && message)) {
-      log(chalk.red(`ERR: Cannot echo to room, missing "client", "client.room", or "message"`));
-      return false;
+      throw new Error('Cannot echo to room, missing "client", "client.room", or "message"');
     }
     log(chalk.blue(`Echoing message to client ${client.id} room`));
     const { room } = client;

@@ -7,8 +7,8 @@ test('fuzzyMatchRooms should match rooms by app', t => {
 
   const rooms = [willMatch, new Room({ app: 'app2', name: 'name2', version: '2.0.0' })];
   const foundRooms = fuzzyMatchRooms(rooms, { app: willMatch.app });
-  const {app,name,version} = willMatch
-  t.deepEqual(foundRooms, [{app,name,version}]);
+  const { app, name, version } = willMatch;
+  t.deepEqual(foundRooms, [{ app, name, version }]);
   t.end();
 });
 
@@ -17,8 +17,8 @@ test('fuzzyMatchRooms should match rooms by name', t => {
 
   const rooms = [willMatch, new Room({ app: 'app2', name: 'name2', version: '2.0.0' })];
   const foundRooms = fuzzyMatchRooms(rooms, { name: willMatch.name });
-  const {app,name,version} = willMatch
-  t.deepEqual(foundRooms, [{app,name,version}]);
+  const { app, name, version } = willMatch;
+  t.deepEqual(foundRooms, [{ app, name, version }]);
   t.end();
 });
 
@@ -27,8 +27,8 @@ test('fuzzyMatchRooms should match rooms by exact version', t => {
 
   const rooms = [willMatch, new Room({ app: 'app2', name: 'name2', version: '2.0.0' })];
   const foundRooms = fuzzyMatchRooms(rooms, { version: willMatch.version });
-  const {app,name,version} = willMatch
-  t.deepEqual(foundRooms, [{app,name,version}]);
+  const { app, name, version } = willMatch;
+  t.deepEqual(foundRooms, [{ app, name, version }]);
   t.end();
 });
 
@@ -38,7 +38,10 @@ test('fuzzyMatchRooms should match rooms by fuzzy version', t => {
 
   const rooms = [willMatch, willMatch2, new Room({ app: 'app2', name: 'name2', version: '2.0.0' })];
   const foundRooms = fuzzyMatchRooms(rooms, { app: willMatch.app, version: '1.0' });
-  t.deepEqual(foundRooms, [{app:willMatch.app,name:willMatch.name,version:willMatch.version}, {app:willMatch2.app, name:willMatch2.name, version:willMatch2.version}]);
+  t.deepEqual(foundRooms, [
+    { app: willMatch.app, name: willMatch.name, version: willMatch.version },
+    { app: willMatch2.app, name: willMatch2.name, version: willMatch2.version },
+  ]);
   t.end();
 });
 

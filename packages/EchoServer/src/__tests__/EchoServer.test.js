@@ -619,6 +619,60 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
   t.end();
 });
 
+test('Room maxClients', { timeout }, async t => {
+  t.comment('client1 is opening a connection...');
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+
+  t.comment('client1 is hosting a room...');
+  client1.clearMessages();
+  client1.expectMessages(1);
+  const jr1 = JSON.stringify({
+    type: MessageType.MakeRoom,
+    roomInfo: {
+      app: 'TinyRoom',
+      version: '1.0.0',
+      name: 'Cupboard',
+      maxClients: 1,
+    },
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
+  t.comment('client2 is opening a connection...');
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+
+  t.comment('client2 trys to join a room but should recieve an error due to maxClients...');
+  client2.clearMessages();
+  client2.expectMessages(1);
+  const jr2 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'TinyRoom',
+      version: '1.0.0',
+      name: 'Cupboard',
+    },
+  });
+  client2.webSocket.send(jr2);
+
+  await client2.expectedMessagesReceived;
+  t.deepEqual(
+    client2.messages[0],
+    {
+      type: MessageType.Error,
+      message: `Room is at capacity and cannot accept more clients due to the room's chosen settings`,
+    },
+    'client2 should not be able to have joined the room due to capacity',
+  );
+  t.end();
+  // TODO
+});
+
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', t => {
   webSocketServer.close();

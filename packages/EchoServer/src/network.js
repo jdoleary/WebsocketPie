@@ -42,8 +42,14 @@ function startServer({ port }) {
           default:
             log(chalk.yellow(`WARN: Message not understood: ${JSON.stringify(message, null, 2)}`));
         }
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error('network.js | ', err);
+        client.send(
+          JSON.stringify({
+            type: MessageType.Error,
+            message: err.message,
+          }),
+        );
       }
     });
     client.on('close', () => {

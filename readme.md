@@ -15,6 +15,7 @@ When a client tries to host a room
     name: string, // room name
     app: string, // app name
     version: string, // app version
+    maxClients: number, // max clients allowed in room
   },
 }
 ```
@@ -114,6 +115,15 @@ Rooms: A filtered list of rooms on the server.
 {
   type: MessageType.Rooms,
   rooms: []
+}
+```
+
+Error: The server notifying the client of an error
+
+```js
+{
+  type: MessageType.Error,
+  message: string
 }
 ```
 
