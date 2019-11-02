@@ -118,11 +118,11 @@ Rooms: A filtered list of rooms on the server.
 }
 ```
 
-Error: The server notifying the client of an error
+Err: The server notifying the client of an error
 
 ```js
 {
-  type: MessageType.Error,
+  type: MessageType.Err,
   message: string
 }
 ```

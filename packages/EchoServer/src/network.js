@@ -46,7 +46,7 @@ function startServer({ port }) {
         console.error('network.js | ', err);
         client.send(
           JSON.stringify({
-            type: MessageType.Error,
+            type: MessageType.Err,
             message: err.message,
           }),
         );

@@ -5,7 +5,7 @@ const MessageType = {
   Rooms: 'Rooms',
   ClientPresenceChanged: 'ClientPresenceChanged',
   ServerAssignedData: 'ServerAssignedData',
-  Error: 'Error',
+  Err: 'Err',
   // Client to Server:
   MakeRoom: 'MakeRoom',
   JoinRoom: 'JoinRoom',
