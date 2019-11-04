@@ -26,6 +26,9 @@ function startServer({ port }) {
       try {
         const message = JSON.parse(data);
         switch (message.type) {
+          case MessageType.MakeRoom:
+            roomManager.makeRoom({ client, roomInfo: message.roomInfo });
+            break;
           case MessageType.JoinRoom:
             roomManager.addClientToRoom({ client, roomInfo: message.roomInfo });
             break;
@@ -41,8 +44,14 @@ function startServer({ port }) {
           default:
             log(chalk.yellow(`WARN: Message not understood: ${JSON.stringify(message, null, 2)}`));
         }
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error('network.js | ', err);
+        client.send(
+          JSON.stringify({
+            type: MessageType.Err,
+            message: err.message,
+          }),
+        );
       }
     });
     client.on('close', () => {

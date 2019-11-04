@@ -6,6 +6,20 @@ Echo Server is a client-agnostic web socket server, generally designed for turn-
 
 ## API: from client to server
 
+When a client tries to host a room
+
+```js
+{
+  type: MessageType.MakeRoom,
+  roomInfo: {
+    name: string, // room name
+    app: string, // app name
+    version: string, // app version
+    maxClients: number, // max clients allowed in room
+  },
+}
+```
+
 When a client tries to join a room
 
 ```js
@@ -104,6 +118,34 @@ Rooms: A filtered list of rooms on the server.
 }
 ```
 
+Err: The server notifying the client of an error
+
+```js
+{
+  type: MessageType.Err,
+  message: string
+}
+
+## Developing with an unpublished pie-client
+
+1. Navigate to packages/PieClient and run `npm link`
+2. Navigate to your client application and run `npm link pie-client`
+
+```
+
+jdo@DESKTOP-OFKI8CH MINGW64 ~/git/echo-server/packages/PieClient
+\$ npm link
+added 155 packages from 96 contributors and audited 247 packages in 16.358s
+found 0 vulnerabilities
+
+C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git\echo-server\packages\PieClient
+
+jdo@DESKTOP-OFKI8CH MINGW64 ~/git/what-bus-driver
+\$ npm link pie-client
+C:\Users\jdo\git\what-bus-driver\node_modules\pie-client -> C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git -> C:\Users\jdo\git\echo-server\packages\PieClient
+
+```
+
 ## Dev Ops
 
 ### Push Image to ECR
@@ -113,3 +155,4 @@ This is set up with AWS Codebuild. Go to codebuild and manually `Start build`
 ### Deploy Image on ECS
 
 TBD
+```

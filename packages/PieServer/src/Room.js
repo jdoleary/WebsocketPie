@@ -3,11 +3,13 @@ const log = require('./log');
 const MessageType = require('./MessageType');
 
 class Room {
-  constructor({ app, name, version }) {
+  constructor({ app, name, version, maxClients }) {
     this.app = app;
     this.clients = [];
     this.name = name;
     this.version = version;
+    // The maximum amount of clients allowed in the room
+    this.maxClients = maxClients;
   }
 
   emit(data) {
@@ -45,8 +47,10 @@ class Room {
   addClient(client) {
     const clientIndex = this.getClientIndex(client);
     if (clientIndex !== -1) {
-      log(chalk.yellow(`WARN: Cannot add client, client is already in the room.`));
-      return;
+      throw new Error('Cannot add client, client is already in the room');
+    }
+    if (this.maxClients !== undefined && this.clients.length === this.maxClients) {
+      throw new Error(`Room is at capacity and cannot accept more clients due to the room's chosen settings`);
     }
     this.clients.push(client);
     this._clientPresenceChanged(client, true);
