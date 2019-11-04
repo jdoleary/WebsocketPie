@@ -18,7 +18,7 @@ function startServer({ port }) {
       JSON.stringify({
         type: MessageType.ServerAssignedData,
         clientId,
-        PieServer: `v${version}`
+        serverVersion: `v${version}`
       }),
     );
     client.on('message', data => {
