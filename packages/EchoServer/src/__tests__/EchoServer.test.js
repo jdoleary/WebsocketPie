@@ -97,11 +97,11 @@ test('Clients joining a room', { timeout }, async t => {
   await client1.expectedMessagesReceived;
   const client1Id = client1.messages[0].clientId;
 
-  t.comment('client1 is joining a room...');
+  t.comment('client1 is hosting a room...');
   client1.clearMessages();
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
@@ -178,10 +178,10 @@ test('Clients joining a room', { timeout }, async t => {
   await client3.connect();
   await client3.expectedMessagesReceived;
 
-  t.comment('client3 is joining a room with a different app...');
+  t.comment('client3 is hosting a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'DBGT',
       version: '1.0.0',
@@ -197,10 +197,10 @@ test('Clients joining a room', { timeout }, async t => {
   await client4.connect();
   await client4.expectedMessagesReceived;
 
-  t.comment('client4 is joining a room with a different version...');
+  t.comment('client4 is hosting a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.1',
@@ -216,10 +216,10 @@ test('Clients joining a room', { timeout }, async t => {
   await client5.connect();
   await client5.expectedMessagesReceived;
 
-  t.comment('client5 is joining a room with a different name...');
+  t.comment('client5 is hosting a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
@@ -246,10 +246,10 @@ test('Sending messages within a room', { timeout }, async t => {
   await client1.expectedMessagesReceived;
   const client1Id = client1.messages[0].clientId;
 
-  t.comment('client1 is joining a room...');
+  t.comment('client1 is hosting a room...');
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
@@ -284,10 +284,10 @@ test('Sending messages within a room', { timeout }, async t => {
   await client3.connect();
   await client3.expectedMessagesReceived;
 
-  t.comment('client3 is joining a room with a different app...');
+  t.comment('client3 is hosting a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'Ultimate Spiderman',
       version: '1.0.0',
@@ -303,10 +303,10 @@ test('Sending messages within a room', { timeout }, async t => {
   await client4.connect();
   await client4.expectedMessagesReceived;
 
-  t.comment('client4 is joining a room with a different version...');
+  t.comment('client4 is hosting a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.1',
@@ -322,10 +322,10 @@ test('Sending messages within a room', { timeout }, async t => {
   await client5.connect();
   await client5.expectedMessagesReceived;
 
-  t.comment('client5 is joining a room with a different name...');
+  t.comment('client5 is hosting a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
@@ -381,10 +381,10 @@ test('Clients leaving a room', { timeout }, async t => {
   await client1.connect();
   await client1.expectedMessagesReceived;
 
-  t.comment('client1 is joining a room...');
+  t.comment('client1 is hosting a room...');
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     name: 'Naruto',
     roomInfo: {
       app: 'Ninja Clash',
@@ -422,10 +422,10 @@ test('Clients leaving a room', { timeout }, async t => {
   await client3.connect();
   await client3.expectedMessagesReceived;
 
-  t.comment('client3 is joining a room with a different app...');
+  t.comment('client3 is Hosting a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     name: 'Sakura',
     roomInfo: {
       app: 'Ninja Clash 2',
@@ -442,10 +442,10 @@ test('Clients leaving a room', { timeout }, async t => {
   await client4.connect();
   await client4.expectedMessagesReceived;
 
-  t.comment('client4 is joining a room with a different version...');
+  t.comment('client4 is hosting a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     name: 'Kakashi',
     roomInfo: {
       app: 'Ninja Clash',
@@ -462,10 +462,10 @@ test('Clients leaving a room', { timeout }, async t => {
   await client5.connect();
   await client5.expectedMessagesReceived;
 
-  t.comment('client5 is joining a room with a different name...');
+  t.comment('client5 is hosting a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     name: 'Orochimaru',
     roomInfo: {
       app: 'Ninja Clash',
@@ -513,9 +513,9 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
   await client1.connect();
   await client1.expectedMessagesReceived;
 
-  t.comment('client1 is making a room');
+  t.comment('client1 is hosting a room');
   const jr1 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     name: 'Neo',
     roomInfo: {
       app: 'The Matrix',
@@ -533,14 +533,14 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
   await client2.connect();
   await client2.expectedMessagesReceived;
 
-  t.comment('client2 is making a room');
+  t.comment('client2 is hosting a room');
   const realWorld1 = {
     app: 'The Real World',
     version: '1.0.0',
     name: 'The Nebuchadnezzar',
   };
   const jr2 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     name: 'Trinity',
     roomInfo: realWorld1,
   });
@@ -554,14 +554,14 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
   await client3.connect();
   await client3.expectedMessagesReceived;
 
-  t.comment('client3 is making a room');
+  t.comment('client3 is hosting a room');
   const realWorld2 = {
     app: 'The Real World',
     version: '1.0.1',
     name: 'The Nebuchadnezzar',
   };
   const jr3 = JSON.stringify({
-    type: MessageType.JoinRoom,
+    type: MessageType.MakeRoom,
     name: 'Morpheus',
     roomInfo: realWorld2,
   });
@@ -617,6 +617,60 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
     "clientSmith should see only the one room in  'The Real World' that matches the name, app, and version",
   );
   t.end();
+});
+
+test('Room maxClients', { timeout }, async t => {
+  t.comment('client1 is opening a connection...');
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+
+  t.comment('client1 is hosting a room...');
+  client1.clearMessages();
+  client1.expectMessages(1);
+  const jr1 = JSON.stringify({
+    type: MessageType.MakeRoom,
+    roomInfo: {
+      app: 'TinyRoom',
+      version: '1.0.0',
+      name: 'Cupboard',
+      maxClients: 1,
+    },
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
+  t.comment('client2 is opening a connection...');
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+
+  t.comment('client2 trys to join a room but should recieve an error due to maxClients...');
+  client2.clearMessages();
+  client2.expectMessages(1);
+  const jr2 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'TinyRoom',
+      version: '1.0.0',
+      name: 'Cupboard',
+    },
+  });
+  client2.webSocket.send(jr2);
+
+  await client2.expectedMessagesReceived;
+  t.deepEqual(
+    client2.messages[0],
+    {
+      type: MessageType.Err,
+      message: `Room is at capacity and cannot accept more clients due to the room's chosen settings`,
+    },
+    'client2 should not be able to have joined the room due to capacity',
+  );
+  t.end();
+  // TODO
 });
 
 /* Note: putting teardown inside a test ensures a serial execution order. */
