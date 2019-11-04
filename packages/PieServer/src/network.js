@@ -4,6 +4,7 @@ const uuidv4 = require('uuid/v4');
 const MessageType = require('./MessageType');
 const log = require('./log');
 const RoomManager = require('./RoomManager');
+const {version} = require('../package.json')
 
 const roomManager = new RoomManager();
 
@@ -17,6 +18,7 @@ function startServer({ port }) {
       JSON.stringify({
         type: MessageType.ServerAssignedData,
         clientId,
+        serverVersion: `v${version}`
       }),
     );
     client.on('message', data => {
