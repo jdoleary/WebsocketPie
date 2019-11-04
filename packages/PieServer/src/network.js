@@ -4,6 +4,7 @@ const uuidv4 = require('uuid/v4');
 const MessageType = require('./MessageType');
 const log = require('./log');
 const RoomManager = require('./RoomManager');
+const {version} = require('../package.json')
 
 const roomManager = new RoomManager();
 
@@ -17,6 +18,7 @@ function startServer({ port }) {
       JSON.stringify({
         type: MessageType.ServerAssignedData,
         clientId,
+        serverVersion: `v${version}`
       }),
     );
     client.on('message', data => {
@@ -24,6 +26,9 @@ function startServer({ port }) {
       try {
         const message = JSON.parse(data);
         switch (message.type) {
+          case MessageType.MakeRoom:
+            roomManager.makeRoom({ client, roomInfo: message.roomInfo });
+            break;
           case MessageType.JoinRoom:
             roomManager.addClientToRoom({ client, roomInfo: message.roomInfo });
             break;
@@ -39,8 +44,14 @@ function startServer({ port }) {
           default:
             log(chalk.yellow(`WARN: Message not understood: ${JSON.stringify(message, null, 2)}`));
         }
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error('network.js | ', err);
+        client.send(
+          JSON.stringify({
+            type: MessageType.Err,
+            message: err.message,
+          }),
+        );
       }
     });
     client.on('close', () => {

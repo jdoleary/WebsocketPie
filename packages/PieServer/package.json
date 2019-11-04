@@ -1,5 +1,5 @@
 {
-  "name": "echo-server",
+  "name": "pie-server",
   "version": "0.1.0",
   "main": "./src/index.js",
   "scripts": {
@@ -29,10 +29,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jdoleary/EchoServer.git"
+    "url": "git+https://github.com/jdoleary/PieServer.git"
   },
   "author": "Jordan O'Leary / Matt Sweda",
   "license": "ISC",
   "description": "",
-  "homepage": "https://github.com/jdoleary/EchoServer#readme"
+  "homepage": "https://github.com/jdoleary/PieServer#readme"
 }
