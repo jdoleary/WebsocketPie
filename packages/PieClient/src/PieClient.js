@@ -1,4 +1,3 @@
-const WebSocket = require('ws');
 const MessageType = require('./MessageType');
 
 /*
@@ -23,7 +22,7 @@ class PieClient {
     this.connected = false;
 
     this.ws = new WebSocket(wsUri);
-    this.ws.on('message', data => {
+    this.ws.onmessage(data => {
       try {
         const message = JSON.parse(data);
         switch (message.type) {
@@ -53,7 +52,7 @@ class PieClient {
         this.onError(e);
       }
     });
-    this.ws.on('open', () => {
+    this.ws.onopen(() => {
       this.connected = true;
       if (this.onConnectInfo) {
         this.onConnectInfo({
@@ -63,7 +62,7 @@ class PieClient {
         });
       }
     });
-    this.ws.on('close', () => {
+    this.ws.onclose(() => {
       this.connected = false;
       if (this.onConnectInfo) {
         this.onConnectInfo({
