@@ -1,28 +1,68 @@
 const chalk = require('chalk');
 const log = require('./log');
-const MessageType = require('./MessageType');
+const { MessageType } = require('./enums');
 
 class Room {
-  constructor({ app, name, version, maxClients }) {
+  constructor({ app, name, version, maxClients, togetherTimeoutMs }) {
     this.app = app;
     this.clients = [];
     this.name = name;
     this.version = version;
     // The maximum amount of clients allowed in the room
     this.maxClients = maxClients;
+    this.togetherTimeoutMs = togetherTimeoutMs;
+    // Holds groups of messaged queued to be sent all at once
+    this.togetherMessages = {};
+    // Holds the timeouts that can send a together message group before
+    // all clients have submitted a together message
+    this.togetherTimeouts = {};
+  }
+
+  echoTogetherMessage(togetherId) {
+    const togetherGroup = this.togetherMessages[togetherId];
+    clearTimeout(this.togetherTimeouts[togetherId]);
+    if (togetherGroup) {
+      const currentTime = new Date();
+      // Echo all the together messages in the group
+      for (let message of togetherGroup) {
+        // Override the time so that the together messages all have the same timestamp
+        message.time = currentTime;
+        this.emit(message);
+      }
+      // Remove the together group because the group of messages has now been echoed
+      delete this.togetherMessages[togetherId];
+    } else {
+      log(
+        chalk.yellow(`Together group ${togetherId} does not exist and cannot be echoed.  It must've already been sent`),
+      );
+    }
+  }
+
+  queueTogetherMessage(message) {
+    const { togetherId } = message;
+    // Allow indexing by 'undefined' if the client app choses not to supply a togetherId
+    // this is how the togetherId is optional
+    if (!this.togetherMessages[togetherId]) {
+      this.togetherMessages[togetherId] = [];
+      // After an optional timeout, echo the group of together messages
+      // regarless if all of the clients have queued their together message
+      if (this.togetherTimeoutMs) {
+        const timeoutId = setTimeout(() => {
+          this.echoTogetherMessage(togetherId);
+        }, this.togetherTimeoutMs);
+        this.togetherTimeouts[togetherId] = timeoutId;
+      }
+    }
+    // Add the message to the list
+    this.togetherMessages[togetherId].push(message);
+    // If all room's clients have added their message send the group of messages
+    if (this.togetherMessages[togetherId].length === this.clients.length) {
+      this.echoTogetherMessage(togetherId);
+    }
   }
 
   emit(data) {
     this.clients.forEach(c => c.send(JSON.stringify(data)));
-  }
-
-  echoMessageFromClient({ client, message }) {
-    const messageWithAdditionalData = {
-      ...message,
-      fromClient: client.id,
-      time: Date.now(),
-    };
-    this.emit(messageWithAdditionalData);
   }
 
   getClientIndex(client) {

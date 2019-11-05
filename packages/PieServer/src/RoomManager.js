@@ -1,9 +1,16 @@
 const chalk = require('chalk');
 const log = require('./log');
-const MessageType = require('./MessageType');
+const { MessageType, DataSubType } = require('./enums');
 const Room = require('./Room');
 const { fuzzyMatchRooms } = require('./util');
 
+function addServerAssignedInfoToMessage({ client, message }) {
+  return {
+    ...message,
+    fromClient: client.id,
+    time: Date.now(),
+  };
+}
 class RoomManager {
   constructor() {
     this.rooms = [];
@@ -53,17 +60,22 @@ class RoomManager {
     room.addClient(client);
   }
 
-  echoToClientRoom({ client, message }) {
+  onData({ client, message }) {
     if (!(client && client.room && message)) {
       throw new Error('Cannot echo to room, missing "client", "client.room", or "message"');
     }
-    log(chalk.blue(`Echoing message to client ${client.id} room`));
     const { room } = client;
-    room.echoMessageFromClient({
-      client,
-      message,
-    });
-    return true;
+    const messageWithAdditionalData = addServerAssignedInfoToMessage({ client, message });
+    switch (message.subType) {
+      case DataSubType.Together:
+        log(chalk.blue(`Queing together message`));
+        room.queueTogetherMessage(messageWithAdditionalData);
+        break;
+      default:
+        log(chalk.blue(`Echoing message to client ${client.id} room`));
+        room.emit(messageWithAdditionalData);
+        return true;
+    }
   }
 
   removeClientFromCurrentRoom(client) {

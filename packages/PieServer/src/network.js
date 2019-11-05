@@ -1,10 +1,10 @@
 const chalk = require('chalk');
 const WebSocket = require('ws');
 const uuidv4 = require('uuid/v4');
-const MessageType = require('./MessageType');
+const { MessageType } = require('./enums');
 const log = require('./log');
 const RoomManager = require('./RoomManager');
-const {version} = require('../package.json')
+const { version } = require('../package.json');
 
 const roomManager = new RoomManager();
 
@@ -18,7 +18,7 @@ function startServer({ port }) {
       JSON.stringify({
         type: MessageType.ServerAssignedData,
         clientId,
-        serverVersion: `v${version}`
+        serverVersion: `v${version}`,
       }),
     );
     client.on('message', data => {
@@ -33,7 +33,7 @@ function startServer({ port }) {
             roomManager.addClientToRoom({ client, roomInfo: message.roomInfo });
             break;
           case MessageType.Data:
-            roomManager.echoToClientRoom({ client, message });
+            roomManager.onData({ client, message });
             break;
           case MessageType.LeaveRoom:
             roomManager.removeClientFromCurrentRoom(client);
@@ -42,7 +42,7 @@ function startServer({ port }) {
             roomManager.getRooms({ client, roomInfo: message.roomInfo });
             break;
           default:
-            log(chalk.yellow(`WARN: Message not understood: ${JSON.stringify(message, null, 2)}`));
+            throw new Error(`WARN: Message not understood: ${JSON.stringify(message, null, 2)}`);
         }
       } catch (err) {
         console.error('network.js | ', err);
