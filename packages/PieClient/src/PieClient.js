@@ -22,9 +22,9 @@ class PieClient {
     this.connected = false;
 
     this.ws = new WebSocket(wsUri);
-    this.ws.onmessage(data => {
+    this.ws.onmessage = event => {
       try {
-        const message = JSON.parse(data);
+        const message = JSON.parse(event.data);
         switch (message.type) {
           case MessageType.Data:
             this.onData(message);
@@ -51,8 +51,8 @@ class PieClient {
         console.error(e);
         this.onError(e);
       }
-    });
-    this.ws.onopen(() => {
+    };
+    this.ws.onopen = () => {
       this.connected = true;
       if (this.onConnectInfo) {
         this.onConnectInfo({
@@ -61,8 +61,8 @@ class PieClient {
           msg: `Opened connection to ${this.wsUri}`,
         });
       }
-    });
-    this.ws.onclose(() => {
+    };
+    this.ws.onclose = () => {
       this.connected = false;
       if (this.onConnectInfo) {
         this.onConnectInfo({
@@ -71,7 +71,7 @@ class PieClient {
           msg: `Connection to ${this.wsUri} closed.`,
         });
       }
-    });
+    };
   }
   joinRoom(roomInfo) {
     if (this.connected) {
