@@ -128,6 +128,13 @@ Err: The server notifying the client of an error
   type: MessageType.Err,
   message: string
 }
+```
+
+## Special Messages
+
+**Together**
+A together message waits for all clients in the room (unless it times out)
+to send a message and then sends them all at once
 
 ## Developing with an unpublished pie-client
 

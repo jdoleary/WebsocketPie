@@ -12,25 +12,25 @@ class Room {
     this.maxClients = maxClients;
     this.togetherTimeoutMs = togetherTimeoutMs;
     // Holds groups of messaged queued to be sent all at once
-    this.togetherMessages = {};
+    this.togetherMessageGroups = {};
     // Holds the timeouts that can send a together message group before
     // all clients have submitted a together message
     this.togetherTimeouts = {};
   }
 
   echoTogetherMessage(togetherId) {
-    const togetherGroup = this.togetherMessages[togetherId];
     clearTimeout(this.togetherTimeouts[togetherId]);
-    if (togetherGroup) {
+    const togetherMessageGroup = this.togetherMessageGroups[togetherId];
+    if (togetherMessageGroup) {
       const currentTime = new Date();
       // Echo all the together messages in the group
-      for (let message of togetherGroup) {
+      for (let message of togetherMessageGroup) {
         // Override the time so that the together messages all have the same timestamp
         message.time = currentTime;
         this.emit(message);
       }
       // Remove the together group because the group of messages has now been echoed
-      delete this.togetherMessages[togetherId];
+      delete this.togetherMessageGroups[togetherId];
     } else {
       log(
         chalk.yellow(`Together group ${togetherId} does not exist and cannot be echoed.  It must've already been sent`),
@@ -42,8 +42,8 @@ class Room {
     const { togetherId } = message;
     // Allow indexing by 'undefined' if the client app choses not to supply a togetherId
     // this is how the togetherId is optional
-    if (!this.togetherMessages[togetherId]) {
-      this.togetherMessages[togetherId] = [];
+    if (!this.togetherMessageGroups[togetherId]) {
+      this.togetherMessageGroups[togetherId] = [];
       // After an optional timeout, echo the group of together messages
       // regarless if all of the clients have queued their together message
       if (this.togetherTimeoutMs) {
@@ -53,10 +53,16 @@ class Room {
         this.togetherTimeouts[togetherId] = timeoutId;
       }
     }
-    // Add the message to the list
-    this.togetherMessages[togetherId].push(message);
+    const preexistingIndex = this.togetherMessageGroups[togetherId].findIndex(m => m.fromClient === message.fromClient);
+    if (preexistingIndex !== -1) {
+      // Client sent message already, overwrite with the new message
+      this.togetherMessageGroups[togetherId][preexistingIndex] = message;
+    } else {
+      // Add the message to the list
+      this.togetherMessageGroups[togetherId].push(message);
+    }
     // If all room's clients have added their message send the group of messages
-    if (this.togetherMessages[togetherId].length === this.clients.length) {
+    if (this.togetherMessageGroups[togetherId].length === this.clients.length) {
       this.echoTogetherMessage(togetherId);
     }
   }
