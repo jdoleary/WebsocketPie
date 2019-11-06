@@ -71,6 +71,11 @@ class Room {
     this.clients.forEach(c => c.send(JSON.stringify(data)));
   }
 
+  emitToIds(data, ids) {
+    const selectClients = this.clients.filter(c => ids.indexOf(c.id) !== -1);
+    selectClients.forEach(c => c.send(JSON.stringify(data)));
+  }
+
   getClientIndex(client) {
     return this.clients.findIndex(c => c.id === client.id);
   }
