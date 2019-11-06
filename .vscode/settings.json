@@ -8,7 +8,7 @@
   ],
   "editor.formatOnSave": true,
   "[javascript]": {
-    "editor.formatOnSave": false
+    "editor.formatOnSave": true
   },
   "files.autoSave": "onFocusChange"
 }

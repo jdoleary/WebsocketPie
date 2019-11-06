@@ -1,11 +1,12 @@
 {
   "name": "pie-server",
   "version": "0.1.0",
+  "description": "",
+  "author": "Jordan O'Leary / Matt Sweda",
+  "license": "ISC",
   "main": "./src/index.js",
   "scripts": {
-    "start": "node ./src/index.js",
-    "test": "tape ./src/__tests__/**/*.js",
-    "lint": "eslint --fix ."
+    "start": "node ./src/index.js"
   },
   "dependencies": {
     "lodash.get": "4.4.2",
@@ -13,26 +14,6 @@
     "ws": "7.0.0"
   },
   "devDependencies": {
-    "chalk": "2.4.2",
-    "eslint": "6.5.1",
-    "eslint-config-prettier": "6.3.0",
-    "eslint-plugin-filenames": "1.3.2",
-    "eslint-plugin-prettier": "3.1.1",
-    "husky": "3.0.9",
-    "prettier": "1.18.2",
-    "tape": "4.10.2"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm test && eslint ."
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jdoleary/PieServer.git"
-  },
-  "author": "Jordan O'Leary / Matt Sweda",
-  "license": "ISC",
-  "description": "",
-  "homepage": "https://github.com/jdoleary/PieServer#readme"
+    "chalk": "2.4.2"
+  }
 }
