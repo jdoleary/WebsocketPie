@@ -4,6 +4,7 @@
   "description": "Monorepo for pie goodness",
   "main": "index.js",
   "scripts": {
+    "setup": "npm i && lerna bootstrap",
     "test": "tape ./packages/**/*.test.js"
   },
   "repository": {
