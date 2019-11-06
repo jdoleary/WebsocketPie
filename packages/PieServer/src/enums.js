@@ -15,4 +15,11 @@ const MessageType = {
   ConnectInfo: 'ConnectInfo',
 };
 
-module.exports = MessageType;
+const DataSubType = {
+  Together: 'Together',
+};
+
+module.exports = {
+  MessageType,
+  DataSubType,
+};

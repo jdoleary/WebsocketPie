@@ -16,6 +16,7 @@ When a client tries to host a room
     app: string, // app name
     version: string, // app version
     maxClients: number, // max clients allowed in room
+    togetherTimeoutMs: number, // number of milliseconds when a group of together messages echos without waiting for the remainder of the clients to send a together message
   },
 }
 ```
@@ -38,6 +39,8 @@ Data from one client, to be echoed to other client(s) in the same room
 ```js
 {
   type: MessageType.Data,
+  subType: DataSubtype.Together
+  togetherId: <anything indexable by an object>  // optional
   payload: <client defined payload>
 }
 ```
@@ -125,6 +128,13 @@ Err: The server notifying the client of an error
   type: MessageType.Err,
   message: string
 }
+```
+
+## Special Messages
+
+**Together**
+A together message waits for all clients in the room (unless it times out)
+to send a message and then sends them all at once
 
 ## Developing with an unpublished pie-client
 

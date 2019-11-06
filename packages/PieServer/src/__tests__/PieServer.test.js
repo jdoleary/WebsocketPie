@@ -6,7 +6,7 @@ the echo server's API matches what's expected. */
 
 const test = require('tape');
 const WebSocket = require('ws');
-const MessageType = require('../MessageType');
+const { MessageType, DataSubType } = require('../enums');
 const { startServer } = require('../network');
 
 const port = process.env.PORT || 8080;
@@ -670,9 +670,149 @@ test('Room maxClients', { timeout }, async t => {
     'client2 should not be able to have joined the room due to capacity',
   );
   t.end();
-  // TODO
 });
+test('Together messages send all at once', { timeout }, async t => {
+  t.comment('client1 is opening a connection...');
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
 
+  t.comment('client1 is hosting a room...');
+  client1.expectMessages(1);
+  const jr1 = JSON.stringify({
+    type: MessageType.MakeRoom,
+    roomInfo: {
+      app: 'SpidermanTogether',
+      version: '1.0.0',
+      name: 'New York',
+    },
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
+  t.comment('client2 is opening a connection...');
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+
+  t.comment('client2 is joining a room...');
+  client2.expectMessages(1);
+  const jr2 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'SpidermanTogether',
+      version: '1.0.0',
+      name: 'New York',
+    },
+  });
+  client2.webSocket.send(jr2);
+  await client2.expectedMessagesReceived;
+
+  t.comment('client1 is sending a message to their room...');
+  client1.clearMessages();
+  client2.clearMessages();
+  client1.expectMessages(1);
+  client2.expectMessages(1);
+  const d1 = JSON.stringify({
+    type: MessageType.Data,
+    subType: DataSubType.Together,
+    togetherId: 1,
+    payload: {
+      test1: 'value1',
+    },
+  });
+  client1.webSocket.send(d1);
+  await delay(wsTransmissionDelay);
+
+  t.equal(
+    client2.messages.length,
+    0,
+    'client2 should not receive a message because the server is waiting to send them together',
+  );
+
+  const d2 = JSON.stringify({
+    type: MessageType.Data,
+    subType: DataSubType.Together,
+    togetherId: 1,
+    payload: {
+      test2: 'value2',
+    },
+  });
+  client2.webSocket.send(d2);
+
+  await client1.expectedMessagesReceived;
+  t.deepEqual(client1.messages[0].payload, { test1: 'value1' }, 'Now client1 should receive the message');
+  t.deepEqual(client1.messages[1].payload, { test2: 'value2' }, 'Now client1 should receive the message');
+  t.equal(
+    client1.messages[0].time,
+    client1.messages[1].time,
+    'Since the messages were sent together the times should be the same.',
+  );
+
+  t.end();
+});
+test('Together messages can timeout and send without all users', { timeout }, async t => {
+  t.comment('client1 is opening a connection...');
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+
+  t.comment('client1 is hosting a room...');
+  client1.expectMessages(1);
+  const jr1 = JSON.stringify({
+    type: MessageType.MakeRoom,
+    roomInfo: {
+      app: 'SpidermanTogether2',
+      version: '1.0.0',
+      name: 'New York',
+      togetherTimeoutMs: 1,
+    },
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
+  t.comment('client2 is opening a connection...');
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+
+  t.comment('client2 is joining a room...');
+  client2.expectMessages(1);
+  const jr2 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'SpidermanTogether2',
+      version: '1.0.0',
+      name: 'New York',
+    },
+  });
+  client2.webSocket.send(jr2);
+  await client2.expectedMessagesReceived;
+
+  t.comment('client1 is sending a message to their room...');
+  client1.clearMessages();
+  client1.expectMessages(1);
+  const d1 = JSON.stringify({
+    type: MessageType.Data,
+    subType: DataSubType.Together,
+    togetherId: 1,
+    payload: {
+      test1: 'value1',
+    },
+  });
+  client1.webSocket.send(d1);
+  await client1.expectedMessagesReceived;
+  t.deepEqual(
+    client1.messages[0].payload,
+    { test1: 'value1' },
+    'Expect together message to timeout and echo without waiting for client2',
+  );
+  t.end();
+});
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', t => {
   webSocketServer.close();

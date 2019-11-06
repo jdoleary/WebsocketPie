@@ -1,4 +1,4 @@
-const MessageType = require('./MessageType');
+const { MessageType } = require('./enums');
 
 /*
 env: 'development' | 'production'
