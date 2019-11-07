@@ -813,6 +813,86 @@ test('Together messages can timeout and send without all users', { timeout }, as
   );
   t.end();
 });
+test('Whipsers should not be heard by clients not being whispered to', { timeout }, async t => {
+  t.comment('client1 is opening a connection...');
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+
+  t.comment('client1 is hosting a room...');
+  client1.expectMessages(1);
+  const jr1 = JSON.stringify({
+    type: MessageType.MakeRoom,
+    roomInfo: {
+      app: 'WhisperRoom',
+      version: '1.0.0',
+      name: 'New York',
+    },
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
+  t.comment('client2 is opening a connection...');
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+
+  t.comment('client2 is joining a room...');
+  client2.expectMessages(1);
+  const jr2 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'WhisperRoom',
+      version: '1.0.0',
+      name: 'New York',
+    },
+  });
+  client2.webSocket.send(jr2);
+  await client2.expectedMessagesReceived;
+  const client2Id = client2.messages[0].clientId;
+
+  t.comment('client3 is opening a connection...');
+  const client3 = new TestClient();
+  client3.expectMessages(1);
+  await client3.connect();
+  await client3.expectedMessagesReceived;
+
+  t.comment('client3 is joining a room...');
+  client3.expectMessages(1);
+  const jr3 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'WhisperRoom',
+      version: '1.0.0',
+      name: 'New York',
+    },
+  });
+  client3.webSocket.send(jr3);
+  await client3.expectedMessagesReceived;
+
+  t.comment('client1 is whispering a message to client2');
+  client1.clearMessages();
+  client2.clearMessages();
+  client3.clearMessages();
+  client2.expectMessages(1);
+  const d1 = JSON.stringify({
+    type: MessageType.Data,
+    subType: DataSubType.Whisper,
+    whisperClientIds: [client2Id],
+    payload: {
+      test1: 'whisper',
+    },
+  });
+  client1.webSocket.send(d1);
+  await client2.expectedMessagesReceived;
+  t.deepEqual(client2.messages[0].payload, { test1: 'whisper' }, 'Expect client 2 to have recieved whisper');
+  t.comment('give client 3 a moment to not receive whisper...');
+  await delay(wsTransmissionDelay);
+  t.equal(client3.messages.length, 0, 'client3 should not have received a message');
+  t.end();
+});
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', t => {
   webSocketServer.close();

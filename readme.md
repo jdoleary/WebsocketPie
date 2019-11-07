@@ -39,8 +39,9 @@ Data from one client, to be echoed to other client(s) in the same room
 ```js
 {
   type: MessageType.Data,
-  subType: DataSubtype.Together
-  togetherId: <anything indexable by an object>  // optional
+  subType: DataSubtype.Together,
+  togetherId: <anything indexable by an object>,  // optional
+  whisperClientIds: [client ids], // optional
   payload: <client defined payload>
 }
 ```
@@ -165,4 +166,7 @@ This is set up with AWS Codebuild. Go to codebuild and manually `Start build`
 ### Deploy Image on ECS
 
 TBD
+
+```
+
 ```

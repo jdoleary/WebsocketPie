@@ -17,6 +17,7 @@ const MessageType = {
 
 const DataSubType = {
   Together: 'Together',
+  Whisper: 'Whisper',
 };
 
 module.exports = {

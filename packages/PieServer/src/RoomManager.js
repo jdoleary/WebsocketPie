@@ -71,6 +71,10 @@ class RoomManager {
         log(chalk.blue(`Queing together message`));
         room.queueTogetherMessage(messageWithAdditionalData);
         break;
+      case DataSubType.Whisper:
+        log(chalk.blue(`Whispering to ${message.whisperClientIds}`));
+        room.whisper(messageWithAdditionalData, message.whisperClientIds);
+        break;
       default:
         log(chalk.blue(`Echoing message to client ${client.id} room`));
         room.emit(messageWithAdditionalData);
