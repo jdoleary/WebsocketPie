@@ -73,6 +73,18 @@ class PieClient {
       }
     };
   }
+  makeRoom(roomInfo) {
+    if (this.connected) {
+      this.ws.send(
+        JSON.stringify({
+          type: MessageType.MakeRoom,
+          roomInfo,
+        }),
+      );
+    } else {
+      this.onError({ msg: `Cannot make room, not currently connected to web socket server` });
+    }
+  }
   joinRoom(roomInfo) {
     if (this.connected) {
       this.ws.send(
