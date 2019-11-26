@@ -6,7 +6,8 @@
   "license": "ISC",
   "main": "./src/index.js",
   "scripts": {
-    "start": "node ./src/index.js"
+    "start": "node ./src/index.js",
+    "start:debug": "node --inspect-brk ./src/index.js"
   },
   "dependencies": {
     "lodash.get": "4.4.2",
