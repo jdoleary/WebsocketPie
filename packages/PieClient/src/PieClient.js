@@ -44,8 +44,13 @@ class PieClient {
               this.onRooms(message);
             }
             break;
+          case MessageType.Err:
+            console.error(message);
+            this.onError(message);
+            break;
           default:
-            console.error(`Message of type ${message.type} not recognized!`);
+            console.log(message);
+            console.error(`Above message of type ${message.type} not recognized!`);
         }
       } catch (e) {
         console.error(e);
@@ -120,11 +125,13 @@ class PieClient {
       this.onError({ msg: `Cannot get rooms, not currently connected to web socket server` });
     }
   }
-  sendData(payload) {
+  sendData(payload, { subType, togetherId }) {
     if (this.connected) {
       this.ws.send(
         JSON.stringify({
           type: MessageType.Data,
+          subType,
+          togetherId,
           payload,
         }),
       );
