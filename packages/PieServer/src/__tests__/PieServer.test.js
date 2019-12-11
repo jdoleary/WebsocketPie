@@ -893,6 +893,93 @@ test('Whipsers should not be heard by clients not being whispered to', { timeout
   t.equal(client3.messages.length, 0, 'client3 should not have received a message');
   t.end();
 });
+test('Rooms are cleaned up when all clients leave', { timeout }, async t => {
+  // Close and reopen server to get rid of all rooms with clients still hanging out in them
+  await webSocketServer.close();
+  webSocketServer = startServer({ port });
+
+  t.comment('client1 is opening a connection...');
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+
+  t.comment('client1 is hosting a room...');
+  client1.expectMessages(1);
+  const room1 = {
+    app: 'Cleanup Room',
+    version: '1.0.0',
+    name: 'Bedroom',
+  };
+  const jr1 = JSON.stringify({
+    type: MessageType.MakeRoom,
+    roomInfo: room1,
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
+  t.comment('client2 is opening a connection...');
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+
+  t.comment('client2 is joining a room...');
+  client2.expectMessages(1);
+  const room2 = {
+    app: 'Observer Room',
+    version: '1.0.0',
+    name: 'Observatory',
+  };
+  const jr2 = JSON.stringify({
+    type: MessageType.MakeRoom,
+    roomInfo: room2,
+  });
+  client2.webSocket.send(jr2);
+  await client2.expectedMessagesReceived;
+
+  t.comment('client2 is getting the rooms');
+  client1.clearMessages();
+  client2.clearMessages();
+  client2.expectMessages(1);
+  const gr1 = JSON.stringify({
+    type: MessageType.GetRooms,
+    roomInfo: {},
+  });
+  client2.webSocket.send(gr1);
+  await client2.expectedMessagesReceived;
+  t.equal(client2.messages[0].type, MessageType.Rooms, 'client2 should receive a rooms message');
+  t.deepEqual(
+    client2.messages[0],
+    {
+      type: MessageType.Rooms,
+      rooms: [room1, room2],
+    },
+    'client2 should see both rooms',
+  );
+  t.comment('client1 should leave their room, causing it to be cleaned up');
+  const lr = JSON.stringify({
+    type: MessageType.LeaveRoom,
+  });
+  client1.webSocket.send(lr);
+
+  t.comment('client2 should see only their own room now');
+  client2.clearMessages();
+  client2.expectMessages(1);
+  client2.webSocket.send(gr1);
+  await client2.expectedMessagesReceived;
+  t.equal(client2.messages[0].type, MessageType.Rooms, 'client2 should receive a rooms message');
+  t.deepEqual(
+    client2.messages[0],
+    {
+      type: MessageType.Rooms,
+      rooms: [room2],
+    },
+    'client2 should see only their own room now',
+  );
+
+  t.end();
+});
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', t => {
   webSocketServer.close();
