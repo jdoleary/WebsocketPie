@@ -125,15 +125,13 @@ class PieClient {
       this.onError({ msg: `Cannot get rooms, not currently connected to web socket server` });
     }
   }
-  sendData(payload, extras = {}) {
-    const { subType = undefined, togetherId = undefined } = extras;
+  sendData(payload, extras) {
     if (this.connected) {
       this.ws.send(
         JSON.stringify({
           type: MessageType.Data,
-          subType,
-          togetherId,
           payload,
+          ...extras,
         }),
       );
     } else {
