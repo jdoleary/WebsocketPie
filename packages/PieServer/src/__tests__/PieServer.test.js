@@ -980,6 +980,72 @@ test('Rooms are cleaned up when all clients leave', { timeout }, async t => {
 
   t.end();
 });
+test('Hidden rooms do not show in the Rooms message', { timeout }, async t => {
+  // Close and reopen server to get rid of all rooms with clients still hanging out in them
+  await webSocketServer.close();
+  webSocketServer = startServer({ port });
+  t.comment('client1 is opening a connection...');
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+
+  t.comment('client1 is hosting a room...');
+  client1.expectMessages(1);
+  const room1 = {
+    app: 'Hidden Room',
+    version: '1.0.0',
+    name: 'Secret',
+    hidden: true,
+  };
+  const jr1 = JSON.stringify({
+    type: MessageType.MakeRoom,
+    roomInfo: room1,
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
+  t.comment('client2 is opening a connection...');
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+
+  t.comment('client2 is hosting a room...');
+  client2.expectMessages(1);
+  const room2 = {
+    app: 'Observer Room',
+    version: '1.0.0',
+    name: 'Observatory',
+  };
+  const jr2 = JSON.stringify({
+    type: MessageType.MakeRoom,
+    roomInfo: room2,
+  });
+  client2.webSocket.send(jr2);
+  await client2.expectedMessagesReceived;
+
+  t.comment('client2 is getting the rooms');
+  client1.clearMessages();
+  client2.clearMessages();
+  client2.expectMessages(1);
+  const gr1 = JSON.stringify({
+    type: MessageType.GetRooms,
+    roomInfo: {},
+  });
+  client2.webSocket.send(gr1);
+  await client2.expectedMessagesReceived;
+  t.equal(client2.messages[0].type, MessageType.Rooms, 'client2 should receive a rooms message');
+  t.deepEqual(
+    client2.messages[0],
+    {
+      type: MessageType.Rooms,
+      rooms: [room2],
+    },
+    'client2 should ONLY see the non-hidden rooms',
+  );
+  t.end();
+});
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', t => {
   webSocketServer.close();

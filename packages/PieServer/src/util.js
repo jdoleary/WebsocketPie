@@ -16,6 +16,8 @@ function fuzzyMatchRooms(rooms, roomInfo) {
 
   return (
     foundRooms
+      // Exclude hidden rooms
+      .filter(r => !r.hidden)
       // Only return the properties that are expected for the 'rooms' message
       // This prevents the stringify 'circular structure' error
       .map(r => ({ app: r.app, name: r.name, version: r.version }))
