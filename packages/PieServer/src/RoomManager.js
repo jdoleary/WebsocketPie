@@ -91,6 +91,12 @@ class RoomManager {
     room.removeClient(client);
     // Remove data added while joining room.
     delete client.room;
+
+    // If room is empty, cleanup room:
+    if (!room.clients.length) {
+      const roomIndex = this.rooms.indexOf(room);
+      this.rooms.splice(roomIndex, 1);
+    }
   }
 
   getRooms({ client, roomInfo }) {

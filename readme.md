@@ -17,6 +17,7 @@ When a client tries to host a room
     version: string, // app version
     maxClients: number, // max clients allowed in room
     togetherTimeoutMs: number, // number of milliseconds when a group of together messages echos without waiting for the remainder of the clients to send a together message
+    hidden: boolean, // if a room should be visible to anyone who queries the rooms
   },
 }
 ```

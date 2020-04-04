@@ -3,7 +3,7 @@ const log = require('./log');
 const { MessageType } = require('./enums');
 
 class Room {
-  constructor({ app, name, version, maxClients, togetherTimeoutMs }) {
+  constructor({ app, name, version, maxClients, togetherTimeoutMs, hidden }) {
     this.app = app;
     this.clients = [];
     this.name = name;
@@ -16,6 +16,8 @@ class Room {
     // Holds the timeouts that can send a together message group before
     // all clients have submitted a together message
     this.togetherTimeouts = {};
+    // If a room should be visible to anyone who queries the rooms
+    this.hidden = hidden;
   }
 
   echoTogetherMessage(togetherId) {
