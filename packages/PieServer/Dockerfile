@@ -1,6 +1,6 @@
 FROM node:10
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/app/packages/PieServer
 
 COPY package*.json ./
 
@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 8080
 
-CMD [ "node", "./src/index.js"]
+ENTRYPOINT [ "npm", "start"]
