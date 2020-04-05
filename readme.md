@@ -174,15 +174,15 @@ Open the port
 
 ### Build the image manually
 
-```sh
-cd packages/PieServer
-# Don't forget the "."''
-docker build -t TAG .
-```
+In top level, run `npm run docker:build`
+
+Why is the build command structured like this? Because docker hub builds in a similar way, from
+top level with `-f` specifying the Dockerfile. This is why the dockerfile assumes that the PATH begins at the top level. This ensures that the packages/PieServer package.json is the one copied into `/app` and not the top level
+package.json
 
 ### Poke around in the image
 
-`docker container run -it TAG bash`
+`docker container run -it --entrypoint "" TAG /bin/bash`
 
 ### Run the image
 
