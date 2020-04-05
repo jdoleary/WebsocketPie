@@ -160,9 +160,29 @@ C:\Users\jdo\git\what-bus-driver\node_modules\pie-client -> C:\Users\jdo\AppData
 
 ## Dev Ops
 
-### Push Image to ECR
+### Push Image to Docker Hub
 
-This is set up with AWS Codebuild. Go to codebuild and manually `Start build`
+Pushing to the `master` branch will automatically trigger a build on docker hub
+
+### Create a droplet to run Echo Server
+
+Use the one-click app:
+https://marketplace.digitalocean.com/apps/docker
+
+Open the port
+`ufw allow 8080`
+
+### Build the image manually
+
+```sh
+cd packages/PieServer
+# Don't forget the "."''
+docker build -t TAG .
+```
+
+### Poke around in the image
+
+`docker container run -it TAG bash`
 
 ### Run the image
 

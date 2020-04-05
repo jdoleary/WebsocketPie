@@ -1,12 +1,12 @@
 FROM node:10
 
-WORKDIR /usr/src/app/packages/PieServer
+WORKDIR /app
 
-COPY package*.json ./
+COPY package*.json /app/
 
 RUN npm install
 
-COPY . .
+COPY . /app
 
 EXPOSE 8080
 
