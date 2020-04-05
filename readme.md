@@ -164,10 +164,14 @@ C:\Users\jdo\git\what-bus-driver\node_modules\pie-client -> C:\Users\jdo\AppData
 
 This is set up with AWS Codebuild. Go to codebuild and manually `Start build`
 
-### Deploy Image on ECS
+### Run the image
 
-TBD
-
-```
+https://docs.docker.com/engine/reference/builder/#expose
 
 ```
+The EXPOSE instruction does not actually publish the port. It functions as a type of documentation between the person who builds the image and the person who runs the container, about which ports are intended to be published. To actually publish the port when running the container, use the -p flag on docker run to publish and map one or more ports, or the -P flag to publish all exposed ports and map them to high-order ports.
+```
+
+Note: don't forget that `[OPTIONS]` **must** come before `IMAGE` in `docker run [OPTIONS] IMAGE [COMMAND] [ARG...]`
+
+`docker container run -d -p 8080:8080/tcp --name pie jdoleary1991/echo-server:latest`

@@ -28,7 +28,7 @@ function onConnected() {
   pie.makeRoom({
     app: 'Some app name',
     name: 'Rock Paper Sissors Unlimited Room!',
-    version: 'v0.1',
+    version: '0.1',
     private: true,
   });
 }
