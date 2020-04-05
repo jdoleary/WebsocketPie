@@ -166,6 +166,13 @@ This is set up with AWS Codebuild. Go to codebuild and manually `Start build`
 
 ### Run the image
 
+```sh
+# Login to docker hub
+docker login --username=jdoleary1991
+docker pull jdoleary1991/echo-server
+docker container run -d -p 8080:8080/tcp --restart on-failure --name pie jdoleary1991/echo-server:latest
+```
+
 https://docs.docker.com/engine/reference/builder/#expose
 
 ```
@@ -173,5 +180,3 @@ The EXPOSE instruction does not actually publish the port. It functions as a typ
 ```
 
 Note: don't forget that `[OPTIONS]` **must** come before `IMAGE` in `docker run [OPTIONS] IMAGE [COMMAND] [ARG...]`
-
-`docker container run -d -p 8080:8080/tcp --name pie jdoleary1991/echo-server:latest`
