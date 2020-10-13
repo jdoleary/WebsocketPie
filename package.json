@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jdoleary/PieTin.git"
+    "url": "git+https://github.com/jdoleary/WebsocketPie.git"
   },
   "keywords": [],
   "author": "Jordan O'Leary / Matt Sweda",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jdoleary/PieTin/issues"
+    "url": "https://github.com/jdoleary/WebsocketPie/issues"
   },
-  "homepage": "https://github.com/jdoleary/PieTin#readme",
+  "homepage": "https://github.com/jdoleary/WebsocketPie#readme",
   "devDependencies": {
     "eslint": "6.5.1",
     "eslint-config-prettier": "6.3.0",
