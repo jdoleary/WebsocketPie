@@ -1,11 +1,11 @@
-# Echo Server
+# PieServer
 
-Greater API can be found in the readme at top level. This document contains specifics only to Echo Server.
+Greater API can be found in the readme at top level. This document contains specifics only to PieServer.
 
 ## Files (abstract to specific)
 
 - index.js
-  - Starts the Echo server.
+  - Starts the PieServer.
 - network.js
   - Handles socket specifics, parses JSON
 - RoomManager.js

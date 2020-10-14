@@ -9,3 +9,7 @@ aws ecr get-login --region us-east-1
 docker pull 505590197138.dkr.ecr.us-east-1.amazonaws.com/echo-server:echo-server
 docker run --name pie -p 8080:8080/tcp 58cbb1d792c4
 ```
+
+## Working Notes
+
+Don't forget that makeRoom adds the user to the room

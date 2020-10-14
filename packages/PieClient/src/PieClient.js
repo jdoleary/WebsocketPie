@@ -2,9 +2,9 @@ const { MessageType } = require('./enums');
 
 /*
 env: 'development' | 'production'
-wsUri: websocket uri of an echo server instance
+wsUri: websocket uri of an PieServer instance
 ws: websocket connection
-onData: a callback that is send data emitted by the echo server
+onData: a callback that is send data emitted by the PieServer
 onInfo: a callback to send information about the connection
 onError: a callback to send error messages
 */

@@ -1,8 +1,10 @@
-# Pie Tin
+# Websocket Pie
+
+![Websocket Pie Logo](logo.png)
 
 ## Info
 
-Echo Server is a client-agnostic web socket server, generally designed for turn-based multiplayer games. It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version. Then messages are send from client to server, which echos the message to all other clients in the room. In this way, the server doesn't care about the content of the game and can fascilitate any game (if latency allows).
+PieServer is a client-agnostic web socket server, generally designed for turn-based multiplayer games. It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version. Then messages are send from client to server, which echos the message to all other clients in the room. In this way, the server doesn't care about the content of the game and can fascilitate any game (if latency allows).
 
 ## API: from client to server
 
@@ -109,7 +111,7 @@ Data : Data send from the server that is an echo of data that the server recieve
   time: 1567963601131, // millis since epoch
   payload: {
     // client defined
-    // This is the magic of echo server that allows it to be client agnostic
+    // This is the magic of PieServer that allows it to be client agnostic
   }
 }
 ```
@@ -164,7 +166,7 @@ C:\Users\jdo\git\what-bus-driver\node_modules\pie-client -> C:\Users\jdo\AppData
 
 Pushing to the `master` branch will automatically trigger a build on docker hub
 
-### Create a droplet to run Echo Server
+### Create a droplet to run PieServer
 
 Use the one-click app:
 https://marketplace.digitalocean.com/apps/docker

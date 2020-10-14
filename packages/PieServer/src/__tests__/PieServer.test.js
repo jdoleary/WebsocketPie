@@ -1,8 +1,8 @@
 /* The objective of this file is to test whether
-the echo server's behavior matches the readme.
+the PieServer's behavior matches the readme.
 We do not care about implementation specifics.
 What we care about is that FROM A CLIENT'S PERSPECTIVE,
-the echo server's API matches what's expected. */
+the PieServer's API matches what's expected. */
 
 const test = require('tape');
 const WebSocket = require('ws');
