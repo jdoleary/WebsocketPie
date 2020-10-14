@@ -2,9 +2,11 @@
 
 ![Websocket Pie Logo](logo.png)
 
-## Info
+Websocket Pie lets you make mutli-user, websocket experiences without writing server-side code!
 
-PieServer is a client-agnostic web socket server, generally designed for turn-based multiplayer games. It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version. Then messages are send from client to server, which echos the message to all other clients in the room. In this way, the server doesn't care about the content of the game and can fascilitate any game (if latency allows).
+The included package, PieServer, is a client-agnostic web socket server. It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version. When messages are sent from client (a browser) to server, it echos the message to all other clients in the room. In this way, the server doesn't care about the content of the message and can fascilitate multiple unique experiences simultaneously.
+
+The package PieClient provides simple functions for consuming the PieServer's api to let you hit the ground running!
 
 ## API: from client to server
 
