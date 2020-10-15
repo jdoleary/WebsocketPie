@@ -3,7 +3,7 @@ const log = require('./log');
 const { MessageType } = require('./enums');
 
 class Room {
-  constructor({ app, name, version, maxClients, togetherTimeoutMs, hidden }) {
+  constructor({ app, name = 'default', version, maxClients, togetherTimeoutMs, hidden }) {
     this.app = app;
     this.clients = [];
     this.name = name;

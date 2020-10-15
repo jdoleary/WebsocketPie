@@ -16,10 +16,10 @@ class RoomManager {
     this.rooms = [];
   }
 
-  getRoom({ app, name, version }) {
-    if (!(app && name && version)) {
+  getRoom({ app, name = 'default', version }) {
+    if (!(app && version)) {
       throw new Error(
-        `Cannot find or make room, missing some or all required args "app", "name" and/or "version" in getRoom({app:${app}, name:${name}, version:${version}})`,
+        `Cannot find or make room, missing some or all required args "app" and/or "version" in getRoom({app:${app}, name:${name}, version:${version}})`,
       );
     }
     const existingRoom = this.rooms.find(room => room.app === app && room.name === name && room.version === version);

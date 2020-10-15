@@ -10,11 +10,20 @@ onError: a callback to send error messages
 */
 
 class PieClient {
-  constructor({ env, wsUri, onData, onError, onServerAssignedData, onClientPresenceChanged, onRooms, onConnectInfo }) {
+  constructor({
+    env = 'development',
+    wsUri,
+    onData,
+    onError,
+    onServerAssignedData,
+    onClientPresenceChanged,
+    onRooms,
+    onConnectInfo,
+  }) {
     this.env = env;
     this.wsUri = wsUri;
     this.onData = onData;
-    this.onError = onError;
+    this.onError = onError || console.error;
     this.onServerAssignedData = onServerAssignedData;
     this.onClientPresenceChanged = onClientPresenceChanged;
     this.onRooms = onRooms;
