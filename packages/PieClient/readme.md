@@ -7,9 +7,8 @@ This package is an PieServer client that abstracts PieServer's public API behind
 ## Getting started, simplest usage:
 
 ```js
-// If you're developing locally you'll need to `npm link` first
-// see readme.md in parent folder for more on that.
 import PieClient from 'pie-client';
+
 const pie = new PieClient({
   env: 'development',
   wsUri: 'ws://localhost:8000',
@@ -24,23 +23,35 @@ const pie = new PieClient({
 
 ```js
 function onConnected() {
-  // Note, pie must be a valid PieClient object
-  pie.makeRoom({
-    app: 'Some app name',
-    name: 'Rock Paper Sissors Unlimited Room!',
-    version: '0.1',
-    private: true,
-  });
+  // To make a room, once connected
+  pie
+    .makeRoom({
+      app: 'Some app name',
+      name: 'Rock Paper Sissors Unlimited Room!',
+      version: '0.1',
+      private: true,
+    })
+    .then(() => console.log('New room made!'))
+    .catch(e => console.error('Could not make new room:', e));
 }
 ```
 
 ```js
-// To Join
-pie.joinRoom({
-  app: 'Some app name',
-  name: 'Rock Paper Sissors Unlimited Room!',
-  version: 'v0.1',
-});
+function onConnected() {
+  // To join a room, once connected
+  pie
+    .joinRoom({
+      app: 'Some app name',
+      name: 'Rock Paper Sissors Unlimited Room!',
+      version: 'v0.1',
+    })
+    .then(() => console.log('Join succeeded!'))
+    .catch(e => console.error('Join failed:', e));
+}
+```
+
+```js
+// To send data to everyone in the room
 pie.sendData({
   any: 'data',
 });
