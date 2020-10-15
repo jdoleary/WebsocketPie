@@ -24,6 +24,15 @@ class PieClient {
       makeRoom: null,
       joinRoom: null,
     };
+    // Optionally support a connection status element
+    this.statusElement = document.querySelector('#websocket-pie-connection-status');
+    if (this.statusElement) {
+      this.statusElement.style['pointer-events'] = 'none';
+      this.statusElement.style['position'] = 'absolute';
+      this.statusElement.style['top'] = '10px';
+      this.statusElement.style['left'] = '10px';
+      this.statusElement.style['user-select'] = 'none';
+    }
 
     this.ws = new WebSocket(wsUri);
     this.ws.onmessage = event => {
@@ -74,6 +83,10 @@ class PieClient {
     this.ws.onopen = () => {
       this.connected = true;
       if (this.onConnectInfo) {
+        if (this.statusElement) {
+          this.statusElement.innerHTML = `⬤ ${this.connected ? 'Connected' : 'Disconnected'}`;
+          this.statusElement.style.color = this.connected ? 'green' : 'red';
+        }
         this.onConnectInfo({
           type: MessageType.ConnectInfo,
           connected: this.connected,
