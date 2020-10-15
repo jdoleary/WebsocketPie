@@ -110,10 +110,20 @@ test('Clients joining a room', { timeout }, async t => {
   });
   client1.webSocket.send(jr1);
   await client1.expectedMessagesReceived;
-  t.equal(client1.messages.length, 1, 'client1 should receive a message');
+  t.equal(client1.messages.length, 2, 'client1 should receive a message');
   t.equal(client1.messages[0].type, MessageType.ClientPresenceChanged, 'client1 should receive a client message');
   t.equal(client1.messages[0].clientThatChanged, client1Id, 'client1 should see their id as the joining client');
   t.equal(client1.messages[0].present, true, 'client joined room, so present should be true');
+  t.equal(
+    client1.messages[1].type,
+    MessageType.ResolvePromise,
+    'client1 should receive notification that the promise is resolved',
+  );
+  t.equal(
+    client1.messages[1].func,
+    MessageType.MakeRoom,
+    'The promise should be notifying that MakeRoom was successful',
+  );
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
   t.equal(client1.messages[0].clients.length, 1, 'client1 should know one client is in the room');
   t.equal(client1.messages[0].clients.includes(client1Id), true, 'client1 should see their id in the array of clients');
@@ -155,10 +165,20 @@ test('Clients joining a room', { timeout }, async t => {
   );
 
   await client2.expectedMessagesReceived;
-  t.equal(client2.messages.length, 1, 'client2 should receive a message');
+  t.equal(client2.messages.length, 2, 'client2 should receive a message');
   t.equal(client2.messages[0].type, MessageType.ClientPresenceChanged, 'client2 should receive a client message');
   t.equal(client2.messages[0].clientThatChanged, client2Id, 'client2  should see their id as the joining client');
   t.equal(client2.messages[0].present, true, 'client2 should be present in room');
+  t.equal(
+    client2.messages[1].type,
+    MessageType.ResolvePromise,
+    'client2 should receive notification that the promise is resolved',
+  );
+  t.equal(
+    client2.messages[1].func,
+    MessageType.JoinRoom,
+    'The promise should be notifying that JoinRoom was successful',
+  );
   t.equal(Array.isArray(client2.messages[0].clients), true, 'client2 should receive an array of clients');
   t.equal(client2.messages[0].clients.length, 2, 'client2 should know that two clients are in the room');
   t.equal(

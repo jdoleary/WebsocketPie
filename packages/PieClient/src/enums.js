@@ -6,6 +6,8 @@ const MessageType = {
   ClientPresenceChanged: 'ClientPresenceChanged',
   ServerAssignedData: 'ServerAssignedData',
   Err: 'Err',
+  ResolvePromise: 'ResolvePromise',
+  RejectPromise: 'RejectPromise',
   // Client to Server:
   MakeRoom: 'MakeRoom',
   JoinRoom: 'JoinRoom',

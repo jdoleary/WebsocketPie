@@ -27,10 +27,24 @@ function startServer({ port }) {
         const message = JSON.parse(data);
         switch (message.type) {
           case MessageType.MakeRoom:
-            roomManager.makeRoom({ client, roomInfo: message.roomInfo });
+            roomManager
+              .makeRoom({ client, roomInfo: message.roomInfo })
+              .then(() => {
+                resolveClientPromise(message.type);
+              })
+              .catch(err => {
+                rejectClientPromise(message.type, err);
+              });
             break;
           case MessageType.JoinRoom:
-            roomManager.addClientToRoom({ client, roomInfo: message.roomInfo });
+            roomManager
+              .addClientToRoom({ client, roomInfo: message.roomInfo })
+              .then(() => {
+                resolveClientPromise(message.type);
+              })
+              .catch(err => {
+                rejectClientPromise(message.type, err);
+              });
             break;
           case MessageType.Data:
             roomManager.onData({ client, message });
@@ -58,6 +72,23 @@ function startServer({ port }) {
       log(chalk.blue(`Client ${client.id} disconnected`));
       roomManager.removeClientFromCurrentRoom(client);
     });
+    function resolveClientPromise(func) {
+      client.send(
+        JSON.stringify({
+          type: MessageType.ResolvePromise,
+          func,
+        }),
+      );
+    }
+    function rejectClientPromise(func, err) {
+      client.send(
+        JSON.stringify({
+          type: MessageType.RejectPromise,
+          func,
+          err,
+        }),
+      );
+    }
   });
   log(`Websocket server is listening on *:${port}`);
   return webSocketServer;

@@ -20,6 +20,10 @@ class PieClient {
     this.onRooms = onRooms;
     this.onConnectInfo = onConnectInfo;
     this.connected = false;
+    this.promiseCBs = {
+      makeRoom: null,
+      joinRoom: null,
+    };
 
     this.ws = new WebSocket(wsUri);
     this.ws.onmessage = event => {
@@ -28,6 +32,16 @@ class PieClient {
         switch (message.type) {
           case MessageType.Data:
             this.onData(message);
+            break;
+          case MessageType.ResolvePromise:
+            if (this.promiseCBs[message.func]) {
+              this.promiseCBs[message.func].resolve();
+            }
+            break;
+          case MessageType.RejectPromise:
+            if (this.promiseCBs[message.func]) {
+              this.promiseCBs[message.func].reject(message.err);
+            }
             break;
           case MessageType.ServerAssignedData:
             if (this.onServerAssignedData) {
@@ -80,26 +94,44 @@ class PieClient {
   }
   makeRoom(roomInfo) {
     if (this.connected) {
-      this.ws.send(
-        JSON.stringify({
-          type: MessageType.MakeRoom,
-          roomInfo,
-        }),
-      );
+      // Cancel previous makeRoom promise if it exists
+      if (this.promiseCBs[MessageType.MakeRoom]) {
+        this.promiseCBs[MessageType.MakeRoom].reject({ msg: 'Cancelled due to newer makeRoom request' });
+      }
+      return new Promise((resolve, reject) => {
+        // Assign callbacks so that the response from the server can
+        // fulfill this promise
+        this.promiseCBs[MessageType.MakeRoom] = { resolve, reject };
+        this.ws.send(
+          JSON.stringify({
+            type: MessageType.MakeRoom,
+            roomInfo,
+          }),
+        );
+      });
     } else {
-      this.onError({ msg: `Cannot make room, not currently connected to web socket server` });
+      return Promise.reject({ msg: `Cannot make room, not currently connected to web socket server` });
     }
   }
   joinRoom(roomInfo) {
     if (this.connected) {
-      this.ws.send(
-        JSON.stringify({
-          type: MessageType.JoinRoom,
-          roomInfo,
-        }),
-      );
+      // Cancel previous joinRoom promise if it exists
+      if (this.promiseCBs[MessageType.JoinRoom]) {
+        this.promiseCBs[MessageType.JoinRoom].reject({ msg: 'Cancelled due to newer joinRoom request' });
+      }
+      return new Promise((resolve, reject) => {
+        // Assign callbacks so that the response from the server can
+        // fulfill this promise
+        this.promiseCBs[MessageType.JoinRoom] = { resolve, reject };
+        this.ws.send(
+          JSON.stringify({
+            type: MessageType.JoinRoom,
+            roomInfo,
+          }),
+        );
+      });
     } else {
-      this.onError({ msg: `Cannot join room, not currently connected to web socket server` });
+      return Promise.reject({ msg: `Cannot join room, not currently connected to web socket server` });
     }
   }
   leaveRoom() {

@@ -30,26 +30,26 @@ class RoomManager {
   makeRoom({ client, roomInfo }) {
     const preExistingRoom = this.getRoom(roomInfo);
     if (preExistingRoom) {
-      throw new Error('Cannot make new room, room already exists');
+      return Promise.reject('Cannot make new room, room already exists');
     }
     // Make the room
     const newRoom = new Room(roomInfo);
     this.rooms.push(newRoom);
     // The host should implicitly join the room
     this.addClientToRoom({ client, roomInfo });
-    return { room: newRoom };
+    return Promise.resolve(newRoom);
   }
 
   addClientToRoom({ client, roomInfo }) {
     if (!(client && roomInfo)) {
-      throw new Error('Cannot add client to room, missing "client", and/or "roomInfo"');
+      return Promise.reject('Cannot add client to room, missing "client", and/or "roomInfo"');
     }
     if (client.room) {
       this.removeClientFromCurrentRoom(client);
     }
     const room = this.getRoom(roomInfo);
     if (!room) {
-      throw new Error(`Cannot add client to room, unable to find or make room`);
+      return Promise.reject(`Cannot add client to room, unable to find or make room`);
     }
     log(
       chalk.blue(
@@ -58,6 +58,7 @@ class RoomManager {
     );
     client = Object.assign(client, { room });
     room.addClient(client);
+    return Promise.resolve();
   }
 
   onData({ client, message }) {
