@@ -12,3 +12,7 @@ Greater API can be found in the readme at top level. This document contains spec
   - Holds rooms, handles adding clients to rooms, passes on data to room with metadata
 - Room.js
   - A group of clients playing the same game
+
+## Hosting
+
+Deployed on Digital Ocean app platform through .do/app.yaml

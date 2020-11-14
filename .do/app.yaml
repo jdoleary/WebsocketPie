@@ -1,0 +1,14 @@
+name: websocket-pie
+region: nyc
+services:
+  - name: pie-server
+    github:
+      branch: master
+      deploy_on_push: true
+      repo: jdoleary/WebsocketPie
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xs
+    routes:
+      - path: /
+    dockerfile_path: packages/PieServer/Dockerfile
