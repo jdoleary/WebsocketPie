@@ -67,6 +67,9 @@ class PieClient {
             }
             break;
           case MessageType.ClientPresenceChanged:
+            this._updateDebugInfo(message);
+            // If client is accepting the onClientPresenceChanged callback,
+            // send the message to it
             if (this.onClientPresenceChanged) {
               this.onClientPresenceChanged(message);
             }
@@ -91,11 +94,10 @@ class PieClient {
     };
     this.ws.onopen = () => {
       this.connected = true;
+      this._updateDebugInfo();
+      // If client is accepting the onConnectInfo callback,
+      // send the message to it
       if (this.onConnectInfo) {
-        if (this.statusElement) {
-          this.statusElement.innerHTML = `⬤ ${this.connected ? 'Connected' : 'Disconnected'}`;
-          this.statusElement.style.color = this.connected ? 'green' : 'red';
-        }
         this.onConnectInfo({
           type: MessageType.ConnectInfo,
           connected: this.connected,
@@ -105,6 +107,9 @@ class PieClient {
     };
     this.ws.onclose = () => {
       this.connected = false;
+      this._updateDebugInfo();
+      // If client is accepting the onConnectInfo callback,
+      // send the message to it
       if (this.onConnectInfo) {
         this.onConnectInfo({
           type: MessageType.ConnectInfo,
@@ -190,6 +195,23 @@ class PieClient {
       );
     } else {
       this.onError({ msg: `Cannot send data to room, not currently connected to web socket server` });
+    }
+  }
+  _updateDebugInfo(message) {
+    try {
+      if (this.statusElement) {
+        if (this.connected) {
+          const numberOfClients = (message && message.clients && message.clients.length) || 1;
+          this.statusElement.innerHTML = `⬤ ${
+            numberOfClients == 1 ? `${numberOfClients} User` : `${numberOfClients} Users`
+          } Connected`;
+        } else {
+          this.statusElement.innerHTML = `⬤ Disconnected`;
+        }
+        this.statusElement.style.color = this.connected ? 'green' : 'red';
+      }
+    } catch (e) {
+      console.error(e);
     }
   }
 }
