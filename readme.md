@@ -149,14 +149,14 @@ to send a message and then sends them all at once
 
 ```
 
-jdo@DESKTOP-OFKI8CH MINGW64 ~/git/echo-server/packages/PieClient
+jdo@DESKTOP ~/git/echo-server/packages/PieClient
 \$ npm link
 added 155 packages from 96 contributors and audited 247 packages in 16.358s
 found 0 vulnerabilities
 
 C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git\echo-server\packages\PieClient
 
-jdo@DESKTOP-OFKI8CH MINGW64 ~/git/what-bus-driver
+jdo@DESKTOP ~/git/what-bus-driver
 \$ npm link pie-client
 C:\Users\jdo\git\what-bus-driver\node_modules\pie-client -> C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git -> C:\Users\jdo\git\echo-server\packages\PieClient
 
