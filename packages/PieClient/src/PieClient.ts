@@ -1,5 +1,4 @@
-const { MessageType } = require('./enums');
-
+import { MessageType } from './enums'
 /*
 env: 'development' | 'production'
 wsUri: websocket uri of a PieServer instance
@@ -8,26 +7,45 @@ onData: a callback that is send data emitted by the PieServer
 onInfo: a callback to send information about the connection
 onError: a callback to send error messages
 */
+interface ConnectInfo {
+  type: string;
+  connected: boolean;
+  msg: string;
+}
+interface ServerAssignedData {
+  type: string;
+  clientId: string;
+  serverVersion: string;
+}
+interface OnDataArgs {
+  type: string;
+  fromClient: string;
+  payload: any;
+}
 
-class PieClient {
+export default class PieClient {
+  env: string;
+  wsUri: string;
+  onData: (x: OnDataArgs) => void;
+  onError: (x: { message: string }) => void;
+  onServerAssignedData: (x: ServerAssignedData) => void;
+  onClientPresenceChanged: (x: string) => void;
+  onRooms: (x: string) => void;
+  onConnectInfo: (c: ConnectInfo) => void;
+  connected: boolean;
+  promiseCBs: {
+    makeRoom: () => void;
+    joinRoom: () => void;
+  }
+  statusElement?: HTMLElement;
+  ws: WebSocket;
   constructor({
     env = 'development',
     wsUri,
-    onData,
-    onError,
-    onServerAssignedData,
-    onClientPresenceChanged,
-    onRooms,
-    onConnectInfo,
   }) {
     this.env = env;
     this.wsUri = wsUri;
-    this.onData = onData;
-    this.onError = onError || console.error;
-    this.onServerAssignedData = onServerAssignedData;
-    this.onClientPresenceChanged = onClientPresenceChanged;
-    this.onRooms = onRooms;
-    this.onConnectInfo = onConnectInfo;
+    this.onError = console.error;
     this.connected = false;
     this.promiseCBs = {
       makeRoom: null,
@@ -46,7 +64,7 @@ class PieClient {
     this.ws = new WebSocket(wsUri);
     this.ws.onmessage = event => {
       try {
-        const message = JSON.parse(event.data);
+        const message: any = JSON.parse(event.data);
         switch (message.type) {
           case MessageType.Data:
             this.onData(message);
@@ -123,7 +141,7 @@ class PieClient {
     if (this.connected) {
       // Cancel previous makeRoom promise if it exists
       if (this.promiseCBs[MessageType.MakeRoom]) {
-        this.promiseCBs[MessageType.MakeRoom].reject({ msg: 'Cancelled due to newer makeRoom request' });
+        this.promiseCBs[MessageType.MakeRoom].reject({ message: 'Cancelled due to newer makeRoom request' });
       }
       return new Promise((resolve, reject) => {
         // Assign callbacks so that the response from the server can
@@ -137,14 +155,14 @@ class PieClient {
         );
       });
     } else {
-      return Promise.reject({ msg: `Cannot make room, not currently connected to web socket server` });
+      return Promise.reject({ message: `Cannot make room, not currently connected to web socket server` });
     }
   }
   joinRoom(roomInfo) {
     if (this.connected) {
       // Cancel previous joinRoom promise if it exists
       if (this.promiseCBs[MessageType.JoinRoom]) {
-        this.promiseCBs[MessageType.JoinRoom].reject({ msg: 'Cancelled due to newer joinRoom request' });
+        this.promiseCBs[MessageType.JoinRoom].reject({ message: 'Cancelled due to newer joinRoom request' });
       }
       return new Promise((resolve, reject) => {
         // Assign callbacks so that the response from the server can
@@ -158,7 +176,7 @@ class PieClient {
         );
       });
     } else {
-      return Promise.reject({ msg: `Cannot join room, not currently connected to web socket server` });
+      return Promise.reject({ message: `Cannot join room, not currently connected to web socket server` });
     }
   }
   leaveRoom() {
@@ -169,7 +187,7 @@ class PieClient {
         }),
       );
     } else {
-      this.onError({ msg: `Cannot leave room, not currently connected to web socket server` });
+      this.onError({ message: `Cannot leave room, not currently connected to web socket server` });
     }
   }
   getRooms(roomInfo) {
@@ -181,7 +199,7 @@ class PieClient {
         }),
       );
     } else {
-      this.onError({ msg: `Cannot get rooms, not currently connected to web socket server` });
+      this.onError({ message: `Cannot get rooms, not currently connected to web socket server` });
     }
   }
   sendData(payload, extras) {
@@ -194,17 +212,16 @@ class PieClient {
         }),
       );
     } else {
-      this.onError({ msg: `Cannot send data to room, not currently connected to web socket server` });
+      this.onError({ message: `Cannot send data to room, not currently connected to web socket server` });
     }
   }
-  _updateDebugInfo(message) {
+  _updateDebugInfo(message?: { clients: object[] }) {
     try {
       if (this.statusElement) {
         if (this.connected) {
           const numberOfClients = (message && message.clients && message.clients.length) || 1;
-          this.statusElement.innerHTML = `⬤ ${
-            numberOfClients == 1 ? `${numberOfClients} User` : `${numberOfClients} Users`
-          } Connected`;
+          this.statusElement.innerHTML = `⬤ ${numberOfClients == 1 ? `${numberOfClients} User` : `${numberOfClients} Users`
+            } Connected`;
         } else {
           this.statusElement.innerHTML = `⬤ Disconnected`;
         }
@@ -215,4 +232,3 @@ class PieClient {
     }
   }
 }
-module.exports = PieClient;

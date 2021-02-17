@@ -1,4 +1,4 @@
-const MessageType = {
+export const MessageType = {
   // Both client and server:
   Data: 'Data',
   // Server to client:
@@ -17,11 +17,6 @@ const MessageType = {
   ConnectInfo: 'ConnectInfo',
 };
 
-const DataSubType = {
+export const DataSubType = {
   Together: 'Together',
-};
-
-module.exports = {
-  MessageType,
-  DataSubType,
 };

@@ -1,12 +1,13 @@
 {
-  "name": "pie-tin",
+  "name": "websocket-pie",
   "version": "0.1.0",
   "description": "Monorepo for pie goodness",
   "main": "index.js",
   "scripts": {
     "setup": "npm i && lerna bootstrap",
     "test": "tape ./packages/**/*.test.js",
-    "docker:build": "docker build -f ./packages/PieServer/Dockerfile ."
+    "docker:build": "docker build -f ./packages/PieServer/Dockerfile .",
+    "lint": "eslint --fix ."
   },
   "repository": {
     "type": "git",

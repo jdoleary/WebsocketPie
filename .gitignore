@@ -1,5 +1,3 @@
-Backend/Frontend/.cache
-Backend/Frontend/dist
-Backend/Frontend/node_modules
 *.env
 node_modules/
+packages/PieClient/dist
