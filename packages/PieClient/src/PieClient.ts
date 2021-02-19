@@ -22,6 +22,22 @@ interface OnDataArgs {
   fromClient: string;
   payload: any;
 }
+export interface ClientPresenceChangedArgs {
+  type: string;
+  clients: string[];
+  clientThatChanged: string;
+  time: number;
+  present: boolean;
+}
+interface Room {
+  app: string;
+  name: string;
+  version: string;
+}
+interface OnRoomsArgs {
+  type: string;
+  rooms: Room[]
+}
 
 export default class PieClient {
   env: string;
@@ -29,8 +45,8 @@ export default class PieClient {
   onData: (x: OnDataArgs) => void;
   onError: (x: { message: string }) => void;
   onServerAssignedData: (x: ServerAssignedData) => void;
-  onClientPresenceChanged: (x: string) => void;
-  onRooms: (x: string) => void;
+  onClientPresenceChanged: (c: ClientPresenceChangedArgs) => void;
+  onRooms: (x: OnRoomsArgs) => void;
   onConnectInfo: (c: ConnectInfo) => void;
   connected: boolean;
   promiseCBs: {
@@ -202,7 +218,7 @@ export default class PieClient {
       this.onError({ message: `Cannot get rooms, not currently connected to web socket server` });
     }
   }
-  sendData(payload, extras) {
+  sendData(payload: object, extras?: object) {
     if (this.connected) {
       this.ws.send(
         JSON.stringify({
