@@ -4,11 +4,14 @@
   "description": "A client for connecting to, sending and receiving messages from a pie server instance",
   "author": "Jordan O'Leary / Matt Sweda",
   "license": "MIT",
-  "main": "./dist/PieClient.js",
+  "main": "./dist/src/PieClient.js",
   "scripts": {
     "update-link": "tsc && npm link"
   },
   "devDependencies": {
     "typescript": "^4.1.5"
-  }
+  },
+  "files": [
+    "/dist"
+  ]
 }

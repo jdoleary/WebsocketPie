@@ -1,4 +1,5 @@
-import { MessageType } from './enums'
+import { MessageType } from './enums';
+import { version } from '../package.json';
 /*
 env: 'development' | 'production'
 wsUri: websocket uri of a PieServer instance
@@ -52,13 +53,11 @@ export default class PieClient {
   promiseCBs: {
     makeRoom: () => void;
     joinRoom: () => void;
-  }
+  };
   statusElement?: HTMLElement;
   ws: WebSocket;
-  constructor({
-    env = 'development',
-    wsUri,
-  }) {
+  constructor({ env = 'development', wsUri }) {
+    console.log(`WebSocketPie Client v${version} ${env}`);
     this.env = env;
     this.wsUri = wsUri;
     this.onError = console.error;
