@@ -5,13 +5,17 @@ const { MessageType } = require('./enums');
 const log = require('./log');
 const RoomManager = require('./RoomManager');
 const { version } = require('../package.json');
+const { parseQueryString } = require('./util');
 
 const roomManager = new RoomManager();
 
 function startServer({ port }) {
   const webSocketServer = new WebSocket.Server({ port });
-  webSocketServer.on('connection', client => {
-    const clientId = uuidv4();
+  webSocketServer.on('connection', (client, req) => {
+    const queryString = parseQueryString(req.url);
+    // Allow user to request a clientId when they join
+    // This supports rejoining after a disconnect
+    const clientId = queryString.clientId || uuidv4();
     client = Object.assign(client, { id: clientId });
     log(chalk.blue(`Client ${clientId} connected`));
     client.send(

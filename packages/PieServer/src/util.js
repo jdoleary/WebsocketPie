@@ -24,6 +24,21 @@ function fuzzyMatchRooms(rooms, roomInfo) {
   );
 }
 
+function parseQueryString(url) {
+  return url
+    .split(/\/?\?/)
+    .join('')
+    .split('&')
+    .reduce((ob, pair) => {
+      const [key, value] = pair.split('=');
+      if (key && value) {
+        ob[key] = value;
+      }
+      return ob;
+    }, {});
+}
+
 module.exports = {
   fuzzyMatchRooms,
+  parseQueryString,
 };
