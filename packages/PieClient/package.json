@@ -5,6 +5,7 @@
   "author": "Jordan O'Leary / Matt Sweda",
   "license": "MIT",
   "main": "./dist/src/PieClient.js",
+  "types": "./dist/src/PieClient.d.ts",
   "scripts": {
     "update-link": "tsc && npm link"
   },

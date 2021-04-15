@@ -18,7 +18,7 @@ interface ServerAssignedData {
   clientId: string;
   serverVersion: string;
 }
-interface OnDataArgs {
+export interface OnDataArgs {
   type: string;
   fromClient: string;
   payload: any;
@@ -37,7 +37,7 @@ interface Room {
 }
 interface OnRoomsArgs {
   type: string;
-  rooms: Room[]
+  rooms: Room[];
 }
 
 export default class PieClient {
