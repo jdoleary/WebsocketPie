@@ -7,6 +7,7 @@
   "main": "./dist/src/PieClient.js",
   "types": "./dist/src/PieClient.d.ts",
   "scripts": {
+    "publish": "tsc && npm publish",
     "update-link": "tsc && npm link"
   },
   "devDependencies": {
