@@ -1,0 +1,14 @@
+{
+  "name": "external-tools-connection-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Jordan O'Leary",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^7.4.4"
+  }
+}
