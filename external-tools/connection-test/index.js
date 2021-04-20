@@ -23,7 +23,7 @@ http.createServer(function (request, response) {
     }catch(e){
         console.error(e)
     }
-}).listen(process.env.PORT || 80)  
+}).listen(process.env.PORT || 8080)  
 
 function checkUrlForWSConnection(uri){
     return new Promise((resolve, reject) => {
