@@ -277,8 +277,9 @@ export default class PieClient {
       if (this.statusElement) {
         if (this.connected) {
           const numberOfClients = (message && message.clients && message.clients.length) || 1;
-          this.statusElement.innerHTML = `⬤ ${numberOfClients == 1 ? `${numberOfClients} User` : `${numberOfClients} Users`
-            } Connected`;
+          this.statusElement.innerHTML = `⬤ ${
+            numberOfClients == 1 ? `${numberOfClients} User` : `${numberOfClients} Users`
+          } Connected`;
         } else {
           this.statusElement.innerHTML = `⬤ Disconnected`;
         }
