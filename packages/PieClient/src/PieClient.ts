@@ -22,6 +22,7 @@ export interface OnDataArgs {
   type: string;
   fromClient: string;
   payload: any;
+  time: number;
 }
 export interface ClientPresenceChangedArgs {
   type: string;
@@ -40,6 +41,13 @@ interface OnRoomsArgs {
   rooms: Room[];
 }
 
+interface Latency {
+  min: number;
+  max: number;
+  averageDataPoints: number[];
+  average: number;
+}
+const maxLatencyDataPoints = 14;
 export default class PieClient {
   env: string;
   wsUri: string;
@@ -49,6 +57,7 @@ export default class PieClient {
   onClientPresenceChanged: (c: ClientPresenceChangedArgs) => void;
   onRooms: (x: OnRoomsArgs) => void;
   onConnectInfo: (c: ConnectInfo) => void;
+  onLatency?: (l: Latency) => void;
   connected: boolean;
   promiseCBs: {
     makeRoom: () => void;
@@ -56,7 +65,10 @@ export default class PieClient {
   };
   statusElement?: HTMLElement;
   ws: WebSocket;
-  constructor({ env = 'development', wsUri }) {
+  stats: {
+    latency: Latency;
+  };
+  constructor({ env = 'development', wsUri, useStats }) {
     console.log(`WebSocketPie Client v${version} ${env}`);
     this.env = env;
     this.wsUri = wsUri;
@@ -75,11 +87,41 @@ export default class PieClient {
       this.statusElement.style['left'] = '10px';
       this.statusElement.style['user-select'] = 'none';
     }
+    this.stats = {
+      latency: {
+        min: Number.MAX_SAFE_INTEGER,
+        max: 0,
+        averageDataPoints: [],
+        average: NaN,
+      },
+    };
 
     this.ws = new WebSocket(wsUri);
     this.ws.onmessage = event => {
       try {
         const message: any = JSON.parse(event.data);
+        if (useStats && message.time) {
+          const currentMessageLatency = Date.now() - message.time;
+          if (currentMessageLatency > this.stats.latency.max) {
+            this.stats.latency.max = currentMessageLatency;
+          }
+          if (currentMessageLatency < this.stats.latency.min) {
+            this.stats.latency.min = currentMessageLatency;
+          }
+          this.stats.latency.averageDataPoints.push(currentMessageLatency);
+
+          if (this.stats.latency.averageDataPoints.length > maxLatencyDataPoints) {
+            // Remove the oldest so the averageDataPoints array stays a fixed size
+            this.stats.latency.averageDataPoints.shift();
+            this.stats.latency.average =
+              this.stats.latency.averageDataPoints.reduce((acc, cur) => acc + cur, 0) /
+              this.stats.latency.averageDataPoints.length;
+            // Broadcast latency information
+            if (this.onLatency) {
+              this.onLatency(this.stats.latency);
+            }
+          }
+        }
         switch (message.type) {
           case MessageType.Data:
             this.onData(message);
