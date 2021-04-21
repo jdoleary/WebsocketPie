@@ -8,7 +8,7 @@ services:
       repo: jdoleary/WebsocketPie
     http_port: 8080
     instance_count: 1
-    instance_size_slug: basic-xs
+    instance_size_slug: basic-xxs
     routes:
       - path: /
     dockerfile_path: packages/PieServer/Dockerfile
