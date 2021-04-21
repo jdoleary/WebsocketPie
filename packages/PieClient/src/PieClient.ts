@@ -68,6 +68,7 @@ export default class PieClient {
   stats: {
     latency: Latency;
   };
+  currentClientId: string;
   constructor({ env = 'development', wsUri, useStats }) {
     console.log(`WebSocketPie Client v${version} ${env}`);
     this.env = env;
@@ -78,6 +79,7 @@ export default class PieClient {
       makeRoom: null,
       joinRoom: null,
     };
+    this.currentClientId = '';
     // Optionally support a connection status element
     this.statusElement = document.querySelector('#websocket-pie-connection-status');
     if (this.statusElement) {
@@ -100,67 +102,13 @@ export default class PieClient {
     this.ws.onmessage = event => {
       try {
         const message: any = JSON.parse(event.data);
-        if (useStats && message.time) {
-          const currentMessageLatency = Date.now() - message.time;
-          if (currentMessageLatency > this.stats.latency.max) {
-            this.stats.latency.max = currentMessageLatency;
-          }
-          if (currentMessageLatency < this.stats.latency.min) {
-            this.stats.latency.min = currentMessageLatency;
-          }
-          this.stats.latency.averageDataPoints.push(currentMessageLatency);
-
-          if (this.stats.latency.averageDataPoints.length > maxLatencyDataPoints) {
-            // Remove the oldest so the averageDataPoints array stays a fixed size
-            this.stats.latency.averageDataPoints.shift();
-            this.stats.latency.average =
-              this.stats.latency.averageDataPoints.reduce((acc, cur) => acc + cur, 0) /
-              this.stats.latency.averageDataPoints.length;
-            // Broadcast latency information
-            if (this.onLatency) {
-              this.onLatency(this.stats.latency);
-            }
-          }
-        }
-        switch (message.type) {
-          case MessageType.Data:
-            this.onData(message);
-            break;
-          case MessageType.ResolvePromise:
-            if (this.promiseCBs[message.func]) {
-              this.promiseCBs[message.func].resolve();
-            }
-            break;
-          case MessageType.RejectPromise:
-            if (this.promiseCBs[message.func]) {
-              this.promiseCBs[message.func].reject(message.err);
-            }
-            break;
-          case MessageType.ServerAssignedData:
-            if (this.onServerAssignedData) {
-              this.onServerAssignedData(message);
-            }
-            break;
-          case MessageType.ClientPresenceChanged:
-            this._updateDebugInfo(message);
-            // If client is accepting the onClientPresenceChanged callback,
-            // send the message to it
-            if (this.onClientPresenceChanged) {
-              this.onClientPresenceChanged(message);
-            }
-            break;
-          case MessageType.Rooms:
-            if (this.onRooms) {
-              this.onRooms(message);
-            }
-            break;
-          case MessageType.Err:
-            console.error(message);
-            this.onError(message);
-            break;
-          default:
-            console.log(message);
-            console.error(`Above message of type ${message.type} not recognized!`);
+        if (message.fromClient === this.currentClientId) {
+          // Discard messages from self, since they are returned to the self client immediately
+          console.trace(
+            'pie-client: discarded own message received from network since own messages are handled immediately.',
+          );
+        } else {
+          this.handleMessage(message, useStats);
         }
       } catch (e) {
         console.error(e);
@@ -193,6 +141,71 @@ export default class PieClient {
         });
       }
     };
+  }
+  handleMessage(message: any, useStats: boolean) {
+    if (useStats && message.time) {
+      const currentMessageLatency = Date.now() - message.time;
+      if (currentMessageLatency > this.stats.latency.max) {
+        this.stats.latency.max = currentMessageLatency;
+      }
+      if (currentMessageLatency < this.stats.latency.min) {
+        this.stats.latency.min = currentMessageLatency;
+      }
+      this.stats.latency.averageDataPoints.push(currentMessageLatency);
+
+      if (this.stats.latency.averageDataPoints.length > maxLatencyDataPoints) {
+        // Remove the oldest so the averageDataPoints array stays a fixed size
+        this.stats.latency.averageDataPoints.shift();
+        this.stats.latency.average =
+          this.stats.latency.averageDataPoints.reduce((acc, cur) => acc + cur, 0) /
+          this.stats.latency.averageDataPoints.length;
+        // Broadcast latency information
+        if (this.onLatency) {
+          this.onLatency(this.stats.latency);
+        }
+      }
+    }
+    switch (message.type) {
+      case MessageType.Data:
+        this.onData(message);
+        break;
+      case MessageType.ResolvePromise:
+        if (this.promiseCBs[message.func]) {
+          this.promiseCBs[message.func].resolve();
+        }
+        break;
+      case MessageType.RejectPromise:
+        if (this.promiseCBs[message.func]) {
+          this.promiseCBs[message.func].reject(message.err);
+        }
+        break;
+      case MessageType.ServerAssignedData:
+        this.currentClientId = message.clientId;
+        if (this.onServerAssignedData) {
+          this.onServerAssignedData(message);
+        }
+        break;
+      case MessageType.ClientPresenceChanged:
+        this._updateDebugInfo(message);
+        // If client is accepting the onClientPresenceChanged callback,
+        // send the message to it
+        if (this.onClientPresenceChanged) {
+          this.onClientPresenceChanged(message);
+        }
+        break;
+      case MessageType.Rooms:
+        if (this.onRooms) {
+          this.onRooms(message);
+        }
+        break;
+      case MessageType.Err:
+        console.error(message);
+        this.onError(message);
+        break;
+      default:
+        console.log(message);
+        console.error(`Above message of type ${message.type} not recognized!`);
+    }
   }
   makeRoom(roomInfo) {
     if (this.connected) {
@@ -261,13 +274,14 @@ export default class PieClient {
   }
   sendData(payload: object, extras?: object) {
     if (this.connected) {
-      this.ws.send(
-        JSON.stringify({
-          type: MessageType.Data,
-          payload,
-          ...extras,
-        }),
-      );
+      const message = {
+        type: MessageType.Data,
+        payload,
+        ...extras,
+      };
+      this.ws.send(JSON.stringify(message));
+      // Handle own message immediately to reduce lag
+      this.handleMessage({ fromClient: this.currentClientId, ...message }, false);
     } else {
       this.onError({ message: `Cannot send data to room, not currently connected to web socket server` });
     }
