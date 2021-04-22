@@ -69,12 +69,16 @@ export default class PieClient {
     latency: Latency;
   };
   currentClientId: string;
+  reconnectTimeoutId: NodeJS.Timeout;
+  reconnectAttempts: number;
+
   constructor({ env = 'development', wsUri, useStats }) {
     console.log(`WebSocketPie Client v${version} ${env}`);
     this.env = env;
     this.wsUri = wsUri;
     this.onError = console.error;
     this.connected = false;
+    this.reconnectAttempts = 0;
     this.promiseCBs = {
       makeRoom: null,
       joinRoom: null,
@@ -98,6 +102,10 @@ export default class PieClient {
       },
     };
 
+    this.connect(wsUri, useStats);
+  }
+  connect(wsUri, useStats) {
+    console.log(`pie-client: connecting to ${wsUri}...`);
     this.ws = new WebSocket(wsUri);
     this.ws.onmessage = event => {
       try {
@@ -113,6 +121,7 @@ export default class PieClient {
       }
     };
     this.ws.onopen = () => {
+      console.log(`pie-client: connected!`);
       this.connected = true;
       this._updateDebugInfo();
       // If client is accepting the onConnectInfo callback,
@@ -124,8 +133,12 @@ export default class PieClient {
           msg: `Opened connection to ${this.wsUri}`,
         });
       }
+      // Reset reconnect attempts now that the connection is successfully opened
+      this.reconnectAttempts = 0;
     };
+    this.ws.onerror = err => console.error('pie-client error:', err);
     this.ws.onclose = () => {
+      console.log(`pie-client: connection closed.`);
       this.connected = false;
       this._updateDebugInfo();
       // If client is accepting the onConnectInfo callback,
@@ -137,6 +150,18 @@ export default class PieClient {
           msg: `Connection to ${this.wsUri} closed.`,
         });
       }
+      // Try reconnect
+      clearTimeout(this.reconnectTimeoutId);
+      const tryReconnectAgainInMillis = Math.pow(this.reconnectAttempts, 2) * 50;
+      console.log(
+        `pie-client: Reconnect attempt ${this.reconnectAttempts +
+          1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
+      );
+      this.reconnectTimeoutId = setTimeout(() => {
+        this.connect(wsUri, useStats);
+      }, tryReconnectAgainInMillis);
+      // Increment reconenctAttempts since successful connect
+      this.reconnectAttempts++;
     };
   }
   handleMessage(message: any, useStats: boolean) {
