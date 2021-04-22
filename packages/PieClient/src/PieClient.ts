@@ -102,12 +102,9 @@ export default class PieClient {
     this.ws.onmessage = event => {
       try {
         const message: any = JSON.parse(event.data);
-        if (message.fromClient === this.currentClientId) {
-          // Discard messages from self, since they are returned to the self client immediately
-          console.trace(
-            'pie-client: discarded own message received from network since own messages are handled immediately.',
-          );
-        } else {
+        // Disregard messages from self, since they are returned to the self client immediately
+        // to prevent input lag
+        if (message.fromClient !== this.currentClientId) {
           this.handleMessage(message, useStats);
         }
       } catch (e) {
