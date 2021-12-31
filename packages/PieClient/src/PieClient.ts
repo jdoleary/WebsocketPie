@@ -35,6 +35,9 @@ interface Room {
   app: string;
   name: string;
   version: string;
+  maxClients: number;
+  togetherTimeoutMs: number;
+  hidden: boolean;
 }
 interface OnRoomsArgs {
   type: string;
