@@ -16,7 +16,7 @@ When a client tries to host a room
 {
   type: MessageType.JoinRoom,
   makeRoomIfNonExistant: true, // This is necessary in order to create a new room, without it, if the room does not exist, the client will get an error message (which may be desirable) so that they do not accidentally create a 2nd, new room while trying to join a friend's room with a typo in it for example.
-  roomInfo: 
+  roomInfo:
     name: string, // room name
     app: string, // app name
     version: string, // app version
@@ -145,21 +145,24 @@ to send a message and then sends them all at once
 
 ## Developing with an unpublished pie-client
 
-1. Navigate to packages/PieClient and run `npm link`
+1. Navigate to packages/PieClient and run `npm run update-link`
 2. Navigate to your client application and run `npm link pie-client`
 
 ```
 
-jdo@DESKTOP ~/git/echo-server/packages/PieClient
-\$ npm link
-added 155 packages from 96 contributors and audited 247 packages in 16.358s
+jdo@DESKTOP ~/git/WebsocketPie/packages/PieClient
+\$ npm run update-link
+
+up to date, audited 3 packages in 766ms
+
 found 0 vulnerabilities
 
-C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git\echo-server\packages\PieClient
+
+C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git\WebsocketPie\packages\PieClient
 
 jdo@DESKTOP ~/git/what-bus-driver
 \$ npm link pie-client
-C:\Users\jdo\git\what-bus-driver\node_modules\pie-client -> C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git -> C:\Users\jdo\git\echo-server\packages\PieClient
+C:\Users\jdo\git\what-bus-driver\node_modules\pie-client -> C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git -> C:\Users\jdo\git\WebsocketPie\packages\PieClient
 
 ```
 
@@ -194,8 +197,8 @@ package.json
 ```sh
 # Login to docker hub
 docker login --username=jdoleary1991
-docker pull jdoleary1991/echo-server
-docker container run -d -p 8080:8080/tcp --restart on-failure --name pie jdoleary1991/echo-server:latest
+docker pull jdoleary1991/WebsocketPie
+docker container run -d -p 8080:8080/tcp --restart on-failure --name pie jdoleary1991/WebsocketPie:latest
 ```
 
 https://docs.docker.com/engine/reference/builder/#expose
