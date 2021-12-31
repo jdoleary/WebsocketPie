@@ -8,12 +8,12 @@ onData: a callback that is send data emitted by the PieServer
 onInfo: a callback to send information about the connection
 onError: a callback to send error messages
 */
-interface ConnectInfo {
+export interface ConnectInfo {
   type: string;
   connected: boolean;
   msg: string;
 }
-interface ServerAssignedData {
+export interface ServerAssignedData {
   type: string;
   clientId: string;
   serverVersion: string;
@@ -31,7 +31,7 @@ export interface ClientPresenceChangedArgs {
   time: number;
   present: boolean;
 }
-interface Room {
+export interface Room {
   app: string;
   name: string;
   version: string;
@@ -39,12 +39,12 @@ interface Room {
   togetherTimeoutMs?: number;
   hidden?: boolean;
 }
-interface OnRoomsArgs {
+export interface OnRoomsArgs {
   type: string;
   rooms: Room[];
 }
 
-interface Latency {
+export interface Latency {
   min: number;
   max: number;
   averageDataPoints: number[];
