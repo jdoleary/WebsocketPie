@@ -261,10 +261,14 @@ export default class PieClient {
             makeRoomIfNonExistant
           }),
         );
-      }).then(() => {
-        console.log(`${MessageType.JoinRoom} successful with`, roomInfo);
-        // Save roomInfo to allow auto rejoining should the server restart
-        this.currentRoomInfo = roomInfo;
+      }).then((currentRoomInfo:any) => {
+        if(typeof currentRoomInfo.app === 'string' && typeof currentRoomInfo.name === 'string' && typeof currentRoomInfo.version === 'string'){
+          console.log(`${MessageType.JoinRoom} successful with`, currentRoomInfo);
+          // Save roomInfo to allow auto rejoining should the server restart
+          this.currentRoomInfo = currentRoomInfo;
+        }else{
+          console.error("joinRoom succeeded but currentRoomInfo is maleformed:", currentRoomInfo);
+        }
       });
     } else {
       return Promise.reject({ message: `${MessageType.JoinRoom} failed, not currently connected to web socket server` });
