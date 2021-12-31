@@ -6,7 +6,8 @@
   "scripts": {
     "test": "tape ./packages/**/*.test.js",
     "docker:build": "docker build -f ./packages/PieServer/Dockerfile .",
-    "lint": "eslint --fix ."
+    "lint": "eslint --fix .",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -20,7 +21,8 @@
   },
   "homepage": "https://github.com/jdoleary/WebsocketPie#readme",
   "devDependencies": {
-    "eslint": "6.5.1",
+    "eslint": "8.5.0",
+    "husky": "7.0.4",
     "tape": "4.10.2"
   }
 }

@@ -13,6 +13,7 @@
         // Removing this would place the .d.ts files
         // next to the .js files
         "outDir": "dist",
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "types":["node"]
     }
 }
