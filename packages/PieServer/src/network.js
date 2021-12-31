@@ -37,8 +37,8 @@ function startServer({ port }) {
             }
             roomManager
               .addClientToRoom({ client, roomInfo })
-              .then(() => {
-                resolveClientPromise(message.type);
+              .then(room => {
+                resolveClientPromise(message.type, room.serialize());
               })
               .catch(err => {
                 rejectClientPromise(message.type, err);
@@ -70,11 +70,12 @@ function startServer({ port }) {
       log(chalk.blue(`Client ${client.id} disconnected`));
       roomManager.removeClientFromCurrentRoom(client);
     });
-    function resolveClientPromise(func) {
+    function resolveClientPromise(func, data) {
       client.send(
         JSON.stringify({
           type: MessageType.ResolvePromise,
           func,
+          data,
         }),
       );
     }

@@ -205,7 +205,7 @@ export default class PieClient {
         break;
       case MessageType.ResolvePromise:
         if (this.promiseCBs[message.func]) {
-          this.promiseCBs[message.func].resolve();
+          this.promiseCBs[message.func].resolve(message.data);
         }
         break;
       case MessageType.RejectPromise:

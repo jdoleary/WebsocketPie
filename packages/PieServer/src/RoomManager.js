@@ -61,7 +61,7 @@ class RoomManager {
     );
     client = Object.assign(client, { room });
     room.addClient(client);
-    return Promise.resolve();
+    return Promise.resolve(room);
   }
 
   onData({ client, message }) {
