@@ -14,8 +14,9 @@ When a client tries to host a room
 
 ```js
 {
-  type: MessageType.MakeRoom,
-  roomInfo: {
+  type: MessageType.JoinRoom,
+  makeRoomIfNonExistant: true, // This is necessary in order to create a new room, without it, if the room does not exist, the client will get an error message (which may be desirable) so that they do not accidentally create a 2nd, new room while trying to join a friend's room with a typo in it for example.
+  roomInfo: 
     name: string, // room name
     app: string, // app name
     version: string, // app version

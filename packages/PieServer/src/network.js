@@ -30,19 +30,13 @@ function startServer({ port }) {
       try {
         const message = JSON.parse(data);
         switch (message.type) {
-          case MessageType.MakeRoom:
-            roomManager
-              .makeRoom({ client, roomInfo: message.roomInfo })
-              .then(() => {
-                resolveClientPromise(message.type);
-              })
-              .catch(err => {
-                rejectClientPromise(message.type, err);
-              });
-            break;
           case MessageType.JoinRoom:
+            const { makeRoomIfNonExistant, roomInfo } = message;
+            if (makeRoomIfNonExistant) {
+              roomManager.makeRoom(roomInfo);
+            }
             roomManager
-              .addClientToRoom({ client, roomInfo: message.roomInfo })
+              .addClientToRoom({ client, roomInfo })
               .then(() => {
                 resolveClientPromise(message.type);
               })

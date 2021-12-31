@@ -9,7 +9,6 @@ export const MessageType = {
   ResolvePromise: 'ResolvePromise',
   RejectPromise: 'RejectPromise',
   // Client to Server:
-  MakeRoom: 'MakeRoom',
   JoinRoom: 'JoinRoom',
   LeaveRoom: 'LeaveRoom',
   GetRooms: 'GetRooms',

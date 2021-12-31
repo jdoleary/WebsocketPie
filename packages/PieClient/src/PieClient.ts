@@ -229,32 +229,14 @@ export default class PieClient {
         console.error(`Above message of type ${message.type} not recognized!`);
     }
   }
-  makeRoom(roomInfo) {
+  makeRoom(roomInfo: Room) {
+    this.joinRoom(roomInfo, true);
+  }
+  joinRoom(roomInfo: Room, makeRoomIfNonExistant: boolean = false) {
     if (this.connected) {
       // Cancel previous makeRoom promise if it exists
-      if (this.promiseCBs[MessageType.MakeRoom]) {
-        this.promiseCBs[MessageType.MakeRoom].reject({ message: 'Cancelled due to newer makeRoom request' });
-      }
-      return new Promise((resolve, reject) => {
-        // Assign callbacks so that the response from the server can
-        // fulfill this promise
-        this.promiseCBs[MessageType.MakeRoom] = { resolve, reject };
-        this.ws.send(
-          JSON.stringify({
-            type: MessageType.MakeRoom,
-            roomInfo,
-          }),
-        );
-      });
-    } else {
-      return Promise.reject({ message: `Cannot make room, not currently connected to web socket server` });
-    }
-  }
-  joinRoom(roomInfo) {
-    if (this.connected) {
-      // Cancel previous joinRoom promise if it exists
       if (this.promiseCBs[MessageType.JoinRoom]) {
-        this.promiseCBs[MessageType.JoinRoom].reject({ message: 'Cancelled due to newer joinRoom request' });
+        this.promiseCBs[MessageType.JoinRoom].reject({ message: `Cancelled due to newer ${MessageType.JoinRoom} request` });
       }
       return new Promise((resolve, reject) => {
         // Assign callbacks so that the response from the server can
@@ -264,11 +246,12 @@ export default class PieClient {
           JSON.stringify({
             type: MessageType.JoinRoom,
             roomInfo,
+            makeRoomIfNonExistant
           }),
         );
       });
     } else {
-      return Promise.reject({ message: `Cannot join room, not currently connected to web socket server` });
+      return Promise.reject({ message: `${MessageType.JoinRoom} failed, not currently connected to web socket server` });
     }
   }
   leaveRoom() {

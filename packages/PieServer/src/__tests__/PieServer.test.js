@@ -101,12 +101,13 @@ test('Clients joining a room', { timeout }, async t => {
   client1.clearMessages();
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
       name: 'Planet Namek',
     },
+    makeRoomIfNonExistant: true,
   });
   client1.webSocket.send(jr1);
   await client1.expectedMessagesReceived;
@@ -121,8 +122,8 @@ test('Clients joining a room', { timeout }, async t => {
   );
   t.equal(
     client1.messages[1].func,
-    MessageType.MakeRoom,
-    'The promise should be notifying that MakeRoom was successful',
+    MessageType.JoinRoom,
+    'The promise should be notifying that JoinRoom was successful',
   );
   t.equal(Array.isArray(client1.messages[0].clients), true, 'client1 should receive an array of clients');
   t.equal(client1.messages[0].clients.length, 1, 'client1 should know one client is in the room');
@@ -201,12 +202,13 @@ test('Clients joining a room', { timeout }, async t => {
   t.comment('client3 is hosting a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
     roomInfo: {
       app: 'DBGT',
       version: '1.0.0',
       name: 'Planet Namek',
     },
+    makeRoomIfNonExistant: true,
   });
   client3.webSocket.send(jr3);
   await client3.expectedMessagesReceived;
@@ -220,12 +222,13 @@ test('Clients joining a room', { timeout }, async t => {
   t.comment('client4 is hosting a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.1',
       name: 'Earth',
     },
+    makeRoomIfNonExistant: true,
   });
   client4.webSocket.send(jr4);
   await client4.expectedMessagesReceived;
@@ -239,12 +242,13 @@ test('Clients joining a room', { timeout }, async t => {
   t.comment('client5 is hosting a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
     roomInfo: {
       app: 'DBZ',
       version: '1.0.0',
       name: 'Earth',
     },
+    makeRoomIfNonExistant: true,
   });
   client5.webSocket.send(jr5);
   await client5.expectedMessagesReceived;
@@ -255,6 +259,36 @@ test('Clients joining a room', { timeout }, async t => {
   t.equal(client1.messages.length, 0, 'client1 should not have receive a message');
   t.equal(client2.messages.length, 0, 'client2 should not have receive a message');
 
+  t.end();
+});
+
+test('Sending MessageType.JoinRoom will reject if the room does not exist', { timeout }, async t => {
+  t.comment('client1 is opening a connection...');
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+
+  t.comment('client1 is hosting a room...');
+  client1.expectMessages(1);
+  const jr1 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'Spiderman',
+      version: '1.0.0',
+      name: 'New York',
+    },
+    // Note: makeRoomIfNonExistant defaults to false
+    makeRoomIfNonExistant: false,
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+  t.equal(
+    client1.messages[1].type,
+    MessageType.RejectPromise,
+    'client1 should receive a RejectPromise message when trying to join a room that does not exist with makeRoomIfNonExistant set to false',
+  );
+  t.equal(client1.messages[1].func, MessageType.JoinRoom, 'The function of the rejected promise should be JoinRoom');
   t.end();
 });
 
@@ -269,12 +303,13 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client1 is hosting a room...');
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
       name: 'New York',
     },
+    makeRoomIfNonExistant: true,
   });
   client1.webSocket.send(jr1);
   await client1.expectedMessagesReceived;
@@ -307,12 +342,13 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client3 is hosting a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
     roomInfo: {
       app: 'Ultimate Spiderman',
       version: '1.0.0',
       name: 'New York',
     },
+    makeRoomIfNonExistant: true,
   });
   client3.webSocket.send(jr3);
   await client3.expectedMessagesReceived;
@@ -326,12 +362,13 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client4 is hosting a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.1',
       name: 'New York',
     },
+    makeRoomIfNonExistant: true,
   });
   client4.webSocket.send(jr4);
   await client4.expectedMessagesReceived;
@@ -345,7 +382,8 @@ test('Sending messages within a room', { timeout }, async t => {
   t.comment('client5 is hosting a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     roomInfo: {
       app: 'Spiderman',
       version: '1.0.0',
@@ -404,7 +442,8 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client1 is hosting a room...');
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     name: 'Naruto',
     roomInfo: {
       app: 'Ninja Clash',
@@ -445,7 +484,8 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client3 is Hosting a room with a different app...');
   client3.expectMessages(1);
   const jr3 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     name: 'Sakura',
     roomInfo: {
       app: 'Ninja Clash 2',
@@ -465,7 +505,8 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client4 is hosting a room with a different version...');
   client4.expectMessages(1);
   const jr4 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     name: 'Kakashi',
     roomInfo: {
       app: 'Ninja Clash',
@@ -485,7 +526,8 @@ test('Clients leaving a room', { timeout }, async t => {
   t.comment('client5 is hosting a room with a different name...');
   client5.expectMessages(1);
   const jr5 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     name: 'Orochimaru',
     roomInfo: {
       app: 'Ninja Clash',
@@ -535,7 +577,8 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
 
   t.comment('client1 is hosting a room');
   const jr1 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     name: 'Neo',
     roomInfo: {
       app: 'The Matrix',
@@ -560,7 +603,8 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
     name: 'The Nebuchadnezzar',
   };
   const jr2 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     name: 'Trinity',
     roomInfo: realWorld1,
   });
@@ -581,7 +625,8 @@ test('getRooms should return an array of rooms with room info', { timeout }, asy
     name: 'The Nebuchadnezzar',
   };
   const jr3 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     name: 'Morpheus',
     roomInfo: realWorld2,
   });
@@ -650,7 +695,8 @@ test('Room maxClients', { timeout }, async t => {
   client1.clearMessages();
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     roomInfo: {
       app: 'TinyRoom',
       version: '1.0.0',
@@ -701,7 +747,8 @@ test('Together messages send all at once', { timeout }, async t => {
   t.comment('client1 is hosting a room...');
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     roomInfo: {
       app: 'SpidermanTogether',
       version: '1.0.0',
@@ -783,7 +830,8 @@ test('Together messages can timeout and send without all users', { timeout }, as
   t.comment('client1 is hosting a room...');
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     roomInfo: {
       app: 'SpidermanTogether2',
       version: '1.0.0',
@@ -843,7 +891,8 @@ test('Whipsers should not be heard by clients not being whispered to', { timeout
   t.comment('client1 is hosting a room...');
   client1.expectMessages(1);
   const jr1 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     roomInfo: {
       app: 'WhisperRoom',
       version: '1.0.0',
@@ -932,7 +981,8 @@ test('Rooms are cleaned up when all clients leave', { timeout }, async t => {
     name: 'Bedroom',
   };
   const jr1 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     roomInfo: room1,
   });
   client1.webSocket.send(jr1);
@@ -952,7 +1002,8 @@ test('Rooms are cleaned up when all clients leave', { timeout }, async t => {
     name: 'Observatory',
   };
   const jr2 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     roomInfo: room2,
   });
   client2.webSocket.send(jr2);
@@ -1019,7 +1070,8 @@ test('Hidden rooms do not show in the Rooms message', { timeout }, async t => {
     hidden: true,
   };
   const jr1 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     roomInfo: room1,
   });
   client1.webSocket.send(jr1);
@@ -1039,7 +1091,8 @@ test('Hidden rooms do not show in the Rooms message', { timeout }, async t => {
     name: 'Observatory',
   };
   const jr2 = JSON.stringify({
-    type: MessageType.MakeRoom,
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
     roomInfo: room2,
   });
   client2.webSocket.send(jr2);

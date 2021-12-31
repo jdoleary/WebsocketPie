@@ -27,17 +27,20 @@ class RoomManager {
       return existingRoom;
     }
   }
-  makeRoom({ client, roomInfo }) {
+  makeRoom(roomInfo) {
     const preExistingRoom = this.getRoom(roomInfo);
     if (preExistingRoom) {
-      return Promise.reject('Cannot make new room, room already exists');
+      // Room already exists, cannot make new room
+      // This intentionally does not return an error,
+      // because clients may automatically try to create
+      // a room before joining it to make sure it exists.
+      // See network.js's client.on('message')...MessageType.JoinRoom
+      return;
     }
     // Make the room
     const newRoom = new Room(roomInfo);
     this.rooms.push(newRoom);
-    // The host should implicitly join the room
-    this.addClientToRoom({ client, roomInfo });
-    return Promise.resolve(newRoom);
+    return newRoom;
   }
 
   addClientToRoom({ client, roomInfo }) {
@@ -49,7 +52,7 @@ class RoomManager {
     }
     const room = this.getRoom(roomInfo);
     if (!room) {
-      return Promise.reject(`Cannot add client to room, unable to find or make room`);
+      return Promise.reject(`Cannot add client to room, unable to find the preexisting room`);
     }
     log(
       chalk.blue(
