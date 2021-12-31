@@ -62,9 +62,14 @@ export default class PieClient {
   onConnectInfo: (c: ConnectInfo) => void;
   onLatency?: (l: Latency) => void;
   connected: boolean;
+  // promiseCBs is useful for storing promise callbacks (resolve, reject)
+  // that need to be invoked in a different place than where they were created.
+  // Since PieClient does a lot of asyncronous work through websockets, a 
+  // promise that was created with the sending of one message
+  // over a websocket must be able to be resolved by the reception of another
+  // message over a websocket. promiseCBs fascilitates this pattern.
   promiseCBs: {
-    makeRoom: () => void;
-    joinRoom: () => void;
+    joinRoom: {resolve:() => void, reject:() => void};
   };
   currentRoomInfo: Room;
   statusElement?: HTMLElement;
@@ -84,7 +89,6 @@ export default class PieClient {
     this.connected = false;
     this.reconnectAttempts = 0;
     this.promiseCBs = {
-      makeRoom: null,
       joinRoom: null,
     };
     this.currentClientId = '';
