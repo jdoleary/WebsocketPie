@@ -158,7 +158,7 @@ export default class PieClient {
       const tryReconnectAgainInMillis = Math.pow(this.reconnectAttempts, 2) * 50;
       console.log(
         `pie-client: Reconnect attempt ${this.reconnectAttempts +
-          1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
+        1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
       );
       this.reconnectTimeoutId = setTimeout(() => {
         this.connect(wsUri, useStats);
@@ -299,9 +299,8 @@ export default class PieClient {
       if (this.statusElement) {
         if (this.connected) {
           const numberOfClients = (message && message.clients && message.clients.length) || 1;
-          this.statusElement.innerHTML = `⬤ ${
-            numberOfClients == 1 ? `${numberOfClients} User` : `${numberOfClients} Users`
-          } Connected`;
+          this.statusElement.innerHTML = `⬤ ${numberOfClients == 1 ? `${numberOfClients} User` : `${numberOfClients} Users`
+            } Connected`;
         } else {
           this.statusElement.innerHTML = `⬤ Disconnected`;
         }
