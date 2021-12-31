@@ -7,9 +7,8 @@ const RoomManager = require('./RoomManager');
 const { version } = require('../package.json');
 const { parseQueryString } = require('./util');
 
-const roomManager = new RoomManager();
-
 function startServer({ port }) {
+  const roomManager = new RoomManager();
   const webSocketServer = new WebSocket.Server({ port });
   webSocketServer.on('connection', (client, req) => {
     const queryString = parseQueryString(req.url);
