@@ -29,7 +29,7 @@ function startServer({ port }) {
       try {
         const message = JSON.parse(data);
         switch (message.type) {
-          case MessageType.JoinRoom:
+          case MessageType.JoinRoom: {
             const { makeRoomIfNonExistant, roomInfo } = message;
             if (makeRoomIfNonExistant) {
               roomManager.makeRoom(roomInfo);
@@ -43,6 +43,7 @@ function startServer({ port }) {
                 rejectClientPromise(message.type, err);
               });
             break;
+          }
           case MessageType.Data:
             roomManager.onData({ client, message });
             break;

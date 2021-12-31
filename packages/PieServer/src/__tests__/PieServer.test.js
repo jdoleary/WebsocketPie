@@ -9,18 +9,25 @@ const WebSocket = require('ws');
 const { MessageType, DataSubType } = require('../enums');
 const { startServer } = require('../network');
 
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 7080;
+// For tests that need access to a unique websocketserver
+let lastPort = port;
+const uniquePortAndUrl = () => {
+  const tempPort = ++lastPort;
+  const tempUrl = `ws://localhost:${tempPort}`;
+  return { tempPort, tempUrl };
+};
 const wsUrl = `ws://localhost:${port}`;
 let webSocketServer;
 
-function TestClient() {
+function TestClient(url = wsUrl) {
   this.clearMessages = () => {
     this.messages.splice(0, this.messages.length);
   };
   this.connect = () => {
     return new Promise((resolve, reject) => {
       try {
-        this.webSocket = new WebSocket(wsUrl);
+        this.webSocket = new WebSocket(url);
         this.webSocket.on('message', data => {
           const message = JSON.parse(data);
           this.messages.push(message);
@@ -963,160 +970,168 @@ test('Whipsers should not be heard by clients not being whispered to', { timeout
   t.end();
 });
 test('Rooms are cleaned up when all clients leave', { timeout }, async t => {
-  // Close and reopen server to get rid of all rooms with clients still hanging out in them
-  await webSocketServer.close();
-  webSocketServer = startServer({ port });
+  // Create a new server so it has no clients or rooms still connected
+  const { tempPort, tempUrl } = uniquePortAndUrl();
+  const tempWebSocketServer = startServer({ port: tempPort });
+  try {
+    t.comment('client1 is opening a connection...');
+    const client1 = new TestClient(tempUrl);
+    client1.expectMessages(1);
+    await client1.connect();
+    await client1.expectedMessagesReceived;
 
-  t.comment('client1 is opening a connection...');
-  const client1 = new TestClient();
-  client1.expectMessages(1);
-  await client1.connect();
-  await client1.expectedMessagesReceived;
+    t.comment('client1 is hosting a room...');
+    client1.expectMessages(1);
+    const room1 = {
+      app: 'Cleanup Room',
+      version: '1.0.0',
+      name: 'Bedroom',
+    };
+    const jr1 = JSON.stringify({
+      type: MessageType.JoinRoom,
+      makeRoomIfNonExistant: true,
+      roomInfo: room1,
+    });
+    client1.webSocket.send(jr1);
+    await client1.expectedMessagesReceived;
 
-  t.comment('client1 is hosting a room...');
-  client1.expectMessages(1);
-  const room1 = {
-    app: 'Cleanup Room',
-    version: '1.0.0',
-    name: 'Bedroom',
-  };
-  const jr1 = JSON.stringify({
-    type: MessageType.JoinRoom,
-    makeRoomIfNonExistant: true,
-    roomInfo: room1,
-  });
-  client1.webSocket.send(jr1);
-  await client1.expectedMessagesReceived;
+    t.comment('client2 is opening a connection...');
+    const client2 = new TestClient(tempUrl);
+    client2.expectMessages(1);
+    await client2.connect();
+    await client2.expectedMessagesReceived;
 
-  t.comment('client2 is opening a connection...');
-  const client2 = new TestClient();
-  client2.expectMessages(1);
-  await client2.connect();
-  await client2.expectedMessagesReceived;
+    t.comment('client2 is joining a room...');
+    client2.expectMessages(1);
+    const room2 = {
+      app: 'Observer Room',
+      version: '1.0.0',
+      name: 'Observatory',
+    };
+    const jr2 = JSON.stringify({
+      type: MessageType.JoinRoom,
+      makeRoomIfNonExistant: true,
+      roomInfo: room2,
+    });
+    client2.webSocket.send(jr2);
+    await client2.expectedMessagesReceived;
 
-  t.comment('client2 is joining a room...');
-  client2.expectMessages(1);
-  const room2 = {
-    app: 'Observer Room',
-    version: '1.0.0',
-    name: 'Observatory',
-  };
-  const jr2 = JSON.stringify({
-    type: MessageType.JoinRoom,
-    makeRoomIfNonExistant: true,
-    roomInfo: room2,
-  });
-  client2.webSocket.send(jr2);
-  await client2.expectedMessagesReceived;
+    t.comment('client2 is getting the rooms');
+    client1.clearMessages();
+    client2.clearMessages();
+    client2.expectMessages(1);
+    const gr1 = JSON.stringify({
+      type: MessageType.GetRooms,
+      roomInfo: {},
+    });
+    client2.webSocket.send(gr1);
+    await client2.expectedMessagesReceived;
+    t.equal(client2.messages[0].type, MessageType.Rooms, 'client2 should receive a rooms message');
+    t.deepEqual(
+      client2.messages[0],
+      {
+        type: MessageType.Rooms,
+        rooms: [room1, room2],
+      },
+      'client2 should see both rooms',
+    );
+    t.comment('client1 should leave their room, causing it to be cleaned up');
+    const lr = JSON.stringify({
+      type: MessageType.LeaveRoom,
+    });
+    client1.webSocket.send(lr);
 
-  t.comment('client2 is getting the rooms');
-  client1.clearMessages();
-  client2.clearMessages();
-  client2.expectMessages(1);
-  const gr1 = JSON.stringify({
-    type: MessageType.GetRooms,
-    roomInfo: {},
-  });
-  client2.webSocket.send(gr1);
-  await client2.expectedMessagesReceived;
-  t.equal(client2.messages[0].type, MessageType.Rooms, 'client2 should receive a rooms message');
-  t.deepEqual(
-    client2.messages[0],
-    {
-      type: MessageType.Rooms,
-      rooms: [room1, room2],
-    },
-    'client2 should see both rooms',
-  );
-  t.comment('client1 should leave their room, causing it to be cleaned up');
-  const lr = JSON.stringify({
-    type: MessageType.LeaveRoom,
-  });
-  client1.webSocket.send(lr);
-
-  t.comment('client2 should see only their own room now');
-  client2.clearMessages();
-  client2.expectMessages(1);
-  client2.webSocket.send(gr1);
-  await client2.expectedMessagesReceived;
-  t.equal(client2.messages[0].type, MessageType.Rooms, 'client2 should receive a rooms message');
-  t.deepEqual(
-    client2.messages[0],
-    {
-      type: MessageType.Rooms,
-      rooms: [room2],
-    },
-    'client2 should see only their own room now',
-  );
-
+    t.comment('client2 should see only their own room now');
+    client2.clearMessages();
+    client2.expectMessages(1);
+    client2.webSocket.send(gr1);
+    await client2.expectedMessagesReceived;
+    t.equal(client2.messages[0].type, MessageType.Rooms, 'client2 should receive a rooms message');
+    t.deepEqual(
+      client2.messages[0],
+      {
+        type: MessageType.Rooms,
+        rooms: [room2],
+      },
+      'client2 should see only their own room now',
+    );
+  } catch (e) {
+    console.error(e);
+  }
+  tempWebSocketServer.close();
   t.end();
 });
 test('Hidden rooms do not show in the Rooms message', { timeout }, async t => {
-  // Close and reopen server to get rid of all rooms with clients still hanging out in them
-  await webSocketServer.close();
-  webSocketServer = startServer({ port });
-  t.comment('client1 is opening a connection...');
-  const client1 = new TestClient();
-  client1.expectMessages(1);
-  await client1.connect();
-  await client1.expectedMessagesReceived;
+  const { tempPort, tempUrl } = uniquePortAndUrl();
+  // Create a new server so it has no clients or rooms still connected
+  const tempWebSocketServer = startServer({ port: tempPort });
+  try {
+    t.comment('client1 is opening a connection...');
+    const client1 = new TestClient(tempUrl);
+    client1.expectMessages(1);
+    await client1.connect();
+    await client1.expectedMessagesReceived;
 
-  t.comment('client1 is hosting a room...');
-  client1.expectMessages(1);
-  const room1 = {
-    app: 'Hidden Room',
-    version: '1.0.0',
-    name: 'Secret',
-    hidden: true,
-  };
-  const jr1 = JSON.stringify({
-    type: MessageType.JoinRoom,
-    makeRoomIfNonExistant: true,
-    roomInfo: room1,
-  });
-  client1.webSocket.send(jr1);
-  await client1.expectedMessagesReceived;
+    t.comment('client1 is hosting a room...');
+    client1.expectMessages(1);
+    const room1 = {
+      app: 'Hidden Room',
+      version: '1.0.0',
+      name: 'Secret',
+      hidden: true,
+    };
+    const jr1 = JSON.stringify({
+      type: MessageType.JoinRoom,
+      makeRoomIfNonExistant: true,
+      roomInfo: room1,
+    });
+    client1.webSocket.send(jr1);
+    await client1.expectedMessagesReceived;
 
-  t.comment('client2 is opening a connection...');
-  const client2 = new TestClient();
-  client2.expectMessages(1);
-  await client2.connect();
-  await client2.expectedMessagesReceived;
+    t.comment('client2 is opening a connection...');
+    const client2 = new TestClient(tempUrl);
+    client2.expectMessages(1);
+    await client2.connect();
+    await client2.expectedMessagesReceived;
 
-  t.comment('client2 is hosting a room...');
-  client2.expectMessages(1);
-  const room2 = {
-    app: 'Observer Room',
-    version: '1.0.0',
-    name: 'Observatory',
-  };
-  const jr2 = JSON.stringify({
-    type: MessageType.JoinRoom,
-    makeRoomIfNonExistant: true,
-    roomInfo: room2,
-  });
-  client2.webSocket.send(jr2);
-  await client2.expectedMessagesReceived;
+    t.comment('client2 is hosting a room...');
+    client2.expectMessages(1);
+    const room2 = {
+      app: 'Observer Room',
+      version: '1.0.0',
+      name: 'Observatory',
+    };
+    const jr2 = JSON.stringify({
+      type: MessageType.JoinRoom,
+      makeRoomIfNonExistant: true,
+      roomInfo: room2,
+    });
+    client2.webSocket.send(jr2);
+    await client2.expectedMessagesReceived;
 
-  t.comment('client2 is getting the rooms');
-  client1.clearMessages();
-  client2.clearMessages();
-  client2.expectMessages(1);
-  const gr1 = JSON.stringify({
-    type: MessageType.GetRooms,
-    roomInfo: {},
-  });
-  client2.webSocket.send(gr1);
-  await client2.expectedMessagesReceived;
-  t.equal(client2.messages[0].type, MessageType.Rooms, 'client2 should receive a rooms message');
-  t.deepEqual(
-    client2.messages[0],
-    {
-      type: MessageType.Rooms,
-      rooms: [room2],
-    },
-    'client2 should ONLY see the non-hidden rooms',
-  );
+    t.comment('client2 is getting the rooms');
+    client1.clearMessages();
+    client2.clearMessages();
+    client2.expectMessages(1);
+    const gr1 = JSON.stringify({
+      type: MessageType.GetRooms,
+      roomInfo: {},
+    });
+    client2.webSocket.send(gr1);
+    await client2.expectedMessagesReceived;
+    t.equal(client2.messages[0].type, MessageType.Rooms, 'client2 should receive a rooms message');
+    t.deepEqual(
+      client2.messages[0],
+      {
+        type: MessageType.Rooms,
+        rooms: [room2],
+      },
+      'client2 should ONLY see the non-hidden rooms',
+    );
+  } catch (e) {
+    console.error(e);
+  }
+  tempWebSocketServer.close();
   t.end();
 });
 /* Note: putting teardown inside a test ensures a serial execution order. */

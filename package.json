@@ -4,7 +4,6 @@
   "description": "Monorepo for pie goodness",
   "main": "index.js",
   "scripts": {
-    "setup": "npm i && lerna bootstrap",
     "test": "tape ./packages/**/*.test.js",
     "docker:build": "docker build -f ./packages/PieServer/Dockerfile .",
     "lint": "eslint --fix ."
@@ -22,12 +21,6 @@
   "homepage": "https://github.com/jdoleary/WebsocketPie#readme",
   "devDependencies": {
     "eslint": "6.5.1",
-    "eslint-config-prettier": "6.3.0",
-    "eslint-plugin-filenames": "1.3.2",
-    "eslint-plugin-prettier": "3.1.1",
-    "husky": "3.0.9",
-    "lerna": "3.18.3",
-    "prettier": "1.18.2",
     "tape": "4.10.2"
   }
 }
