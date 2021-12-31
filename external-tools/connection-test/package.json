@@ -9,6 +9,6 @@
   "author": "Jordan O'Leary",
   "license": "ISC",
   "dependencies": {
-    "ws": "^7.4.4"
+    "ws": "^7.4.6"
   }
 }
