@@ -66,6 +66,7 @@ export default class PieClient {
     makeRoom: () => void;
     joinRoom: () => void;
   };
+  currentRoomInfo: Room;
   statusElement?: HTMLElement;
   ws: WebSocket;
   stats: {
@@ -135,6 +136,10 @@ export default class PieClient {
           connected: this.connected,
           msg: `Opened connection to ${this.wsUri}`,
         });
+      }
+      if (this.currentRoomInfo) {
+        console.log("Rejoining room", this.currentRoomInfo)
+        this.joinRoom(this.currentRoomInfo, true)
       }
       // Reset reconnect attempts now that the connection is successfully opened
       this.reconnectAttempts = 0;
@@ -252,6 +257,10 @@ export default class PieClient {
             makeRoomIfNonExistant
           }),
         );
+      }).then(() => {
+        console.log(`${MessageType.JoinRoom} successful with`, roomInfo);
+        // Save roomInfo to allow auto rejoining should the server restart
+        this.currentRoomInfo = roomInfo;
       });
     } else {
       return Promise.reject({ message: `${MessageType.JoinRoom} failed, not currently connected to web socket server` });
@@ -264,6 +273,7 @@ export default class PieClient {
           type: MessageType.LeaveRoom,
         }),
       );
+      this.currentRoomInfo = undefined;
     } else {
       this.onError({ message: `Cannot leave room, not currently connected to web socket server` });
     }
