@@ -20,6 +20,19 @@ class Room {
     this.hidden = hidden;
   }
 
+  serialize() {
+    const { app, name, version, maxClients, togetherTimeoutMs, hidden } = this;
+    // Return should match Room interface from PieClient.ts
+    return {
+      app,
+      name,
+      version,
+      maxClients,
+      togetherTimeoutMs,
+      hidden,
+    };
+  }
+
   echoTogetherMessage(togetherId) {
     clearTimeout(this.togetherTimeouts[togetherId]);
     const togetherMessageGroup = this.togetherMessageGroups[togetherId];
