@@ -11,7 +11,7 @@
     "update-link": "tsc && npm link"
   },
   "devDependencies": {
-    "typescript": "^4.1.5"
+    "typescript": "^4.5.4"
   },
   "files": [
     "/dist"

@@ -78,7 +78,7 @@ export default class PieClient {
     latency: Latency;
   };
   currentClientId: string;
-  reconnectTimeoutId: NodeJS.Timeout;
+  reconnectTimeoutId: ReturnType<typeof setTimeout>;
   reconnectAttempts: number;
 
   constructor({ env = 'development', wsUri, useStats }) {

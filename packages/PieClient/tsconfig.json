@@ -14,6 +14,6 @@
         // next to the .js files
         "outDir": "dist",
         "resolveJsonModule": true,
-        "types":["node"]
+        "lib": ["es2015", "dom"]
     }
 }
