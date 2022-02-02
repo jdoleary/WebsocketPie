@@ -69,7 +69,7 @@ export default class PieClient {
   // over a websocket must be able to be resolved by the reception of another
   // message over a websocket. promiseCBs fascilitates this pattern.
   promiseCBs: {
-    joinRoom: {resolve:() => void, reject:() => void};
+    joinRoom: { resolve: () => void, reject: () => void };
   };
   currentRoomInfo: Room;
   statusElement?: HTMLElement;
@@ -82,7 +82,7 @@ export default class PieClient {
   reconnectAttempts: number;
 
   constructor({ env = 'development', wsUri, useStats }) {
-    console.log(`WebSocketPie Client v${version} ${env}`);
+    console.log(`Pie: WebSocketPie Client v${version} ${env}`);
     this.env = env;
     this.wsUri = wsUri;
     this.onError = console.error;
@@ -113,7 +113,7 @@ export default class PieClient {
     this.connect(wsUri, useStats);
   }
   connect(wsUri, useStats) {
-    console.log(`pie-client: connecting to ${wsUri}...`);
+    console.log(`Pie: pie-client: connecting to ${wsUri}...`);
     this.ws = new WebSocket(wsUri);
     this.ws.onmessage = event => {
       try {
@@ -129,7 +129,7 @@ export default class PieClient {
       }
     };
     this.ws.onopen = () => {
-      console.log(`pie-client: connected!`);
+      console.log(`Pie: pie-client: connected!`);
       this.connected = true;
       this._updateDebugInfo();
       // If client is accepting the onConnectInfo callback,
@@ -142,7 +142,7 @@ export default class PieClient {
         });
       }
       if (this.currentRoomInfo) {
-        console.log("Rejoining room", this.currentRoomInfo)
+        console.log("Pie: Rejoining room", this.currentRoomInfo)
         this.joinRoom(this.currentRoomInfo, true)
       }
       // Reset reconnect attempts now that the connection is successfully opened
@@ -150,7 +150,7 @@ export default class PieClient {
     };
     this.ws.onerror = err => console.error('pie-client error:', err);
     this.ws.onclose = () => {
-      console.log(`pie-client: connection closed.`);
+      console.log(`Pie: pie-client: connection closed.`);
       this.connected = false;
       this._updateDebugInfo();
       // If client is accepting the onConnectInfo callback,
@@ -166,7 +166,7 @@ export default class PieClient {
       clearTimeout(this.reconnectTimeoutId);
       const tryReconnectAgainInMillis = Math.pow(this.reconnectAttempts, 2) * 50;
       console.log(
-        `pie-client: Reconnect attempt ${this.reconnectAttempts +
+        `Pie: pie-client: Reconnect attempt ${this.reconnectAttempts +
         1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
       );
       this.reconnectTimeoutId = setTimeout(() => {
@@ -237,8 +237,8 @@ export default class PieClient {
         this.onError(message);
         break;
       default:
-        console.log(message);
-        console.error(`Above message of type ${message.type} not recognized!`);
+        console.log('Pie:', message);
+        console.error(`Pie: Above message of type ${message.type} not recognized!`);
     }
   }
   makeRoom(roomInfo: Room) {
@@ -261,13 +261,13 @@ export default class PieClient {
             makeRoomIfNonExistant
           }),
         );
-      }).then((currentRoomInfo:any) => {
-        if(typeof currentRoomInfo.app === 'string' && typeof currentRoomInfo.name === 'string' && typeof currentRoomInfo.version === 'string'){
-          console.log(`${MessageType.JoinRoom} successful with`, currentRoomInfo);
+      }).then((currentRoomInfo: any) => {
+        if (typeof currentRoomInfo.app === 'string' && typeof currentRoomInfo.name === 'string' && typeof currentRoomInfo.version === 'string') {
+          console.log(`Pie: ${MessageType.JoinRoom} successful with`, currentRoomInfo);
           // Save roomInfo to allow auto rejoining should the server restart
           this.currentRoomInfo = currentRoomInfo;
-        }else{
-          console.error("joinRoom succeeded but currentRoomInfo is maleformed:", currentRoomInfo);
+        } else {
+          console.error("Pie: joinRoom succeeded but currentRoomInfo is maleformed:", currentRoomInfo);
         }
       });
     } else {
