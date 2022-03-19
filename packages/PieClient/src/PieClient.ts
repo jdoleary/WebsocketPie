@@ -299,7 +299,7 @@ export default class PieClient {
       this.onError({ message: `Cannot get rooms, not currently connected to web socket server` });
     }
   }
-  sendData(payload: any, extras?: object) {
+  sendData(payload: any, extras?: any) {
     if (this.connected) {
       const message = {
         type: MessageType.Data,
@@ -307,8 +307,12 @@ export default class PieClient {
         ...extras,
       };
       this.ws.send(JSON.stringify(message));
-      // Handle own message immediately to reduce lag
-      this.handleMessage({ fromClient: this.currentClientId, ...message }, false);
+      if (!(extras && extras.subType === undefined)) {
+        // Handle own message immediately to reduce lag
+        // Only handle own message immediately if there is no subtype.  Otherwise it
+        // would process Whisper or Together messages immediately which it shouldn't.
+        this.handleMessage({ fromClient: this.currentClientId, ...message }, false);
+      }
     } else {
       this.onError({ message: `Cannot send data to room, not currently connected to web socket server` });
     }
