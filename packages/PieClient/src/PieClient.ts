@@ -307,7 +307,7 @@ export default class PieClient {
         ...extras,
       };
       this.ws.send(JSON.stringify(message));
-      if (!(extras && extras.subType === undefined)) {
+      if (!extras || extras.subType === undefined) {
         // Handle own message immediately to reduce lag
         // Only handle own message immediately if there is no subtype.  Otherwise it
         // would process Whisper or Together messages immediately which it shouldn't.
