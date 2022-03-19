@@ -18,4 +18,5 @@ export const MessageType = {
 
 export const DataSubType = {
   Together: 'Together',
+  Whisper: 'Whisper',
 };

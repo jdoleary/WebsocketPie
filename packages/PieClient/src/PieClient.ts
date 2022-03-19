@@ -20,6 +20,7 @@ export interface ServerAssignedData {
 }
 export interface OnDataArgs {
   type: string;
+  subType: string;
   fromClient: string;
   payload: any;
   time: number;
@@ -298,7 +299,7 @@ export default class PieClient {
       this.onError({ message: `Cannot get rooms, not currently connected to web socket server` });
     }
   }
-  sendData(payload: object, extras?: object) {
+  sendData(payload: any, extras?: object) {
     if (this.connected) {
       const message = {
         type: MessageType.Data,
