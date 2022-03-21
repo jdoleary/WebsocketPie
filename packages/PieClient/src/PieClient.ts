@@ -74,7 +74,7 @@ export default class PieClient {
   };
   currentRoomInfo: Room;
   statusElement?: HTMLElement;
-  ws: WebSocket;
+  ws?: WebSocket;
   stats: {
     latency: Latency;
   };
@@ -82,10 +82,9 @@ export default class PieClient {
   reconnectTimeoutId: ReturnType<typeof setTimeout>;
   reconnectAttempts: number;
 
-  constructor({ env = 'development', wsUri, useStats }) {
+  constructor({ env = 'development' }) {
     console.log(`Pie: WebSocketPie Client v${version} ${env}`);
     this.env = env;
-    this.wsUri = wsUri;
     this.onError = console.error;
     this.connected = false;
     this.reconnectAttempts = 0;
@@ -110,10 +109,9 @@ export default class PieClient {
         average: NaN,
       },
     };
-
-    this.connect(wsUri, useStats);
   }
   connect(wsUri, useStats) {
+    this.wsUri = wsUri;
     console.log(`Pie: pie-client: connecting to ${wsUri}...`);
     this.ws = new WebSocket(wsUri);
     this.ws.onmessage = event => {
@@ -176,6 +174,31 @@ export default class PieClient {
       // Increment reconenctAttempts since successful connect
       this.reconnectAttempts++;
     };
+  }
+  connectSolo() {
+    this.connected = true;
+    this.ws = undefined;
+    this.onConnectInfo({
+      type: MessageType.ConnectInfo,
+      connected: this.connected,
+      msg: `"Connected" in solo mode`,
+    });
+    this._updateDebugInfo();
+    const clientFakeId = 1;
+    // Fake serverAssignedData
+    this.handleMessage({
+      type: MessageType.ServerAssignedData,
+      clientId: clientFakeId,
+      serverVersion: `no server - client is in solomode`,
+    }, false);
+    // Fake clientPresenceChanged
+    this.handleMessage({
+      clients: [clientFakeId],
+      clientThatChanged: clientFakeId,
+      time: Date.now(),
+      type: MessageType.ClientPresenceChanged,
+      present: true,
+    }, false);
   }
   handleMessage(message: any, useStats: boolean) {
     if (useStats && message.time) {
@@ -306,7 +329,9 @@ export default class PieClient {
         payload,
         ...extras,
       };
-      this.ws.send(JSON.stringify(message));
+      if (this.ws !== undefined) {
+        this.ws.send(JSON.stringify(message));
+      }
       if (!extras || extras.subType === undefined) {
         // Handle own message immediately to reduce lag
         // Only handle own message immediately if there is no subtype.  Otherwise it
@@ -321,9 +346,13 @@ export default class PieClient {
     try {
       if (this.statusElement) {
         if (this.connected) {
-          const numberOfClients = (message && message.clients && message.clients.length) || 1;
-          this.statusElement.innerHTML = `⬤ ${numberOfClients == 1 ? `${numberOfClients} User` : `${numberOfClients} Users`
-            } Connected`;
+          if (this.ws === undefined) {
+            this.statusElement.innerHTML = `⬤ Connected in solo mode`;
+          } else {
+            const numberOfClients = (message && message.clients && message.clients.length) || 1;
+            this.statusElement.innerHTML = `⬤ ${numberOfClients == 1 ? `${numberOfClients} User` : `${numberOfClients} Users`
+              } Connected`;
+          }
         } else {
           this.statusElement.innerHTML = `⬤ Disconnected`;
         }
