@@ -54,13 +54,13 @@ export interface Latency {
 const maxLatencyDataPoints = 14;
 export default class PieClient {
   env: string;
-  wsUri: string;
-  onData: (x: OnDataArgs) => void;
-  onError: (x: { message: string }) => void;
-  onServerAssignedData: (x: ServerAssignedData) => void;
-  onClientPresenceChanged: (c: ClientPresenceChangedArgs) => void;
-  onRooms: (x: OnRoomsArgs) => void;
-  onConnectInfo: (c: ConnectInfo) => void;
+  wsUri?: string;
+  onData?: (x: OnDataArgs) => void;
+  onError?: ((x: { message: string }) => void);
+  onServerAssignedData?: ((x: ServerAssignedData) => void);
+  onClientPresenceChanged?: ((c: ClientPresenceChangedArgs) => void);
+  onRooms?: ((x: OnRoomsArgs) => void);
+  onConnectInfo?: ((c: ConnectInfo) => void);
   onLatency?: (l: Latency) => void;
   connected: boolean;
   // promiseCBs is useful for storing promise callbacks (resolve, reject)
@@ -70,16 +70,16 @@ export default class PieClient {
   // over a websocket must be able to be resolved by the reception of another
   // message over a websocket. promiseCBs fascilitates this pattern.
   promiseCBs: {
-    joinRoom: { resolve: () => void, reject: () => void };
+    joinRoom?: { resolve: () => void, reject: () => void };
   };
-  currentRoomInfo: Room;
-  statusElement?: HTMLElement;
+  currentRoomInfo?: Room;
+  statusElement: HTMLElement | null;
   ws?: WebSocket;
   stats: {
     latency: Latency;
   };
   currentClientId: string;
-  reconnectTimeoutId: ReturnType<typeof setTimeout>;
+  reconnectTimeoutId?: ReturnType<typeof setTimeout>;
   reconnectAttempts: number;
 
   constructor({ env = 'development' }) {
@@ -89,17 +89,18 @@ export default class PieClient {
     this.connected = false;
     this.reconnectAttempts = 0;
     this.promiseCBs = {
-      joinRoom: null,
+      joinRoom: undefined,
     };
     this.currentClientId = '';
     // Optionally support a connection status element
     this.statusElement = document.querySelector('#websocket-pie-connection-status');
     if (this.statusElement) {
-      this.statusElement.style['pointer-events'] = 'none';
+      this.statusElement = this.statusElement as HTMLElement;
+      this.statusElement.style['pointerEvents'] = 'none';
       this.statusElement.style['position'] = 'absolute';
       this.statusElement.style['top'] = '10px';
       this.statusElement.style['left'] = '10px';
-      this.statusElement.style['user-select'] = 'none';
+      this.statusElement.style['userSelect'] = 'none';
     }
     this.stats = {
       latency: {
@@ -110,7 +111,7 @@ export default class PieClient {
       },
     };
   }
-  connect(wsUri, useStats) {
+  connect(wsUri: string, useStats: boolean) {
     this.wsUri = wsUri;
     console.log(`Pie: pie-client: connecting to ${wsUri}...`);
     this.ws = new WebSocket(wsUri);
@@ -122,9 +123,11 @@ export default class PieClient {
         if (message.fromClient !== this.currentClientId) {
           this.handleMessage(message, useStats);
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
-        this.onError(e);
+        if (this.onError) {
+          this.onError(e);
+        }
       }
     };
     this.ws.onopen = () => {
@@ -178,11 +181,13 @@ export default class PieClient {
   connectSolo() {
     this.connected = true;
     this.ws = undefined;
-    this.onConnectInfo({
-      type: MessageType.ConnectInfo,
-      connected: this.connected,
-      msg: `"Connected" in solo mode`,
-    });
+    if (this.onConnectInfo) {
+      this.onConnectInfo({
+        type: MessageType.ConnectInfo,
+        connected: this.connected,
+        msg: `"Connected" in solo mode`,
+      });
+    }
     this._updateDebugInfo();
     const clientFakeId = 1;
     // Fake serverAssignedData
@@ -225,15 +230,21 @@ export default class PieClient {
     }
     switch (message.type) {
       case MessageType.Data:
-        this.onData(message);
+        if (this.onData) {
+          this.onData(message);
+        }
         break;
       case MessageType.ResolvePromise:
-        if (this.promiseCBs[message.func]) {
-          this.promiseCBs[message.func].resolve(message.data);
+        // @ts-ignore
+        if (this.promiseCBs[functionName]) {
+          // @ts-ignore
+          this.promiseCBs[functionName].resolve(message.data);
         }
         break;
       case MessageType.RejectPromise:
+        // @ts-ignore
         if (this.promiseCBs[message.func]) {
+          // @ts-ignore
           this.promiseCBs[message.func].reject(message.err);
         }
         break;
@@ -258,7 +269,9 @@ export default class PieClient {
         break;
       case MessageType.Err:
         console.error(message);
-        this.onError(message);
+        if (this.onError) {
+          this.onError(message);
+        }
         break;
       default:
         console.log('Pie:', message);
@@ -271,20 +284,25 @@ export default class PieClient {
   joinRoom(roomInfo: Room, makeRoomIfNonExistant: boolean = false) {
     if (this.connected) {
       // Cancel previous makeRoom promise if it exists
+      // @ts-ignore
       if (this.promiseCBs[MessageType.JoinRoom]) {
+        // @ts-ignore
         this.promiseCBs[MessageType.JoinRoom].reject({ message: `Cancelled due to newer ${MessageType.JoinRoom} request` });
       }
       return new Promise((resolve, reject) => {
         // Assign callbacks so that the response from the server can
         // fulfill this promise
+        // @ts-ignore
         this.promiseCBs[MessageType.JoinRoom] = { resolve, reject };
-        this.ws.send(
-          JSON.stringify({
-            type: MessageType.JoinRoom,
-            roomInfo,
-            makeRoomIfNonExistant
-          }),
-        );
+        if (this.ws) {
+          this.ws.send(
+            JSON.stringify({
+              type: MessageType.JoinRoom,
+              roomInfo,
+              makeRoomIfNonExistant
+            }),
+          );
+        }
       }).then((currentRoomInfo: any) => {
         if (typeof currentRoomInfo.app === 'string' && typeof currentRoomInfo.name === 'string' && typeof currentRoomInfo.version === 'string') {
           console.log(`Pie: ${MessageType.JoinRoom} successful with`, currentRoomInfo);
@@ -299,7 +317,7 @@ export default class PieClient {
     }
   }
   leaveRoom() {
-    if (this.connected) {
+    if (this.connected && this.ws) {
       this.ws.send(
         JSON.stringify({
           type: MessageType.LeaveRoom,
@@ -307,11 +325,13 @@ export default class PieClient {
       );
       this.currentRoomInfo = undefined;
     } else {
-      this.onError({ message: `Cannot leave room, not currently connected to web socket server` });
+      if (this.onError) {
+        this.onError({ message: `Cannot leave room, not currently connected to web socket server` });
+      }
     }
   }
-  getRooms(roomInfo) {
-    if (this.connected) {
+  getRooms(roomInfo: any) {
+    if (this.connected && this.ws) {
       this.ws.send(
         JSON.stringify({
           type: MessageType.GetRooms,
@@ -319,7 +339,9 @@ export default class PieClient {
         }),
       );
     } else {
-      this.onError({ message: `Cannot get rooms, not currently connected to web socket server` });
+      if (this.onError) {
+        this.onError({ message: `Cannot get rooms, not currently connected to web socket server` });
+      }
     }
   }
   sendData(payload: any, extras?: any) {
@@ -339,7 +361,9 @@ export default class PieClient {
         this.handleMessage({ fromClient: this.currentClientId, ...message }, false);
       }
     } else {
-      this.onError({ message: `Cannot send data to room, not currently connected to web socket server` });
+      if (this.onError) {
+        this.onError({ message: `Cannot send data to room, not currently connected to web socket server` });
+      }
     }
   }
   _updateDebugInfo(message?: { clients: object[] }) {

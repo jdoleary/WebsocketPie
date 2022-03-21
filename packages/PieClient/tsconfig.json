@@ -4,6 +4,7 @@
         "src/**/*"
     ],
     "compilerOptions": {
+        "strict": true,
         // Tells TypeScript to read JS files, as
         // normally they are ignored as source files
         "allowJs": false,
@@ -14,6 +15,9 @@
         // next to the .js files
         "outDir": "dist",
         "resolveJsonModule": true,
-        "lib": ["es2015", "dom"]
+        "lib": [
+            "es2015",
+            "dom"
+        ]
     }
 }
