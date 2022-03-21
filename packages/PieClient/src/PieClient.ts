@@ -70,7 +70,7 @@ export default class PieClient {
   // over a websocket must be able to be resolved by the reception of another
   // message over a websocket. promiseCBs fascilitates this pattern.
   promiseCBs: {
-    joinRoom?: { resolve: () => void, reject: () => void };
+    joinRoom?: { resolve: (x: any) => void, reject: (x: any) => void };
   };
   currentRoomInfo?: Room;
   statusElement: HTMLElement | null;
@@ -235,17 +235,17 @@ export default class PieClient {
         }
         break;
       case MessageType.ResolvePromise:
-        // @ts-ignore
-        if (this.promiseCBs[functionName]) {
-          // @ts-ignore
-          this.promiseCBs[functionName].resolve(message.data);
+        const funcNameForResolve = message.func as keyof typeof this.promiseCBs;
+        const promiseCbRes = this.promiseCBs[funcNameForResolve];
+        if (promiseCbRes) {
+          promiseCbRes.resolve(message.data);
         }
         break;
       case MessageType.RejectPromise:
-        // @ts-ignore
-        if (this.promiseCBs[message.func]) {
-          // @ts-ignore
-          this.promiseCBs[message.func].reject(message.err);
+        const funcNameForReject = message.func as keyof typeof this.promiseCBs;
+        const promiseCbRej = this.promiseCBs[funcNameForReject];
+        if (promiseCbRej) {
+          promiseCbRej.reject(message.err);
         }
         break;
       case MessageType.ServerAssignedData:
