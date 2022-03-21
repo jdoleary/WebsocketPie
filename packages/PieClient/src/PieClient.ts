@@ -303,6 +303,11 @@ export default class PieClient {
             }),
           );
         }
+        if (this.connected && this.ws === undefined) {
+          // solo mode, resolve immediately
+          resolve(roomInfo)
+        }
+
       }).then((currentRoomInfo: any) => {
         if (typeof currentRoomInfo.app === 'string' && typeof currentRoomInfo.name === 'string' && typeof currentRoomInfo.version === 'string') {
           console.log(`Pie: ${MessageType.JoinRoom} successful with`, currentRoomInfo);

@@ -1,6 +1,6 @@
 {
   "name": "pie-client",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "A client for connecting to, sending and receiving messages from a pie server instance",
   "author": "Jordan O'Leary / Matt Sweda",
   "license": "MIT",
