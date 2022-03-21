@@ -1059,6 +1059,9 @@ test('Rooms are cleaned up when all clients leave', { timeout }, async t => {
     console.error(e);
   }
   tempWebSocketServer.close();
+  for (const ws of tempWebSocketServer.clients) {
+    ws.terminate();
+  }
   t.end();
 });
 test('Hidden rooms do not show in the Rooms message', { timeout }, async t => {
@@ -1132,10 +1135,16 @@ test('Hidden rooms do not show in the Rooms message', { timeout }, async t => {
     console.error(e);
   }
   tempWebSocketServer.close();
+  for (const ws of tempWebSocketServer.clients) {
+    ws.terminate();
+  }
   t.end();
 });
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', t => {
   webSocketServer.close();
+  for (const ws of webSocketServer.clients) {
+    ws.terminate();
+  }
   t.end();
 });
