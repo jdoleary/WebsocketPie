@@ -114,6 +114,9 @@ export default class PieClient {
   connect(wsUri: string, useStats: boolean) {
     this.wsUri = wsUri;
     console.log(`Pie: pie-client: connecting to ${wsUri}...`);
+    if (this.ws) {
+      this.ws.close();
+    }
     this.ws = new WebSocket(wsUri);
     this.ws.onmessage = event => {
       try {
