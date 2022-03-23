@@ -84,7 +84,7 @@ export default class PieClient {
   reconnectTimeoutId?: ReturnType<typeof setTimeout>;
   reconnectAttempts: number;
 
-  constructor({ env = 'development' }) {
+  constructor({ env = 'development' } = {}) {
     log(`WebSocketPie Client v${version} ${env}`);
     this.env = env;
     this.onError = logError;
