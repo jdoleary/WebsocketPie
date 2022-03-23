@@ -23,6 +23,6 @@
   "devDependencies": {
     "eslint": "8.5.0",
     "husky": "7.0.4",
-    "tape": "4.10.2"
+    "tape": "5.5.2"
   }
 }
