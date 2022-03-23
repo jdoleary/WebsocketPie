@@ -7,7 +7,7 @@ This package is a client that abstracts @websocketpie/server's public API behind
 ## Getting started, simplest usage:
 
 ```js
-import PieClient from 'pie-client';
+import PieClient from '@websocketpie/client';
 
 const pie = new PieClient();
 pie.onData = x => console.log('onData:', x.payload);
