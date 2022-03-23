@@ -244,6 +244,9 @@ export default class PieClient {
 
   }
   async disconnect(): Promise<void> {
+    // "Disconnect" from soloMode (this is valid to execute even if pieClient
+    // isn't in soloMode
+    this.soloMode = false;
     return new Promise(resolve => {
       if (!this.ws || this.ws.readyState == this.ws.CLOSED) {
         // Resolve immediately, client is already not connected 
