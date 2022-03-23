@@ -63,6 +63,7 @@ export default class PieClient {
   onConnectInfo?: ((c: ConnectInfo) => void);
   onLatency?: (l: Latency) => void;
   connected: boolean;
+  useStats: boolean;
   // promiseCBs is useful for storing promise callbacks (resolve, reject)
   // that need to be invoked in a different place than where they were created.
   // Since PieClient does a lot of asyncronous work through websockets, a 
@@ -91,6 +92,7 @@ export default class PieClient {
     this.promiseCBs = {
       joinRoom: undefined,
     };
+    this.useStats = false;
     this.currentClientId = '';
     // Optionally support a connection status element
     this.statusElement = document.querySelector('#websocket-pie-connection-status');
@@ -113,8 +115,11 @@ export default class PieClient {
   }
   async connect(wsUri: string, useStats: boolean): Promise<void> {
     this.wsUri = wsUri;
+    this.useStats = useStats;
     console.log(`Pie: pie-client: connecting to ${wsUri}...`);
-    if (this.ws) {
+    // If there is already an existing websocket connection
+    // close it before opening a new one
+    if (this.ws && this.connected) {
       await this.disconnect();
     }
     return new Promise((resolve, reject) => {
@@ -153,6 +158,9 @@ export default class PieClient {
         }
         // Reset reconnect attempts now that the connection is successfully opened
         this.reconnectAttempts = 0;
+        if (this.ws) {
+          this.ws.addEventListener('close', this.tryReconnect);
+        }
         resolve();
       };
       this.ws.onerror = err => {
@@ -163,21 +171,8 @@ export default class PieClient {
         // it will reject the connection promise
         reject();
       }
-      this.ws.onclose = () => {
-        this.onClose();
-        // Try reconnect
-        clearTimeout(this.reconnectTimeoutId);
-        const tryReconnectAgainInMillis = Math.pow(this.reconnectAttempts, 2) * 50;
-        console.log(
-          `Pie: pie-client: Reconnect attempt ${this.reconnectAttempts +
-          1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
-        );
-        this.reconnectTimeoutId = setTimeout(() => {
-          this.connect(wsUri, useStats);
-        }, tryReconnectAgainInMillis);
-        // Increment reconenctAttempts since successful connect
-        this.reconnectAttempts++;
-      };
+      // Always invoke this.onClose() when the socket is closed
+      this.ws.addEventListener('close', this.onClose);
     });
   }
   connectSolo() {
@@ -207,7 +202,7 @@ export default class PieClient {
       present: true,
     }, false);
   }
-  onClose() {
+  onClose = () => {
     console.log(`Pie: pie-client: connection closed.`);
     this.connected = false;
     this._updateDebugInfo();
@@ -222,15 +217,33 @@ export default class PieClient {
     }
 
   }
+  tryReconnect = () => {
+    // Try reconnect
+    clearTimeout(this.reconnectTimeoutId);
+    const tryReconnectAgainInMillis = 100 + Math.pow(this.reconnectAttempts, 2) * 50;
+    console.log(
+      `Pie: pie-client: Reconnect attempt ${this.reconnectAttempts +
+      1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
+    );
+    this.reconnectTimeoutId = setTimeout(() => {
+      if (this.wsUri) {
+        this.connect(this.wsUri, this.useStats);
+      }
+    }, tryReconnectAgainInMillis);
+    // Increment reconenctAttempts since successful connect
+    this.reconnectAttempts++;
+
+  }
   async disconnect(): Promise<void> {
     return new Promise(resolve => {
       if (this.ws) {
-        // Reassign onclose so it doesn't
-        // try to auto reconnect
-        this.ws.onclose = () => {
-          this.onClose();
+        // Do NOT try to reconnect after close since we are
+        // intentionally closing the socket
+        this.ws.removeEventListener('close', this.tryReconnect);
+        // Resolve this promise when the connection is finally closed
+        this.ws.addEventListener('close', () => {
           resolve();
-        };
+        });
         // Close the connection
         this.ws.close();
       }
