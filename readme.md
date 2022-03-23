@@ -1,12 +1,14 @@
 # Websocket Pie
 
 ![Websocket Pie Logo](logo.png)
+[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jdoleary/WebsocketPie/tree/master)
 
-Websocket Pie lets you make mutli-user, websocket experiences without writing server-side code!
+WebsocketPie allows you to make realtime, multi-user applications without writing any server-side code.  Simply, connect clients to a WebsocketPie/server instance and the server will act as a hub that echos messages it receives to all connected clients.
+
 
 The included package, PieServer, is a client-agnostic web socket server. It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version. When messages are sent from client (a browser) to server, it echos the message to all other clients in the room. In this way, the server doesn't care about the content of the message and can fascilitate multiple unique experiences simultaneously.
 
-The package PieClient provides simple functions for consuming the PieServer's api to let you hit the ground running!
+The package @websocketpie/client provides simple functions for consuming the PieServer's api to let you hit the ground running!
 
 ## API: from client to server
 
@@ -175,14 +177,16 @@ C:\Users\me\git\my-project\node_modules\pie-client -> C:\Users\me\AppData\Roamin
 USERNAME=YOUR_USERNAME
 docker login --username=$USERNAME
 
-# PACKAGE_VERSION from https://gist.github.com/DarrenN/8c6a5b969481725a4413
+# PACKAGE_VERSION modified from https://gist.github.com/DarrenN/8c6a5b969481725a4413
 PACKAGE_VERSION=$(cat packages/PieServer/package.json \
   | grep version \
   | head -1 \
   | awk -F: '{ print $2 }' \
-  | sed 's/[",]//g')
-docker build -f ./packages/PieServer/Dockerfile -t $USERNAME/websocket-pie:$PACKAGE_VERSION .
-docker push $USERNAME/websocket-pie:$PACKAGE_VERSION
+  | sed 's/[", ]//g')
+docker build -f ./packages/PieServer/Dockerfile -t $USERNAME/websocketpie-server:$PACKAGE_VERSION .
+docker push $USERNAME/websocketpie-server:$PACKAGE_VERSION
+# Update `latest` tag
+docker push $USERNAME/websocketpie-server
 ```
 
 ### Create a droplet to run PieServer
@@ -211,8 +215,8 @@ package.json
 # Login to docker hub
 USERNAME=YOUR_USERNAME
 docker login --username=USERNAME
-docker pull $USERNAME/WebsocketPie
-docker container run -d -p 8080:8080/tcp --restart on-failure --name pie $USERNAME/WebsocketPie:latest
+docker pull $USERNAME/websocketpie-server
+docker container run -d -p 8080:8080/tcp --restart on-failure --name pie $USERNAME/websocketpie-server:latest
 ```
 
 https://docs.docker.com/engine/reference/builder/#expose
