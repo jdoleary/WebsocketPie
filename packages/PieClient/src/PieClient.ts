@@ -95,7 +95,7 @@ export default class PieClient {
     this.useStats = false;
     this.currentClientId = '';
     // Optionally support a connection status element
-    this.statusElement = document.querySelector('#websocket-pie-connection-status');
+    this.statusElement = document.querySelector('#websocketpie-connection-status');
     if (this.statusElement) {
       this.statusElement = this.statusElement as HTMLElement;
       this.statusElement.style['pointerEvents'] = 'none';

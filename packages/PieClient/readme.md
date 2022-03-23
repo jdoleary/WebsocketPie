@@ -59,4 +59,4 @@ pie.sendData({
 
 ## Extras
 
-Add `<div id='websocket-pie-connection-status'></div>` to the page to have PieClient automatically update it with the connection status
+Add `<div id='websocketpie-connection-status'></div>` to the page to have @websocketpie/client automatically update it with the connection status
