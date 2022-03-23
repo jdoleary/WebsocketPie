@@ -244,13 +244,17 @@ export default class PieClient {
 
   }
   async disconnect(): Promise<void> {
-    // "Disconnect" from soloMode (this is valid to execute even if pieClient
-    // isn't in soloMode
-    this.soloMode = false;
-    return new Promise(resolve => {
+    console.log('Pie: pie-client: Disconnecting...');
+    return new Promise<void>(resolve => {
+      if (this.soloMode) {
+        this.soloMode = false;
+        resolve();
+        return
+      }
       if (!this.ws || this.ws.readyState == this.ws.CLOSED) {
         // Resolve immediately, client is already not connected 
         resolve();
+        return
       } else {
         // Do NOT try to reconnect after close since we are
         // intentionally closing the socket
@@ -264,6 +268,8 @@ export default class PieClient {
         this.ws.close();
         this._updateDebugInfo();
       }
+    }).then(() => {
+      console.log('Pie: pie-client: Successfully disconnected.');
     });
 
   }
