@@ -245,7 +245,10 @@ export default class PieClient {
   }
   async disconnect(): Promise<void> {
     return new Promise(resolve => {
-      if (this.ws) {
+      if (!this.ws || this.ws.readyState == this.ws.CLOSED) {
+        // Resolve immediately, client is already not connected 
+        resolve();
+      } else {
         // Do NOT try to reconnect after close since we are
         // intentionally closing the socket
         this.ws.removeEventListener('close', this.tryReconnect);
