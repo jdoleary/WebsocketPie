@@ -8,52 +8,16 @@ This package is a client that abstracts @websocketpie/server's public API behind
 ```js
 import PieClient from 'pie-client';
 
-const pie = new PieClient({
-  env: 'development',
-  wsUri: 'ws://localhost:8000',
-  onData: console.log,
-  onError: console.error,
-  onServerAssignedData: console.log,
-  onClientPresenceChanged: console.log,
-  onRooms: rooms => console.log('rooms', rooms),
-  onConnectInfo: ({ connected }) => console.log('Connected', connected),
-});
-```
-
-```js
-function onConnected() {
-  // To make a room, once connected
-  pie
-    .makeRoom({
+const pie = new PieClient();
+pie.onData = x => console.log('onData:', x.payload);
+await pie.connect('ws://localhost:8000');
+await pie.makeRoom({
       app: 'Some app name',
       name: 'Rock Paper Sissors Unlimited Room!',
       version: '0.1',
       private: true,
-    })
-    .then(() => console.log('New room made!'))
-    .catch(e => console.error('Could not make new room:', e));
-}
-```
-
-```js
-function onConnected() {
-  // To join a room, once connected
-  pie
-    .joinRoom({
-      app: 'Some app name',
-      name: 'Rock Paper Sissors Unlimited Room!',
-      version: 'v0.1',
-    })
-    .then(() => console.log('Join succeeded!'))
-    .catch(e => console.error('Join failed:', e));
-}
-```
-
-```js
-// To send data to everyone in the room
-pie.sendData({
-  any: 'data',
-});
+    });
+pie.sendData("hello world");
 ```
 
 ## Extras
