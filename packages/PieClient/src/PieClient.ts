@@ -87,6 +87,7 @@ export default class PieClient {
     console.log(`Pie: WebSocketPie Client v${version} ${env}`);
     this.env = env;
     this.onError = console.error;
+    this.soloMode = false;
     this.reconnectAttempts = 0;
     this.promiseCBs = {
       joinRoom: undefined,
