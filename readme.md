@@ -7,12 +7,12 @@
 
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue-ghost.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jdoleary/WebsocketPie/tree/master)
 
-WebsocketPie allows you to make realtime, multi-user applications without writing any server-side code.  Simply, connect clients to a WebsocketPie/server instance and the server will act as a hub that echos messages it receives to all connected clients.
+WebsocketPie allows you to make realtime, multi-user applications without writing any server-side code.  Simply, connect clients to a @websocketpie/server instance and the server will act as a hub that echos messages it receives to all connected clients.
 
 
-The included package, PieServer, is a client-agnostic web socket server. It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version. When messages are sent from client (a browser) to server, it echos the message to all other clients in the room. In this way, the server doesn't care about the content of the message and can fascilitate multiple unique experiences simultaneously.
+@websocketpie/server is a client-agnostic web socket server. It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version. When messages are sent from client (a browser) to server, it echos the message to all other clients in the room. In this way, the server doesn't care about the content of the message and can fascilitate multiple unique experiences simultaneously.
 
-The package @websocketpie/client provides simple functions for consuming the PieServer's api to let you hit the ground running!
+@websocketpie/client provides simple functions for consuming the @websocketpie/server's api to let you hit the ground running!
 
 ## API: from client to server
 
