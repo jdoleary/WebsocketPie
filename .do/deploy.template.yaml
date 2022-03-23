@@ -1,15 +1,16 @@
-name: websocketpie-server
-region: nyc
-services:
-- http_port: 8080
-  image:
-    registry: jordanoleary
-    registry_type: DOCKER_HUB
-    repository: websocketpie-server
-    tag: latest
-  instance_count: 1
-  instance_size_slug: basic-xxs
+spec:
   name: websocketpie-server
-  routes:
-  - path: /
-  source_dir: /
+  region: nyc
+  services:
+  - http_port: 8080
+    image:
+      registry: jordanoleary
+      registry_type: DOCKER_HUB
+      repository: websocketpie-server
+      tag: latest
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    name: websocketpie-server
+    routes:
+    - path: /
+    source_dir: /
