@@ -1,6 +1,6 @@
 {
   "name": "@websocketpie/server",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "The backend for WebsocketPie.  A client-agnostic websocket server.",
   "main": "./src/index.js",
   "bin": "./src/index.js",
@@ -11,9 +11,7 @@
   "dependencies": {
     "lodash.get": "4.4.2",
     "uuid": "3.3.3",
-    "ws": "^8.5.0"
-  },
-  "devDependencies": {
+    "ws": "^8.5.0",
     "chalk": "2.4.2"
   },
   "repository": {
