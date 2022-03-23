@@ -1,4 +1,5 @@
 import { MessageType } from './enums';
+import { log, logError } from './log';
 import { version } from '../package.json';
 /*
 env: 'development' | 'production'
@@ -84,9 +85,9 @@ export default class PieClient {
   reconnectAttempts: number;
 
   constructor({ env = 'development' }) {
-    console.log(`Pie: WebSocketPie Client v${version} ${env}`);
+    log(`WebSocketPie Client v${version} ${env}`);
     this.env = env;
-    this.onError = console.error;
+    this.onError = logError;
     this.soloMode = false;
     this.reconnectAttempts = 0;
     this.promiseCBs = {
@@ -121,12 +122,12 @@ export default class PieClient {
   async connect(wsUrl: string, useStats: boolean): Promise<void> {
     // Only connect if there is no this.ws object or if the current this.ws socket is CLOSED
     if (this.ws && this.ws.readyState !== this.ws.CLOSED) {
-      console.error('Pie: pie-client: Cannot create a new connection.  Please fully close the existing connection before attempting to open a new one');
+      logError('Cannot create a new connection.  Please fully close the existing connection before attempting to open a new one');
       return
     }
     this.soloMode = false;
     this.useStats = useStats;
-    console.log(`Pie: pie-client: connecting to ${wsUrl}...`);
+    log(`connecting to ${wsUrl}...`);
 
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket(wsUrl);
@@ -140,14 +141,14 @@ export default class PieClient {
             this.handleMessage(message, useStats);
           }
         } catch (e: any) {
-          console.error(e);
+          logError(e);
           if (this.onError) {
             this.onError(e);
           }
         }
       };
       this.ws.onopen = () => {
-        console.log(`Pie: pie-client: connected!`);
+        log(`connected!`);
         this._updateDebugInfo();
         // If client is accepting the onConnectInfo callback,
         // send the message to it
@@ -159,7 +160,7 @@ export default class PieClient {
           });
         }
         if (this.currentRoomInfo) {
-          console.log("Pie: Rejoining room", this.currentRoomInfo)
+          log("Rejoining room", this.currentRoomInfo)
           this.joinRoom(this.currentRoomInfo, true)
         }
         // Reset reconnect attempts now that the connection is successfully opened
@@ -170,7 +171,7 @@ export default class PieClient {
         resolve();
       };
       this.ws.onerror = err => {
-        console.error('pie-client error:', err);
+        logError(err);
         // There may be other errors than just one during
         // connection attempt but in the event that 
         // the error occurs during the connection attempt
@@ -211,7 +212,7 @@ export default class PieClient {
     }, false);
   }
   onClose = () => {
-    console.log(`Pie: pie-client: connection closed.`);
+    log(`connection closed.`);
     this._updateDebugInfo();
     // If client is accepting the onConnectInfo callback,
     // send the message to it
@@ -228,15 +229,15 @@ export default class PieClient {
     // Try reconnect
     clearTimeout(this.reconnectTimeoutId);
     const tryReconnectAgainInMillis = 100 + Math.pow(this.reconnectAttempts, 2) * 50;
-    console.log(
-      `Pie: pie-client: Reconnect attempt ${this.reconnectAttempts +
+    log(
+      `Reconnect attempt ${this.reconnectAttempts +
       1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
     );
     this.reconnectTimeoutId = setTimeout(() => {
       if (this.ws && this.ws.url) {
         this.connect(this.ws.url, this.useStats);
       } else {
-        console.error('Cannot attempt to reconnect, this.ws has no url');
+        logError('Cannot attempt to reconnect, this.ws has no url');
       }
     }, tryReconnectAgainInMillis);
     // Increment reconenctAttempts since successful connect
@@ -244,7 +245,7 @@ export default class PieClient {
 
   }
   async disconnect(): Promise<void> {
-    console.log('Pie: pie-client: Disconnecting...');
+    log('Disconnecting...');
     return new Promise<void>(resolve => {
       if (this.soloMode) {
         this.soloMode = false;
@@ -271,7 +272,7 @@ export default class PieClient {
     }).then(() => {
       // Updates debug info to show that it is closed
       this._updateDebugInfo();
-      console.log('Pie: pie-client: Successfully disconnected.');
+      log('Successfully disconnected.');
     });
 
   }
@@ -338,14 +339,14 @@ export default class PieClient {
         }
         break;
       case MessageType.Err:
-        console.error(message);
+        logError(message);
         if (this.onError) {
           this.onError(message);
         }
         break;
       default:
-        console.log('Pie:', message);
-        console.error(`Pie: Above message of type ${message.type} not recognized!`);
+        log(message);
+        logError(`Above message of type ${message.type} not recognized!`);
     }
   }
   makeRoom(roomInfo: Room) {
@@ -380,11 +381,11 @@ export default class PieClient {
 
       }).then((currentRoomInfo: any) => {
         if (typeof currentRoomInfo.app === 'string' && typeof currentRoomInfo.name === 'string' && typeof currentRoomInfo.version === 'string') {
-          console.log(`Pie: ${MessageType.JoinRoom} successful with`, currentRoomInfo);
+          log(`${MessageType.JoinRoom} successful with`, currentRoomInfo);
           // Save roomInfo to allow auto rejoining should the server restart
           this.currentRoomInfo = currentRoomInfo;
         } else {
-          console.error("Pie: joinRoom succeeded but currentRoomInfo is maleformed:", currentRoomInfo);
+          logError("joinRoom succeeded but currentRoomInfo is maleformed:", currentRoomInfo);
         }
       });
     } else {
@@ -464,7 +465,7 @@ export default class PieClient {
         this.statusElement.style.color = this.soloMode || (this.ws && (this.ws.readyState == this.ws.OPEN || this.ws.readyState == this.ws.CONNECTING)) ? 'green' : 'red';
       }
     } catch (e) {
-      console.error(e);
+      logError(e);
     }
   }
 }
