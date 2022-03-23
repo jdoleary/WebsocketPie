@@ -1,4 +1,5 @@
 # Websocket Pie
+![PieServer Docker Image](https://img.shields.io/docker/v/jdoleary1991/websocket-pie?label=Docker)
 
 ![Websocket Pie Logo](logo.png)
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jdoleary/WebsocketPie/tree/master)
