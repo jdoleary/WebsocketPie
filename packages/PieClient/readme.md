@@ -1,4 +1,5 @@
 ![NPM: @websocketpie/client](https://img.shields.io/npm/v/@websocketpie/client?color=brightgreen)
+
 A client for connecting to, sending and receiving messages from a @websocketpie/server instance.
 
 This package is a client that abstracts @websocketpie/server's public API behind simple publicly exported methods.
