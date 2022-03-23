@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const { startServer } = require('./network');
 
 const version = process.env.npm_package_version;

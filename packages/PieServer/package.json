@@ -1,10 +1,9 @@
 {
-  "name": "pie-server",
-  "version": "0.5.0",
-  "description": "",
-  "author": "Jordan O'Leary / Matt Sweda",
-  "license": "MIT",
+  "name": "@websocketpie/server",
+  "version": "0.5.1",
+  "description": "The backend for WebsocketPie.  A client-agnostic websocket server.",
   "main": "./src/index.js",
+  "bin": "./src/index.js",
   "scripts": {
     "start": "node ./src/index.js",
     "start:debug": "node --inspect-brk ./src/index.js"
@@ -16,5 +15,19 @@
   },
   "devDependencies": {
     "chalk": "2.4.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdoleary/WebsocketPie.git"
+  },
+  "keywords": [
+    "websocketpie",
+    "wsPie"
+  ],
+  "author": "Jordan O'Leary / Matt Sweda",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jdoleary/WebsocketPie/issues"
+  },
+  "homepage": "https://github.com/jdoleary/WebsocketPie#readme"
 }
