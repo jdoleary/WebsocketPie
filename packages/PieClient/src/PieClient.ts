@@ -458,6 +458,8 @@ export default class PieClient {
           this.statusElement.innerHTML = `⬤ Disconnected`;
         } else if (this.ws && this.ws.readyState == this.ws.CLOSING) {
           this.statusElement.innerHTML = `⬤ Disconnecting...`;
+        } else {
+          this.statusElement.innerHTML = `⬤ Not Connected`;
         }
         this.statusElement.style.color = this.soloMode || (this.ws && (this.ws.readyState == this.ws.OPEN || this.ws.readyState == this.ws.CONNECTING)) ? 'green' : 'red';
       }
