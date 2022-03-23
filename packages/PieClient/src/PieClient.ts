@@ -448,7 +448,7 @@ export default class PieClient {
         } else if (this.ws && this.ws.readyState == this.ws.CLOSING) {
           this.statusElement.innerHTML = `⬤ Disconnecting...`;
         }
-        this.statusElement.style.color = this.ws && (this.ws.readyState == this.ws.OPEN || this.ws.readyState == this.ws.CONNECTING) ? 'green' : 'red';
+        this.statusElement.style.color = this.soloMode || (this.ws && (this.ws.readyState == this.ws.OPEN || this.ws.readyState == this.ws.CONNECTING)) ? 'green' : 'red';
       }
     } catch (e) {
       console.error(e);
