@@ -1,8 +1,9 @@
-# PieServer
+# @websocketpie/server
 
-Greater API can be found in the readme at top level. This document contains specifics only to PieServer.
+## Getting Started
+Start the server with `npx @websocketpie/server` or checkout the repository at https://github.com/jdoleary/WebsocketPie to run from source.
 
-## Files (abstract to specific)
+## Files
 
 - index.js
   - Starts the PieServer.
@@ -12,7 +13,3 @@ Greater API can be found in the readme at top level. This document contains spec
   - Holds rooms, handles adding clients to rooms, passes on data to room with metadata
 - Room.js
   - A group of clients playing the same game
-
-## Hosting
-
-Deployed on Digital Ocean app platform through .do/app.yaml

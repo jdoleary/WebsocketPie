@@ -1,8 +1,8 @@
-# Pie Client
+# @websocketpie/client
 
-A client for connecting to, sending and receiving messages from a PieServer instance.
+A client for connecting to, sending and receiving messages from a @websocketpie/server instance.
 
-This package is a PieServer client that abstracts PieServer's public API behind simple publicly exported methods.
+This package is a client that abstracts @websocketpie/server's public API behind simple publicly exported methods.
 
 ## Getting started, simplest usage:
 
