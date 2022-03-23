@@ -261,14 +261,16 @@ export default class PieClient {
         this.ws.removeEventListener('close', this.tryReconnect);
         // Resolve this promise when the connection is finally closed
         this.ws.addEventListener('close', () => {
-          this._updateDebugInfo();
           resolve();
         });
         // Close the connection
         this.ws.close();
+        // Updates debug info to show that it is closing
         this._updateDebugInfo();
       }
     }).then(() => {
+      // Updates debug info to show that it is closed
+      this._updateDebugInfo();
       console.log('Pie: pie-client: Successfully disconnected.');
     });
 
