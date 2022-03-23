@@ -1,8 +1,9 @@
 # Websocket Pie
-![PieServer Docker Image](https://img.shields.io/docker/v/jdoleary1991/websocket-pie?label=Docker)
 
 ![Websocket Pie Logo](logo.png)
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jdoleary/WebsocketPie/tree/master)
+![PieServer Docker Image](https://img.shields.io/docker/v/jdoleary1991/websocket-pie?label=Docker)
+![NPM: @websocketpie/client](https://img.shields.io/npm/v/@websocketpie/client?label=npm%3A%20%40websocketpie%2Fclient)
 
 WebsocketPie allows you to make realtime, multi-user applications without writing any server-side code.  Simply, connect clients to a WebsocketPie/server instance and the server will act as a hub that echos messages it receives to all connected clients.
 
