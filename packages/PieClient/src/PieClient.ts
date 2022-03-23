@@ -111,75 +111,74 @@ export default class PieClient {
       },
     };
   }
-  connect(wsUri: string, useStats: boolean) {
+  async connect(wsUri: string, useStats: boolean): Promise<void> {
     this.wsUri = wsUri;
     console.log(`Pie: pie-client: connecting to ${wsUri}...`);
     if (this.ws) {
-      this.ws.close();
+      await this.disconnect();
     }
-    this.ws = new WebSocket(wsUri);
-    this.ws.onmessage = event => {
-      try {
-        const message: any = JSON.parse(event.data);
-        // Disregard messages from self, since they are returned to the self client immediately
-        // to prevent input lag
-        if (message.fromClient !== this.currentClientId) {
-          this.handleMessage(message, useStats);
+    return new Promise((resolve, reject) => {
+      this.ws = new WebSocket(wsUri);
+      this.ws.onmessage = event => {
+        try {
+          const message: any = JSON.parse(event.data);
+          // Disregard messages from self, since they are returned to the self client immediately
+          // to prevent input lag
+          if (message.fromClient !== this.currentClientId) {
+            this.handleMessage(message, useStats);
+          }
+        } catch (e: any) {
+          console.error(e);
+          if (this.onError) {
+            this.onError(e);
+          }
         }
-      } catch (e: any) {
-        console.error(e);
-        if (this.onError) {
-          this.onError(e);
+      };
+      this.ws.onopen = () => {
+        console.log(`Pie: pie-client: connected!`);
+        this.connected = true;
+        this._updateDebugInfo();
+        // If client is accepting the onConnectInfo callback,
+        // send the message to it
+        if (this.onConnectInfo) {
+          this.onConnectInfo({
+            type: MessageType.ConnectInfo,
+            connected: this.connected,
+            msg: `Opened connection to ${this.wsUri}`,
+          });
         }
+        if (this.currentRoomInfo) {
+          console.log("Pie: Rejoining room", this.currentRoomInfo)
+          this.joinRoom(this.currentRoomInfo, true)
+        }
+        // Reset reconnect attempts now that the connection is successfully opened
+        this.reconnectAttempts = 0;
+        resolve();
+      };
+      this.ws.onerror = err => {
+        console.error('pie-client error:', err);
+        // There may be other errors than just one during
+        // connection attempt but in the event that 
+        // the error occurs during the connection attempt
+        // it will reject the connection promise
+        reject();
       }
-    };
-    this.ws.onopen = () => {
-      console.log(`Pie: pie-client: connected!`);
-      this.connected = true;
-      this._updateDebugInfo();
-      // If client is accepting the onConnectInfo callback,
-      // send the message to it
-      if (this.onConnectInfo) {
-        this.onConnectInfo({
-          type: MessageType.ConnectInfo,
-          connected: this.connected,
-          msg: `Opened connection to ${this.wsUri}`,
-        });
-      }
-      if (this.currentRoomInfo) {
-        console.log("Pie: Rejoining room", this.currentRoomInfo)
-        this.joinRoom(this.currentRoomInfo, true)
-      }
-      // Reset reconnect attempts now that the connection is successfully opened
-      this.reconnectAttempts = 0;
-    };
-    this.ws.onerror = err => console.error('pie-client error:', err);
-    this.ws.onclose = () => {
-      console.log(`Pie: pie-client: connection closed.`);
-      this.connected = false;
-      this._updateDebugInfo();
-      // If client is accepting the onConnectInfo callback,
-      // send the message to it
-      if (this.onConnectInfo) {
-        this.onConnectInfo({
-          type: MessageType.ConnectInfo,
-          connected: this.connected,
-          msg: `Connection to ${this.wsUri} closed.`,
-        });
-      }
-      // Try reconnect
-      clearTimeout(this.reconnectTimeoutId);
-      const tryReconnectAgainInMillis = Math.pow(this.reconnectAttempts, 2) * 50;
-      console.log(
-        `Pie: pie-client: Reconnect attempt ${this.reconnectAttempts +
-        1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
-      );
-      this.reconnectTimeoutId = setTimeout(() => {
-        this.connect(wsUri, useStats);
-      }, tryReconnectAgainInMillis);
-      // Increment reconenctAttempts since successful connect
-      this.reconnectAttempts++;
-    };
+      this.ws.onclose = () => {
+        this.onClose();
+        // Try reconnect
+        clearTimeout(this.reconnectTimeoutId);
+        const tryReconnectAgainInMillis = Math.pow(this.reconnectAttempts, 2) * 50;
+        console.log(
+          `Pie: pie-client: Reconnect attempt ${this.reconnectAttempts +
+          1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
+        );
+        this.reconnectTimeoutId = setTimeout(() => {
+          this.connect(wsUri, useStats);
+        }, tryReconnectAgainInMillis);
+        // Increment reconenctAttempts since successful connect
+        this.reconnectAttempts++;
+      };
+    });
   }
   connectSolo() {
     this.connected = true;
@@ -207,6 +206,36 @@ export default class PieClient {
       type: MessageType.ClientPresenceChanged,
       present: true,
     }, false);
+  }
+  onClose() {
+    console.log(`Pie: pie-client: connection closed.`);
+    this.connected = false;
+    this._updateDebugInfo();
+    // If client is accepting the onConnectInfo callback,
+    // send the message to it
+    if (this.onConnectInfo) {
+      this.onConnectInfo({
+        type: MessageType.ConnectInfo,
+        connected: this.connected,
+        msg: `Connection to ${this.wsUri} closed.`,
+      });
+    }
+
+  }
+  async disconnect(): Promise<void> {
+    return new Promise(resolve => {
+      if (this.ws) {
+        // Reassign onclose so it doesn't
+        // try to auto reconnect
+        this.ws.onclose = () => {
+          this.onClose();
+          resolve();
+        };
+        // Close the connection
+        this.ws.close();
+      }
+    });
+
   }
   handleMessage(message: any, useStats: boolean) {
     if (useStats && message.time) {
