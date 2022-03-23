@@ -1,12 +1,11 @@
 {
-  "name": "pie-client",
+  "name": "@websocketpie/client",
   "version": "0.13.3",
-  "description": "A client for connecting to, sending and receiving messages from a pie server instance",
-  "author": "Jordan O'Leary / Matt Sweda",
-  "license": "MIT",
+  "description": "A client for connecting to, sending and receiving messages from a WebsocketPie/server instance",
   "main": "./dist/src/PieClient.js",
   "types": "./dist/src/PieClient.d.ts",
   "scripts": {
+    "publish": "npm publish --access public",
     "prepublishOnly": "tsc",
     "update-link": "tsc && npm link"
   },
@@ -15,5 +14,20 @@
   },
   "files": [
     "/dist"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdoleary/WebsocketPie.git"
+  },
+  "keywords": [
+    "websocketpie",
+    "websocket-pie",
+    "wspie"
+  ],
+  "author": "Jordan O'Leary / Matt Sweda",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jdoleary/WebsocketPie/issues"
+  },
+  "homepage": "https://github.com/jdoleary/WebsocketPie#readme"
 }
