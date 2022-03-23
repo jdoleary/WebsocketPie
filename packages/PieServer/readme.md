@@ -1,5 +1,4 @@
-# @websocketpie/server
-
+![NPM: @websocketpie/server](https://img.shields.io/npm/v/@websocketpie/server?color=brightgreen)
 ## Getting Started
 Start the server with `npx @websocketpie/server` or checkout the repository at https://github.com/jdoleary/WebsocketPie to run from source.
 
