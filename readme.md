@@ -150,7 +150,7 @@ to send a message and then sends them all at once
 
 ```
 
-jdo@DESKTOP ~/git/WebsocketPie/packages/PieClient
+me@DESKTOP ~/git/WebsocketPie/packages/PieClient
 \$ npm run update-link
 
 up to date, audited 3 packages in 766ms
@@ -158,11 +158,11 @@ up to date, audited 3 packages in 766ms
 found 0 vulnerabilities
 
 
-C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git\WebsocketPie\packages\PieClient
+C:\Users\me\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\me\git\WebsocketPie\packages\PieClient
 
-jdo@DESKTOP ~/git/what-bus-driver
+me@DESKTOP ~/git/my-project
 \$ npm link pie-client
-C:\Users\jdo\git\what-bus-driver\node_modules\pie-client -> C:\Users\jdo\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\jdo\git -> C:\Users\jdo\git\WebsocketPie\packages\PieClient
+C:\Users\me\git\my-project\node_modules\pie-client -> C:\Users\me\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\me\git -> C:\Users\me\git\WebsocketPie\packages\PieClient
 
 ```
 
@@ -170,7 +170,20 @@ C:\Users\jdo\git\what-bus-driver\node_modules\pie-client -> C:\Users\jdo\AppData
 
 ### Push Image to Docker Hub
 
-Pushing to the `master` branch will automatically trigger a build on docker hub
+```bash
+# Note: you must log in to hub.docker.com first
+USERNAME=YOUR_USERNAME
+docker login --username=$USERNAME
+
+# PACKAGE_VERSION from https://gist.github.com/DarrenN/8c6a5b969481725a4413
+PACKAGE_VERSION=$(cat packages/PieServer/package.json \
+  | grep version \
+  | head -1 \
+  | awk -F: '{ print $2 }' \
+  | sed 's/[",]//g')
+docker build -f ./packages/PieServer/Dockerfile -t $USERNAME/websocket-pie:$PACKAGE_VERSION .
+docker push $USERNAME/websocket-pie:$PACKAGE_VERSION
+```
 
 ### Create a droplet to run PieServer
 
@@ -196,9 +209,10 @@ package.json
 
 ```sh
 # Login to docker hub
-docker login --username=jdoleary1991
-docker pull jdoleary1991/WebsocketPie
-docker container run -d -p 8080:8080/tcp --restart on-failure --name pie jdoleary1991/WebsocketPie:latest
+USERNAME=YOUR_USERNAME
+docker login --username=USERNAME
+docker pull $USERNAME/WebsocketPie
+docker container run -d -p 8080:8080/tcp --restart on-failure --name pie $USERNAME/WebsocketPie:latest
 ```
 
 https://docs.docker.com/engine/reference/builder/#expose
