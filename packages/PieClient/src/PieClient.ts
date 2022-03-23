@@ -371,8 +371,8 @@ export default class PieClient {
             }),
           );
         }
-        if (this.isConnected() && this.ws === undefined) {
-          // solo mode, resolve immediately
+        if (this.soloMode) {
+          // if in soloMode, resolve immediately
           resolve(roomInfo)
         }
 
