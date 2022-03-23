@@ -96,13 +96,10 @@ export default class PieClient {
     this.useStats = false;
     this.currentClientId = '';
     // Optionally support a connection status element
-    this.statusElement = document.querySelector('#websocketpie-connection-status');
+    this.statusElement = document.getElementById('websocketpie-connection-status');
     if (this.statusElement) {
       this.statusElement = this.statusElement as HTMLElement;
       this.statusElement.style['pointerEvents'] = 'none';
-      this.statusElement.style['position'] = 'absolute';
-      this.statusElement.style['top'] = '10px';
-      this.statusElement.style['left'] = '10px';
       this.statusElement.style['userSelect'] = 'none';
     }
     this.stats = {
