@@ -1,7 +1,7 @@
-name: websocket-pie
+name: websocketpie-server
 region: nyc
 services:
-  - name: pie-server
+  - name: websocketpie-server
     github:
       branch: master
       deploy_on_push: true
