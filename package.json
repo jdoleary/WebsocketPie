@@ -1,8 +1,7 @@
 {
-  "name": "websocket-pie",
-  "version": "0.1.0",
-  "description": "Monorepo for pie goodness",
-  "main": "index.js",
+  "name": "websocketpie",
+  "version": "1.0.0",
+  "description": "WebsocketPie allows you to make realtime, multi-user applications without writing any server-side code",
   "scripts": {
     "test": "tape ./packages/**/*.test.js",
     "docker:build": "docker build -f ./packages/PieServer/Dockerfile .",
