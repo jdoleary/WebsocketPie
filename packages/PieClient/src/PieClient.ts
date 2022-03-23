@@ -2,7 +2,6 @@ import { MessageType } from './enums';
 import { version } from '../package.json';
 /*
 env: 'development' | 'production'
-wsUri: websocket uri of a PieServer instance
 ws: websocket connection
 onData: a callback that is send data emitted by the PieServer
 onInfo: a callback to send information about the connection
@@ -54,7 +53,6 @@ export interface Latency {
 const maxLatencyDataPoints = 14;
 export default class PieClient {
   env: string;
-  wsUri?: string;
   onData?: (x: OnDataArgs) => void;
   onError?: ((x: { message: string }) => void);
   onServerAssignedData?: ((x: ServerAssignedData) => void);
@@ -62,7 +60,9 @@ export default class PieClient {
   onRooms?: ((x: OnRoomsArgs) => void);
   onConnectInfo?: ((c: ConnectInfo) => void);
   onLatency?: (l: Latency) => void;
-  connected: boolean;
+  // Fakes a connection so that the pieClient API can be used
+  // with a single user that echos messages back to itself.
+  soloMode: boolean;
   useStats: boolean;
   // promiseCBs is useful for storing promise callbacks (resolve, reject)
   // that need to be invoked in a different place than where they were created.
@@ -87,7 +87,6 @@ export default class PieClient {
     console.log(`Pie: WebSocketPie Client v${version} ${env}`);
     this.env = env;
     this.onError = console.error;
-    this.connected = false;
     this.reconnectAttempts = 0;
     this.promiseCBs = {
       joinRoom: undefined,
@@ -113,17 +112,24 @@ export default class PieClient {
       },
     };
   }
-  async connect(wsUri: string, useStats: boolean): Promise<void> {
-    this.wsUri = wsUri;
-    this.useStats = useStats;
-    console.log(`Pie: pie-client: connecting to ${wsUri}...`);
-    // If there is already an existing websocket connection
-    // close it before opening a new one
-    if (this.ws && this.connected) {
-      await this.disconnect();
+  // See https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
+  isConnected(): boolean {
+    return this.soloMode || !!this.ws && this.ws.readyState == this.ws.OPEN;
+
+  }
+  async connect(wsUrl: string, useStats: boolean): Promise<void> {
+    // Only connect if there is no this.ws object or if the current this.ws socket is CLOSED
+    if (this.ws && this.ws.readyState !== this.ws.CLOSED) {
+      console.error('Pie: pie-client: Cannot create a new connection.  Please fully close the existing connection before attempting to open a new one');
+      return
     }
+    this.soloMode = false;
+    this.useStats = useStats;
+    console.log(`Pie: pie-client: connecting to ${wsUrl}...`);
+
     return new Promise((resolve, reject) => {
-      this.ws = new WebSocket(wsUri);
+      this.ws = new WebSocket(wsUrl);
+      this._updateDebugInfo();
       this.ws.onmessage = event => {
         try {
           const message: any = JSON.parse(event.data);
@@ -141,15 +147,14 @@ export default class PieClient {
       };
       this.ws.onopen = () => {
         console.log(`Pie: pie-client: connected!`);
-        this.connected = true;
         this._updateDebugInfo();
         // If client is accepting the onConnectInfo callback,
         // send the message to it
         if (this.onConnectInfo) {
           this.onConnectInfo({
             type: MessageType.ConnectInfo,
-            connected: this.connected,
-            msg: `Opened connection to ${this.wsUri}`,
+            connected: this.isConnected(),
+            msg: `Opened connection to ${this.ws && this.ws.url}`,
           });
         }
         if (this.currentRoomInfo) {
@@ -175,13 +180,15 @@ export default class PieClient {
       this.ws.addEventListener('close', this.onClose);
     });
   }
-  connectSolo() {
-    this.connected = true;
+  async connectSolo() {
+    // Disconnect if currently connected so we can fake a singleplayer connection
+    await this.disconnect();
+    this.soloMode = true;
     this.ws = undefined;
     if (this.onConnectInfo) {
       this.onConnectInfo({
         type: MessageType.ConnectInfo,
-        connected: this.connected,
+        connected: this.isConnected(),
         msg: `"Connected" in solo mode`,
       });
     }
@@ -204,15 +211,14 @@ export default class PieClient {
   }
   onClose = () => {
     console.log(`Pie: pie-client: connection closed.`);
-    this.connected = false;
     this._updateDebugInfo();
     // If client is accepting the onConnectInfo callback,
     // send the message to it
     if (this.onConnectInfo) {
       this.onConnectInfo({
         type: MessageType.ConnectInfo,
-        connected: this.connected,
-        msg: `Connection to ${this.wsUri} closed.`,
+        connected: this.isConnected(),
+        msg: `Connection to ${this.ws && this.ws.url} closed.`,
       });
     }
 
@@ -226,8 +232,10 @@ export default class PieClient {
       1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
     );
     this.reconnectTimeoutId = setTimeout(() => {
-      if (this.wsUri) {
-        this.connect(this.wsUri, this.useStats);
+      if (this.ws && this.ws.url) {
+        this.connect(this.ws.url, this.useStats);
+      } else {
+        console.error('Cannot attempt to reconnect, this.ws has no url');
       }
     }, tryReconnectAgainInMillis);
     // Increment reconenctAttempts since successful connect
@@ -242,10 +250,12 @@ export default class PieClient {
         this.ws.removeEventListener('close', this.tryReconnect);
         // Resolve this promise when the connection is finally closed
         this.ws.addEventListener('close', () => {
+          this._updateDebugInfo();
           resolve();
         });
         // Close the connection
         this.ws.close();
+        this._updateDebugInfo();
       }
     });
 
@@ -327,7 +337,7 @@ export default class PieClient {
     this.joinRoom(roomInfo, true);
   }
   joinRoom(roomInfo: Room, makeRoomIfNonExistant: boolean = false) {
-    if (this.connected) {
+    if (this.isConnected()) {
       // Cancel previous makeRoom promise if it exists
       // @ts-ignore
       if (this.promiseCBs[MessageType.JoinRoom]) {
@@ -348,7 +358,7 @@ export default class PieClient {
             }),
           );
         }
-        if (this.connected && this.ws === undefined) {
+        if (this.isConnected() && this.ws === undefined) {
           // solo mode, resolve immediately
           resolve(roomInfo)
         }
@@ -367,7 +377,7 @@ export default class PieClient {
     }
   }
   leaveRoom() {
-    if (this.connected && this.ws) {
+    if (this.isConnected() && this.ws) {
       this.ws.send(
         JSON.stringify({
           type: MessageType.LeaveRoom,
@@ -381,7 +391,7 @@ export default class PieClient {
     }
   }
   getRooms(roomInfo: any) {
-    if (this.connected && this.ws) {
+    if (this.isConnected() && this.ws) {
       this.ws.send(
         JSON.stringify({
           type: MessageType.GetRooms,
@@ -395,7 +405,7 @@ export default class PieClient {
     }
   }
   sendData(payload: any, extras?: any) {
-    if (this.connected) {
+    if (this.isConnected()) {
       const message = {
         type: MessageType.Data,
         payload,
@@ -419,18 +429,22 @@ export default class PieClient {
   _updateDebugInfo(message?: { clients: object[] }) {
     try {
       if (this.statusElement) {
-        if (this.connected) {
-          if (this.ws === undefined) {
+        if (this.ws && this.ws.readyState == this.ws.CONNECTING) {
+          this.statusElement.innerHTML = `⬤ Connecting...`;
+        } else if (this.isConnected()) {
+          if (this.soloMode) {
             this.statusElement.innerHTML = `⬤ Connected in solo mode`;
-          } else {
+          } else if (this.ws && this.ws.readyState == this.ws.OPEN) {
             const numberOfClients = (message && message.clients && message.clients.length) || 1;
             this.statusElement.innerHTML = `⬤ ${numberOfClients == 1 ? `${numberOfClients} User` : `${numberOfClients} Users`
               } Connected`;
           }
-        } else {
+        } else if (this.ws && this.ws.readyState == this.ws.CLOSED) {
           this.statusElement.innerHTML = `⬤ Disconnected`;
+        } else if (this.ws && this.ws.readyState == this.ws.CLOSING) {
+          this.statusElement.innerHTML = `⬤ Disconnecting...`;
         }
-        this.statusElement.style.color = this.connected ? 'green' : 'red';
+        this.statusElement.style.color = this.ws && (this.ws.readyState == this.ws.OPEN || this.ws.readyState == this.ws.CONNECTING) ? 'green' : 'red';
       }
     } catch (e) {
       console.error(e);
