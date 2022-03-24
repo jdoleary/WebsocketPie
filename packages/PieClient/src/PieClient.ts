@@ -1,13 +1,6 @@
 import { MessageType } from './enums';
 import { log, logError } from './log';
 import { version } from '../package.json';
-/*
-env: 'development' | 'production'
-ws: websocket connection
-onData: a callback that is send data emitted by the PieServer
-onInfo: a callback to send information about the connection
-onError: a callback to send error messages
-*/
 export interface ConnectInfo {
   type: string;
   connected: boolean;
@@ -53,18 +46,26 @@ export interface Latency {
 }
 const maxLatencyDataPoints = 14;
 export default class PieClient {
-  env: string;
+  // onData: a callback that is invoked when data is recieved from PieServer
   onData?: (x: OnDataArgs) => void;
   onError?: ((x: { message: string }) => void);
+  // onServerAssignedData: a callback that is invoked with the user's client data that is assigned when
+  // connecting to a PieServer
   onServerAssignedData?: ((x: ServerAssignedData) => void);
+  // onClientPresenceChanged: is invoked when a client joins or leaves a room that
+  // the current client is connected to
   onClientPresenceChanged?: ((c: ClientPresenceChangedArgs) => void);
   onRooms?: ((x: OnRoomsArgs) => void);
   onConnectInfo?: ((c: ConnectInfo) => void);
+  // onLatency receives latency information if useStats is
+  // set to true
   onLatency?: (l: Latency) => void;
-  // Fakes a connection so that the pieClient API can be used
+  // a flag to determine if latency stats should be recorded
+  // Results are sent to the onLatency callback
+  useStats: boolean;
+  // soloMode fakes a connection so that the pieClient API can be used
   // with a single user that echos messages back to itself.
   soloMode: boolean;
-  useStats: boolean;
   // promiseCBs is useful for storing promise callbacks (resolve, reject)
   // that need to be invoked in a different place than where they were created.
   // Since PieClient does a lot of asyncronous work through websockets, a 
@@ -74,19 +75,25 @@ export default class PieClient {
   promiseCBs: {
     joinRoom?: { resolve: (x: any) => void, reject: (x: any) => void };
   };
+  // Stores information of the current room to support automatic re-joining
   currentRoomInfo?: Room;
+  // an optional HTMLElement that is automatically updated with the connection status
   statusElement: HTMLElement | null;
+  // the websocket instance that is used to communicate with PieServer
   ws?: WebSocket;
   stats: {
     latency: Latency;
   };
+  // the server-assigned id of the current client
   currentClientId: string;
+  // a setTimeout id used to try to reconnect after accidental disconnection
+  // with a built in falloff
   reconnectTimeoutId?: ReturnType<typeof setTimeout>;
+  // The number of reconnect attempts since successful connection
   reconnectAttempts: number;
 
-  constructor({ env = 'development' } = {}) {
-    log(`WebSocketPie Client v${version} ${env}`);
-    this.env = env;
+  constructor() {
+    log(`WebSocketPie Client v${version}`);
     this.onError = logError;
     this.soloMode = false;
     this.reconnectAttempts = 0;
@@ -431,6 +438,9 @@ export default class PieClient {
         // Handle own message immediately to reduce lag
         // Only handle own message immediately if there is no subtype.  Otherwise it
         // would process Whisper or Together messages immediately which it shouldn't.
+        // --
+        // Note: Since clients handle their own data immediately, it won't have
+        // serverAssignedData attached, such as `time`
         this.handleMessage({ fromClient: this.currentClientId, ...message }, false);
       }
     } else {
