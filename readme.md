@@ -1,5 +1,3 @@
-# Websocket Pie
-
 ![Websocket Pie Logo](logo.png)
 ![PieServer Docker Image](https://img.shields.io/docker/v/jdoleary1991/websocket-pie?label=Docker&color=brightgreen)
 ![NPM: @websocketpie/server](https://img.shields.io/npm/v/@websocketpie/server?color=brightgreen&label=npm%3A%20%40websocketpie%2Fserver)
