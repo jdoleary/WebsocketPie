@@ -1,6 +1,6 @@
 export function log(...args: any[]) {
-    console.log('ws🥧:', ...args);
+    console.log('websocket🥧:', ...args);
 }
 export function logError(...args: any[]) {
-    console.error('ws🥧:', ...args);
+    console.error('websocket🥧:', ...args);
 }
