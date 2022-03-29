@@ -188,6 +188,7 @@ PACKAGE_VERSION=$(cat packages/PieServer/package.json \
 docker build -f ./packages/PieServer/Dockerfile -t $USERNAME/websocketpie-server:$PACKAGE_VERSION .
 docker push $USERNAME/websocketpie-server:$PACKAGE_VERSION
 # Update `latest` tag
+docker build -f ./packages/PieServer/Dockerfile -t $USERNAME/websocketpie-server .
 docker push $USERNAME/websocketpie-server
 ```
 
