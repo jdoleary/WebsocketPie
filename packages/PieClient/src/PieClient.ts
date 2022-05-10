@@ -21,9 +21,7 @@ export interface OnDataArgs {
 export interface ClientPresenceChangedArgs {
   type: string;
   clients: string[];
-  clientThatChanged: string;
   time: number;
-  present: boolean;
 }
 export interface Room {
   app: string;

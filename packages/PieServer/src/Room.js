@@ -101,13 +101,11 @@ class Room {
   }
 
   // For internal use only
-  _clientPresenceChanged(client, present) {
+  _clientPresenceChanged() {
     this.emit({
       clients: this.getClientsSafeToEmit(),
-      clientThatChanged: client.id,
       time: Date.now(),
       type: MessageType.ClientPresenceChanged,
-      present,
     });
   }
 
@@ -120,7 +118,7 @@ class Room {
       throw new Error(`Room is at capacity and cannot accept more clients due to the room's chosen settings`);
     }
     this.clients.push(client);
-    this._clientPresenceChanged(client, true);
+    this._clientPresenceChanged();
   }
 
   removeClient(client) {
@@ -130,7 +128,7 @@ class Room {
       return;
     }
     this.clients.splice(clientIndex, 1);
-    this._clientPresenceChanged(client, false);
+    this._clientPresenceChanged();
   }
 }
 
