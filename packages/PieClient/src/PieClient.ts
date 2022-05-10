@@ -87,6 +87,8 @@ export default class PieClient {
   // a setTimeout id used to try to reconnect after accidental disconnection
   // with a built in falloff
   reconnectTimeoutId?: ReturnType<typeof setTimeout>;
+  // a timeout to check if the server sends a 'ping' message
+  heartbeatTimeout?: ReturnType<typeof setTimeout>;
   // The number of reconnect attempts since successful connection
   reconnectAttempts: number;
 
@@ -135,6 +137,30 @@ export default class PieClient {
     return this.soloMode
       || window.navigator.onLine && !!this.ws && this.ws.readyState == this.ws.OPEN;
   }
+  // heartbeat is used to determine on the client-side if the client is unaware that 
+  // it is disconnected from the server.
+  // When invoked, it will wait a specified amount of time and if the heartbeatTimeout
+  // is not canceled it will report that latency is too high.
+  heartbeat() {
+    // Clear any previous heartbeatTimeout
+    clearTimeout(this.heartbeatTimeout);
+
+    // Delay should be equal to the interval at which your server
+    // sends out pings plus a conservative assumption of the latency.
+    const waitForResponseMs = 5000;
+    // Set a timeout that will be cleared when the next message from own client is recieved.
+    this.heartbeatTimeout = setTimeout(() => {
+      const errorMsg = `Latency for own message echoed back from server exceeded threshold of ${waitForResponseMs} milliseconds.`;
+      logError(errorMsg);
+      if (this.onError) {
+        this.onError({ message: errorMsg });
+      }
+      // Why Commented Out: We __could__ close the websocket here, but for now I'm choosing just to report the error
+      // if (this.ws) {
+      //   this.ws.close();
+      // }
+    }, waitForResponseMs);
+  }
   async connect(wsUrl: string, useStats: boolean): Promise<void> {
     // Only connect if there is no this.ws object or if the current this.ws socket is CLOSED
     if (this.ws && this.ws.readyState !== this.ws.CLOSED) {
@@ -153,7 +179,16 @@ export default class PieClient {
           const message: any = JSON.parse(event.data);
           // Disregard messages from self, since they are returned to the self client immediately
           // to prevent input lag
-          if (message.fromClient !== this.currentClientId) {
+          if (message.fromClient == this.currentClientId) {
+            // Message from self
+            // Clear the heartbeatTimeout because this client has recieved 
+            // its own message back from the pieServer
+            clearTimeout(this.heartbeatTimeout);
+            // Do not pass messages from self to this.handleMessage
+            // because messages from self are handled immediately to reduce
+            // appearance of latency from the server
+          } else {
+            // If the message is not from self, pass it along to this.handleMessage
             this.handleMessage(message, useStats);
           }
         } catch (e: any) {
@@ -448,6 +483,10 @@ export default class PieClient {
       };
       if (this.ws !== undefined) {
         this.ws.send(JSON.stringify(message));
+        // Since this client has just sent a message, queue a heartbeat
+        // to ensure that it will report an error if the message isn't
+        // echoed back after a reasonable amount of time.
+        this.heartbeat();
       }
       if (!extras || extras.subType === undefined) {
         // Handle own message immediately to reduce lag
