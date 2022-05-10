@@ -115,11 +115,25 @@ export default class PieClient {
         average: NaN,
       },
     };
+
+    window.addEventListener('online', () => {
+      log('Network online');
+      this._updateDebugInfo();
+    });
+    window.addEventListener('offline', () => {
+      log('Network offline');
+      this._updateDebugInfo();
+      // Note, is is important to NOT close the websocket connection here,
+      // because if the connection comes back on line, the connection will
+      // automatically resume sending and receiving messages (This is built 
+      // in to the WebsocketAPI)
+    });
+
   }
   // See https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
   isConnected(): boolean {
-    return this.soloMode || !!this.ws && this.ws.readyState == this.ws.OPEN;
-
+    return this.soloMode
+      || window.navigator.onLine && !!this.ws && this.ws.readyState == this.ws.OPEN;
   }
   async connect(wsUrl: string, useStats: boolean): Promise<void> {
     // Only connect if there is no this.ws object or if the current this.ws socket is CLOSED
