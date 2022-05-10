@@ -7,10 +7,16 @@ const RoomManager = require('./RoomManager');
 const { version } = require('../package.json');
 const { parseQueryString } = require('./util');
 
-function startServer({ port }) {
+function heartbeat() {
+  this.isAlive = true;
+}
+
+function startServer({ port, heartbeatCheckMillis = 5000 }) {
   const roomManager = new RoomManager();
   const webSocketServer = new WebSocket.Server({ port });
   webSocketServer.on('connection', (client, req) => {
+    client.isAlive = true;
+    client.on('pong', heartbeat);
     const queryString = parseQueryString(req.url);
     // Allow user to request a clientId when they join
     // This supports rejoining after a disconnect
@@ -89,7 +95,20 @@ function startServer({ port }) {
       );
     }
   });
-  log(`Websocket server is listening on *:${port}`);
+  const heartbeatInterval = setInterval(function ping() {
+    webSocketServer.clients.forEach(function each(client) {
+      log('Send ping to clients');
+      if (client.isAlive === false) return client.terminate();
+
+      client.isAlive = false;
+      client.ping();
+    });
+  }, heartbeatCheckMillis);
+
+  webSocketServer.on('close', function close() {
+    clearInterval(heartbeatInterval);
+  });
+  log(`Websocket server is listening on *:${port} and will check client heartbeat every ${heartbeatCheckMillis} milliseconds.`);
   return webSocketServer;
 }
 
