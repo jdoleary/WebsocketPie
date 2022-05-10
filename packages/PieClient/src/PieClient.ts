@@ -237,7 +237,10 @@ export default class PieClient {
     );
     this.reconnectTimeoutId = setTimeout(() => {
       if (this.ws && this.ws.url) {
-        this.connect(this.ws.url, this.useStats);
+        this.connect(this.ws.url, this.useStats).catch(e => {
+          logError('Failed to reconnect')
+          console.error(e)
+        });
       } else {
         logError('Cannot attempt to reconnect, this.ws has no url');
       }
