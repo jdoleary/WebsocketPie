@@ -279,16 +279,19 @@ export default class PieClient {
   tryReconnect = () => {
     // Try reconnect
     clearTimeout(this.reconnectTimeoutId);
-    const tryReconnectAgainInMillis = 100 + Math.pow(this.reconnectAttempts, 2) * 50;
+    const maxTimeoutMillis = 3000;
+    // Reconnect timeout with falloff based on number of reconnectAttempts with a maximum timeout
+    const tryReconnectAgainInMillis = Math.min(maxTimeoutMillis, 100 + Math.pow(this.reconnectAttempts, 2) * 50);
     log(
       `Reconnect attempt ${this.reconnectAttempts +
       1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
     );
     this.reconnectTimeoutId = setTimeout(() => {
       if (this.ws && this.ws.url) {
-        this.connect(this.ws.url, this.useStats).catch(e => {
-          logError('Failed to reconnect')
-          console.error(e)
+        this.connect(this.ws.url, this.useStats).catch(() => {
+          log('Failed to reconnect');
+          // Try again to reconnect
+          this.tryReconnect();
         });
       } else {
         logError('Cannot attempt to reconnect, this.ws has no url');
