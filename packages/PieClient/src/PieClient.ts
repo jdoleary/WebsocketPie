@@ -83,7 +83,7 @@ export default class PieClient {
     latency: Latency;
   };
   // the server-assigned id of the current client
-  currentClientId: string;
+  clientId: string;
   // a setTimeout id used to try to reconnect after accidental disconnection
   // with a built in falloff
   reconnectTimeoutId?: ReturnType<typeof setTimeout>;
@@ -101,7 +101,7 @@ export default class PieClient {
       joinRoom: undefined,
     };
     this.useStats = false;
-    this.currentClientId = '';
+    this.clientId = '';
     // Optionally support a connection status element
     this.statusElement = document.getElementById('websocketpie-connection-status');
     if (this.statusElement) {
@@ -169,17 +169,20 @@ export default class PieClient {
     }
     this.soloMode = false;
     this.useStats = useStats;
-    log(`connecting to ${wsUrl}...`);
+    log(`connecting to ${wsUrl} ${this.clientId ? `with clientId: ${this.clientId}` : ''}...`);
 
     return new Promise((resolve, reject) => {
-      this.ws = new WebSocket(wsUrl);
+      // Passing optional cliendId into the WebSocket constructor will tell PieServer
+      // that this client requests to join with that ID and it will save the whole
+      // url in this.ws.url so that reconnection attempts use the clientId
+      this.ws = new WebSocket(wsUrl + (this.clientId ? `?clientId=${this.clientId}` : ''));
       this._updateDebugInfo();
       this.ws.onmessage = event => {
         try {
           const message: any = JSON.parse(event.data);
           // Disregard messages from self, since they are returned to the self client immediately
           // to prevent input lag
-          if (message.fromClient == this.currentClientId) {
+          if (message.fromClient == this.clientId) {
             // Message from self
             // Clear the heartbeatTimeout because this client has recieved 
             // its own message back from the pieServer
@@ -288,7 +291,9 @@ export default class PieClient {
     );
     this.reconnectTimeoutId = setTimeout(() => {
       if (this.ws && this.ws.url) {
-        this.connect(this.ws.url, this.useStats).catch(() => {
+        // Strip any search params from the current url
+        const { origin: url } = new URL(this.ws.url)
+        this.connect(url, this.useStats).catch(() => {
           log('Failed to reconnect');
           // Try again to reconnect
           this.tryReconnect();
@@ -377,7 +382,7 @@ export default class PieClient {
         }
         break;
       case MessageType.ServerAssignedData:
-        this.currentClientId = message.clientId;
+        this.clientId = message.clientId;
         if (this.onServerAssignedData) {
           this.onServerAssignedData(message);
         }
@@ -498,7 +503,7 @@ export default class PieClient {
         // --
         // Note: Since clients handle their own data immediately, it won't have
         // serverAssignedData attached, such as `time`
-        this.handleMessage({ fromClient: this.currentClientId, ...message }, false);
+        this.handleMessage({ fromClient: this.clientId, ...message }, false);
       }
     } else {
       if (this.onError) {
