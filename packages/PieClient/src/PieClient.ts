@@ -491,12 +491,16 @@ export default class PieClient {
       };
       if (this.ws !== undefined) {
         this.ws.send(JSON.stringify(message));
+      }
+      if (!extras || extras.subType === undefined) {
         // Since this client has just sent a message, queue a heartbeat
         // to ensure that it will report an error if the message isn't
         // echoed back after a reasonable amount of time.
+        // note: Heartbeat should only be run on messages without a subType
+        // because normal messages are expected to be echoed back to the sender immediatly
+        // where messages with a subType get special handling and may not come back at all
+        // or will come back intentionally with a delay
         this.heartbeat();
-      }
-      if (!extras || extras.subType === undefined) {
         // Handle own message immediately to reduce lag
         // Only handle own message immediately if there is no subtype.  Otherwise it
         // would process Whisper or Together messages immediately which it shouldn't.
