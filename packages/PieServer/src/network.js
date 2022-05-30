@@ -11,8 +11,9 @@ function heartbeat() {
   this.isAlive = true;
 }
 
-function startServer({ port, heartbeatCheckMillis = 5000 }) {
-  const roomManager = new RoomManager();
+// makeHostApp: See examples/HostApp/readme.md for explanation about how hostApp works
+function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = null }) {
+  const roomManager = new RoomManager(makeHostAppInstance);
   const webSocketServer = new WebSocket.Server({ port });
   webSocketServer.on('connection', (client, req) => {
     client.isAlive = true;

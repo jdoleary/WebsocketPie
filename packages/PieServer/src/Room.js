@@ -3,7 +3,11 @@ const log = require('./log');
 const { MessageType } = require('./enums');
 
 class Room {
-  constructor({ app, name = 'default', version, maxClients, togetherTimeoutMs, hidden }) {
+  constructor({ app, name = 'default', version, maxClients, togetherTimeoutMs, hidden }, hostApp = undefined) {
+    this.hostApp = hostApp;
+    if (this.hostApp) {
+      this.hostApp.sendData = payload => this._emit({ type: MessageType.Data, payload });
+    }
     this.app = app;
     this.clients = [];
     this.name = name;
@@ -83,6 +87,12 @@ class Room {
   }
 
   emit(data) {
+    if (this.hostApp) {
+      this.hostApp.handleData(data);
+    }
+    this._emit(data);
+  }
+  _emit(data) {
     this.clients.forEach(c => c.send(JSON.stringify(data)));
   }
 

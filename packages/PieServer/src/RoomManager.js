@@ -12,8 +12,9 @@ function addServerAssignedInfoToMessage({ client, message }) {
   };
 }
 class RoomManager {
-  constructor() {
+  constructor(makeHostAppInstance) {
     this.rooms = [];
+    this.makeHostAppInstance = makeHostAppInstance;
   }
 
   getRoom({ app, name = 'default', version }) {
@@ -37,8 +38,10 @@ class RoomManager {
       // See network.js's client.on('message')...MessageType.JoinRoom
       return;
     }
+
+    const hostApplicationInstance = this.makeHostAppInstance ? this.makeHostAppInstance() : undefined;
     // Make the room
-    const newRoom = new Room(roomInfo);
+    const newRoom = new Room(roomInfo, hostApplicationInstance);
     this.rooms.push(newRoom);
     return newRoom;
   }
