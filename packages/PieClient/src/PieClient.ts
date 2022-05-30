@@ -142,6 +142,11 @@ export default class PieClient {
   // When invoked, it will wait a specified amount of time and if the heartbeatTimeout
   // is not canceled it will report that latency is too high.
   heartbeat() {
+    if (this.soloMode) {
+      // Do not run heartbeat checks in soloMode because there is no server in
+      // solomode and it would always cause the heartbeat error to log.
+      return;
+    }
     // Clear any previous heartbeatTimeout
     clearTimeout(this.heartbeatTimeout);
 
