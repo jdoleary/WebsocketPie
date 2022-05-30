@@ -4,6 +4,11 @@
         "src/**/*"
     ],
     "compilerOptions": {
+        "target": "ES2015",
+        "module": "ES2020",
+        "esModuleInterop": true,
+        "moduleResolution": "Node",
+        "resolveJsonModule": true,
         "strict": true,
         // Tells TypeScript to read JS files, as
         // normally they are ignored as source files
@@ -14,7 +19,6 @@
         // Removing this would place the .d.ts files
         // next to the .js files
         "outDir": "dist",
-        "resolveJsonModule": true,
         "lib": [
             "es2015",
             "dom"
