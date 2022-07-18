@@ -9,10 +9,10 @@
     "start:debug": "node --inspect-brk ./src/index.js"
   },
   "dependencies": {
+    "chalk": "2.4.2",
     "lodash.get": "4.4.2",
-    "uuid": "3.3.3",
-    "ws": "^8.5.0",
-    "chalk": "2.4.2"
+    "uuid": "^8.3.2",
+    "ws": "^8.5.0"
   },
   "repository": {
     "type": "git",
