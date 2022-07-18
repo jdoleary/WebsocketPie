@@ -1,7 +1,7 @@
 class SampleHostApp {
     // The host will receive all data that is send from a client
     // to the @websocketpie/server
-    handleData(data) {
+    handleMessage(data) {
         console.log('SampleHostApp received: ', data)
 
         if (data.type == 'ClientPresenceChanged') {

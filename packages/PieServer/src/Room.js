@@ -6,6 +6,7 @@ class Room {
   constructor({ app, name = 'default', version, maxClients, togetherTimeoutMs, hidden }, hostApp = undefined) {
     this.hostApp = hostApp;
     if (this.hostApp) {
+      // Override hostApp.sendData so that it can sendData to the room
       this.hostApp.sendData = payload => this._emit({ type: MessageType.Data, payload });
     }
     this.app = app;
@@ -88,7 +89,7 @@ class Room {
 
   emit(data) {
     if (this.hostApp) {
-      this.hostApp.handleData(data);
+      this.hostApp.handleMessage(data);
     }
     this._emit(data);
   }
