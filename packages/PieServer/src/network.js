@@ -1,6 +1,6 @@
 const chalk = require('chalk');
 const WebSocket = require('ws');
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const { MessageType } = require('./enums');
 const log = require('./log');
 const RoomManager = require('./RoomManager');
