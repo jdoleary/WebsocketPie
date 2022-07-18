@@ -11,7 +11,6 @@ function heartbeat() {
   this.isAlive = true;
 }
 
-const version = process.env.npm_package_version;
 // makeHostApp: See examples/HostApp/readme.md for explanation about how hostApp works
 function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = null }) {
   log(`Pie: Running PieServer v${version} with port ${port}`);
