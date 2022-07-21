@@ -101,6 +101,7 @@ class RoomManager {
 
     // If room is empty, cleanup room:
     if (!room.clients.length) {
+      room.cleanup();
       const roomIndex = this.rooms.indexOf(room);
       this.rooms.splice(roomIndex, 1);
     }

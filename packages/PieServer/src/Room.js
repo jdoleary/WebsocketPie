@@ -24,6 +24,11 @@ class Room {
     // If a room should be visible to anyone who queries the rooms
     this.hidden = hidden;
   }
+  cleanup() {
+    if (this.hostApp && this.hostApp.cleanup) {
+      this.hostApp.cleanup();
+    }
+  }
 
   serialize() {
     const { app, name, version, maxClients, togetherTimeoutMs, hidden } = this;

@@ -1,4 +1,9 @@
 class SampleHostApp {
+    cleanup() {
+        // Invoked when a room is cleaned up.
+        // Use this method to stop any timers or anything that would keep the HostApp object
+        // from being garbagecollected
+    }
     // The host will receive all data that is send from a client
     // to the @websocketpie/server
     handleMessage(data) {
