@@ -7,7 +7,7 @@ class Room {
     this.hostApp = hostApp;
     if (this.hostApp) {
       // Override hostApp.sendData so that it can sendData to the room
-      this.hostApp.sendData = payload => this._emit({ type: MessageType.Data, payload });
+      this.hostApp.sendData = payload => this.emit({ type: MessageType.Data, payload });
     }
     this.app = app;
     this.clients = [];
@@ -91,9 +91,6 @@ class Room {
     if (this.hostApp) {
       this.hostApp.handleMessage(data);
     }
-    this._emit(data);
-  }
-  _emit(data) {
     this.clients.forEach(c => c.send(JSON.stringify(data)));
   }
 
