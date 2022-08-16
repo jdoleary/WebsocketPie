@@ -1,4 +1,5 @@
 class SampleHostApp {
+    version = '0.1.0';
     cleanup() {
         // Invoked when a room is cleaned up.
         // Use this method to stop any timers or anything that would keep the HostApp object

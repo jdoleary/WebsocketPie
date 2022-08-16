@@ -14,6 +14,8 @@ function heartbeat() {
 // makeHostApp: See examples/HostApp/readme.md for explanation about how hostApp works
 function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = null }) {
   log(`Pie: Running PieServer v${version} with port ${port}`);
+  // Get the version of the host app so it can be sent to the client on connection
+  const hostAppVersion = makeHostAppInstance ? makeHostAppInstance().version : undefined;
   const roomManager = new RoomManager(makeHostAppInstance);
   const webSocketServer = new WebSocket.Server({ port });
   webSocketServer.on('connection', (client, req) => {
@@ -29,7 +31,10 @@ function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = 
       JSON.stringify({
         type: MessageType.ServerAssignedData,
         clientId,
+        // The @websocketpie/server version
         serverVersion: `v${version}`,
+        // The version of the optional hostApp
+        hostAppVersion: `v${hostAppVersion}`
       }),
     );
     client.on('message', data => {
