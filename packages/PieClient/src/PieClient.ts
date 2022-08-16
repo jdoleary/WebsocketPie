@@ -9,7 +9,10 @@ export interface ConnectInfo {
 export interface ServerAssignedData {
   type: string;
   clientId: string;
+  // The @websocketpie/server version
   serverVersion: string;
+  // The version of the hostApp software optionally running on websocketpie
+  hostAppVersion: string;
 }
 export interface OnDataArgs {
   type: string;
