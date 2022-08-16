@@ -1,6 +1,6 @@
 {
   "name": "websocketpie",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "WebsocketPie allows you to make realtime, multi-user applications without writing any server-side code",
   "scripts": {
     "test": "tape ./packages/**/*.test.js",
