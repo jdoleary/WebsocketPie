@@ -32,9 +32,9 @@ function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = 
         type: MessageType.ServerAssignedData,
         clientId,
         // The @websocketpie/server version
-        serverVersion: `v${version}`,
+        serverVersion: version,
         // The version of the optional hostApp
-        hostAppVersion: `v${hostAppVersion}`
+        hostAppVersion: hostAppVersion
       }),
     );
     client.on('message', data => {
