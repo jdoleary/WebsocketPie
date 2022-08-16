@@ -11,9 +11,11 @@
 WebsocketPie allows you to make realtime, multi-user applications without writing any server-side code.  Simply, connect clients to a @websocketpie/server instance and the server will act as a hub that echos messages it receives to all connected clients.
 
 
-@websocketpie/server is a client-agnostic web socket server. It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version. When messages are sent from client (a browser) to server, it echos the message to all other clients in the room. In this way, the server doesn't care about the content of the message and can fascilitate multiple unique experiences simultaneously.
+**@websocketpie/server** is a client-agnostic web socket server. It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version. When messages are sent from client (a browser) to server, it echos the message to all other clients in the room. In this way, the server doesn't care about the content of the message and can fascilitate multiple unique experiences simultaneously.
 
-@websocketpie/client provides simple functions for consuming the @websocketpie/server's api to let you hit the ground running!
+**@websocketpie/client** provides simple functions for consuming the @websocketpie/server's api to let you hit the ground running!
+
+Note: Do **not* `npm install` @websocketpie directly, this is the monorepo.  Instead install either the server or the client as shown above.
 
 ## API: from client to server
 
