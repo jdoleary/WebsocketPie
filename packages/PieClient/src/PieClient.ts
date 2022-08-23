@@ -257,7 +257,7 @@ export default class PieClient {
       });
     }
     this._updateDebugInfo();
-    const clientFakeId = 1;
+    const clientFakeId = 'solomode_client_id';
     // Fake serverAssignedData
     this.handleMessage({
       type: MessageType.ServerAssignedData,
@@ -267,7 +267,6 @@ export default class PieClient {
     // Fake clientPresenceChanged
     this.handleMessage({
       clients: [clientFakeId],
-      clientThatChanged: clientFakeId,
       time: Date.now(),
       type: MessageType.ClientPresenceChanged,
       present: true,
