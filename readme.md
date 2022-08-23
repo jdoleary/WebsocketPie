@@ -106,7 +106,6 @@ Client joined / left room: Info about a client that just joined a room, and all 
     '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
     '123e4567-e89b-12d3-a456-426655440000'
   ],
-  clientThatChanged: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
   // true if client joined room (is now present in room), false if client left room (is no longer present in room)
   present: true,
   // millis since epoch
