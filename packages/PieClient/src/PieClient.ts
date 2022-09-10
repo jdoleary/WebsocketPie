@@ -172,8 +172,8 @@ export default class PieClient {
   async connect(wsUrl: string, useStats: boolean): Promise<void> {
     // Only connect if there is no this.ws object or if the current this.ws socket is CLOSED
     if (this.ws && this.ws.readyState !== this.ws.CLOSED) {
-      logError('Cannot create a new connection.  Please fully close the existing connection before attempting to open a new one');
-      return
+      log(`Disconnecting from current connection at ${this.ws.url} so that new connection to ${wsUrl} can be made...`)
+      await this.disconnect();
     }
     this.soloMode = false;
     this.useStats = useStats;
@@ -273,7 +273,7 @@ export default class PieClient {
     }, false);
   }
   onClose = () => {
-    log(`connection closed.`);
+    log(`Connection closed.`);
     this._updateDebugInfo();
     // If client is accepting the onConnectInfo callback,
     // send the message to it
@@ -314,15 +314,16 @@ export default class PieClient {
 
   }
   async disconnect(): Promise<void> {
-    log('Disconnecting...');
     return new Promise<void>(resolve => {
       if (this.soloMode) {
         this.soloMode = false;
         resolve();
+        log('"Disconnected" from soloMode');
         return
       }
       if (!this.ws || this.ws.readyState == this.ws.CLOSED) {
         // Resolve immediately, client is already not connected 
+        log('Attempted to disconnect but there was no preexisting connection to disconnect from.');
         resolve();
         return
       } else {
@@ -333,15 +334,16 @@ export default class PieClient {
         this.ws.addEventListener('close', () => {
           resolve();
         });
+        log('Disconnecting...');
         // Close the connection
         this.ws.close();
         // Updates debug info to show that it is closing
         this._updateDebugInfo();
+        log('Disconnected.');
       }
     }).then(() => {
       // Updates debug info to show that it is closed
       this._updateDebugInfo();
-      log('Successfully disconnected.');
     });
 
   }
