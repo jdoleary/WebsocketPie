@@ -228,7 +228,7 @@ export default class PieClient {
         // Reset reconnect attempts now that the connection is successfully opened
         this.reconnectAttempts = 0;
         if (this.ws) {
-          this.ws.addEventListener('close', this.tryReconnect.bind(this));
+          this.ws.addEventListener('close', this.tryReconnect);
         }
         resolve();
       };
