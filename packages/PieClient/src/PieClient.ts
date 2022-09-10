@@ -292,10 +292,25 @@ export default class PieClient {
     const maxTimeoutMillis = 3000;
     // Reconnect timeout with falloff based on number of reconnectAttempts with a maximum timeout
     const tryReconnectAgainInMillis = Math.min(maxTimeoutMillis, 100 + Math.pow(this.reconnectAttempts, 2) * 50);
+    if (this.statusElement) {
+      this.statusElement.innerHTML = `⬤ Connecting...`;
+    }
     log(
       `Reconnect attempt ${this.reconnectAttempts +
       1}; will try to reconnect automatically in ${tryReconnectAgainInMillis} milliseconds.`,
     );
+    const updateFalloffMessage = () => {
+      if (this.statusElement) {
+        this.statusElement.innerHTML = `⬤ Reattempting connection in ${(tryReconnectAgainInMillis / 1000).toFixed(1)} seconds...`;
+      }
+    }
+    updateFalloffMessage();
+    // Update statusElement every 1/10th second
+    for (let i = 0; i < tryReconnectAgainInMillis / 100; i++) {
+      setTimeout(() => {
+        updateFalloffMessage();
+      }, i * 100)
+    }
     this.reconnectTimeoutId = setTimeout(() => {
       if (this.ws && this.ws.url) {
         // Strip any search params from the current url
