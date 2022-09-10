@@ -289,7 +289,7 @@ export default class PieClient {
   tryReconnect = () => {
     // Try reconnect
     clearTimeout(this.reconnectTimeoutId);
-    const maxTimeoutMillis = 3000;
+    const maxTimeoutMillis = 10000;
     // Reconnect timeout with falloff based on number of reconnectAttempts with a maximum timeout
     const tryReconnectAgainInMillis = Math.min(maxTimeoutMillis, 100 + Math.pow(this.reconnectAttempts, 2) * 50);
     log(
