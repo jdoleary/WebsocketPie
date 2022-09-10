@@ -544,7 +544,7 @@ export default class PieClient {
         } else {
           this.statusElement.innerHTML = `⬤ Not Connected`;
         }
-        this.statusElement.style.color = this.soloMode || (this.ws && (this.ws.readyState == this.ws.OPEN || this.ws.readyState == this.ws.CONNECTING)) ? 'green' : 'red';
+        this.statusElement.style.color = this.soloMode || (this.ws && this.ws.readyState == this.ws.OPEN) ? 'green' : this.ws && this.ws.readyState == this.ws.CONNECTING ? 'yellow' : 'red';
       }
     } catch (e) {
       logError(e);
