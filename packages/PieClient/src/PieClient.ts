@@ -326,6 +326,9 @@ export default class PieClient {
 
   }
   async disconnect(): Promise<void> {
+    // It is important to leave current room before disconnecting so that
+    // currentRoomInfo is cleared
+    this.leaveRoom();
     return new Promise<void>(resolve => {
       if (this.soloMode) {
         this.soloMode = false;
@@ -476,17 +479,14 @@ export default class PieClient {
     }
   }
   leaveRoom() {
+    // Clear currentRoomInfo even if pie is connected in soloMode
+    this.currentRoomInfo = undefined;
     if (this.isConnected() && this.ws) {
       this.ws.send(
         JSON.stringify({
           type: MessageType.LeaveRoom,
         }),
       );
-      this.currentRoomInfo = undefined;
-    } else {
-      if (this.onError) {
-        this.onError({ message: `Cannot leave room, not currently connected to web socket server` });
-      }
     }
   }
   getRooms(roomInfo: any) {
