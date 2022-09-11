@@ -481,6 +481,12 @@ export default class PieClient {
   leaveRoom() {
     // Clear currentRoomInfo even if pie is connected in soloMode
     this.currentRoomInfo = undefined;
+    if (this.soloMode) {
+      // Clear clientId if exiting a room in soloMode
+      // Note: The clientId will be retained in actual multiplayer
+      // so that a client can rejoin a server if they wish
+      this.clientId = '';
+    }
     if (this.isConnected() && this.ws) {
       this.ws.send(
         JSON.stringify({
