@@ -23,6 +23,12 @@ class Room {
     this.togetherTimeouts = {};
     // If a room should be visible to anyone who queries the rooms
     this.hidden = hidden;
+    // If all clients leave a room, the room is marked for clean up and if no clients rejoin by the time
+    // the timeout triggers, the room will be cleaned up.
+    this.cleanupTimeoutId;
+  }
+  toString() {
+    return `${this.app};${this.name};${this.version}`
   }
   cleanup() {
     if (this.hostApp && this.hostApp.cleanup) {
