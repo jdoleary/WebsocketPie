@@ -177,13 +177,21 @@ export default class PieClient {
     }
     this.soloMode = false;
     this.useStats = useStats;
-    log(`connecting to ${wsUrl} ${this.clientId ? `with clientId: ${this.clientId}` : ''}...`);
+    const { cliendId: clientIdFromQueryString } = parseQueryString(wsUrl);
+    if (clientIdFromQueryString) {
+      this.clientId = clientIdFromQueryString;
+    }
+    const url = new URL(wsUrl);
+    // Clear url querystring
+    url.search = '';
+
+    log(`Connecting to ${url.toString()} ${this.clientId ? `with clientId: ${this.clientId}` : ''}...`);
 
     return new Promise((resolve, reject) => {
       // Passing optional cliendId into the WebSocket constructor will tell PieServer
       // that this client requests to join with that ID and it will save the whole
       // url in this.ws.url so that reconnection attempts use the clientId
-      this.ws = new WebSocket(wsUrl + (this.clientId ? `?clientId=${this.clientId}` : ''));
+      this.ws = new WebSocket(url.toString() + (this.clientId ? `?clientId=${this.clientId}` : ''));
       this._updateDebugInfo();
       this.ws.onmessage = event => {
         try {
@@ -568,4 +576,19 @@ export default class PieClient {
       logError(e);
     }
   }
+}
+
+type QueryStringObject = { [key: string]: string };
+function parseQueryString(url: string): QueryStringObject {
+  return url
+    .split(/\/?\?/)
+    .join('')
+    .split('&')
+    .reduce((ob: QueryStringObject, pair) => {
+      const [key, value] = pair.split('=');
+      if (key && value) {
+        ob[key] = value;
+      }
+      return ob;
+    }, {});
 }
