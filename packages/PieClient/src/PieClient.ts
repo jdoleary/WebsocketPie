@@ -177,7 +177,7 @@ export default class PieClient {
     }
     this.soloMode = false;
     this.useStats = useStats;
-    const { cliendId: clientIdFromQueryString } = parseQueryString(wsUrl);
+    const { clientId: clientIdFromQueryString } = parseQueryString(wsUrl);
     if (clientIdFromQueryString) {
       this.clientId = clientIdFromQueryString;
     }
@@ -580,8 +580,8 @@ export default class PieClient {
 
 type QueryStringObject = { [key: string]: string };
 function parseQueryString(url: string): QueryStringObject {
-  return url
-    .split(/\/?\?/)
+  return new URL(url).search
+    .split('?')
     .join('')
     .split('&')
     .reduce((ob: QueryStringObject, pair) => {
