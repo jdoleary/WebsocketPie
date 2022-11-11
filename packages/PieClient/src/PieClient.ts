@@ -1,6 +1,8 @@
 import { MessageType } from './enums';
 import { log, logError } from './log';
 import { version } from '../package.json';
+
+const clientSoloModeId = 'solomode_client_id';
 export interface ConnectInfo {
   type: string;
   connected: boolean;
@@ -265,19 +267,11 @@ export default class PieClient {
       });
     }
     this._updateDebugInfo();
-    const clientFakeId = 'solomode_client_id';
     // Fake serverAssignedData
     this.handleMessage({
       type: MessageType.ServerAssignedData,
-      clientId: clientFakeId,
+      clientId: clientSoloModeId,
       serverVersion: `no server - client is in solomode`,
-    }, false);
-    // Fake clientPresenceChanged
-    this.handleMessage({
-      clients: [clientFakeId],
-      time: Date.now(),
-      type: MessageType.ClientPresenceChanged,
-      present: true,
     }, false);
   }
   onClose = () => {
@@ -469,7 +463,15 @@ export default class PieClient {
           );
         }
         if (this.soloMode) {
-          // if in soloMode, resolve immediately
+          // Now that client has joined a room in soloMode, send a 
+          // manufactured clientPresenceChanged as if it came from the server
+          // because pieClient fakes all server messages when in soloMode
+          this.handleMessage({
+            clients: [clientSoloModeId],
+            time: Date.now(),
+            type: MessageType.ClientPresenceChanged,
+            present: true,
+          }, false);
           resolve(roomInfo)
         }
 
