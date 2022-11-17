@@ -47,40 +47,40 @@ class RoomManager {
   }
 
   addClientToRoom({ client, roomInfo }) {
-    if (!(client && roomInfo)) {
-      return Promise.reject('Cannot add client to room, missing "client", and/or "roomInfo"');
-    }
-    // Cache the clients previous room,
-    // then later in this function if the client successfully joins
-    // the new room, remove the client from their old room
-    const previousRoom = client.room;
-    const room = this.getRoom(roomInfo);
-    if (!room) {
-      return Promise.reject(`Cannot add client to room, unable to find the preexisting room`);
-    }
-    if (room.cleanupTimeoutId !== undefined) {
-      log(chalk.blue(`Cancelling clean up for room ${room.toString()} because a client has rejoined.`));
-      clearTimeout(room.cleanupTimeoutId);
-      room.cleanupTimeoutId = undefined;
-    }
-    log(
-      chalk.blue(
-        `Adding client ${client.id} to room: (app: ${room.app}, version: ${room.version}, name: ${room.name})`,
-      ),
-    );
-    client = Object.assign(client, { room });
     try {
+      if (!(client && roomInfo)) {
+        return Promise.reject('Cannot add client to room, missing "client", and/or "roomInfo"');
+      }
+      // Cache the clients previous room,
+      // then later in this function if the client successfully joins
+      // the new room, remove the client from their old room
+      const previousRoom = client.room;
+      const room = this.getRoom(roomInfo);
+      if (!room) {
+        return Promise.reject(`Cannot add client to room, unable to find the preexisting room`);
+      }
+      if (room.cleanupTimeoutId !== undefined) {
+        log(chalk.blue(`Cancelling clean up for room ${room.toString()} because a client has rejoined.`));
+        clearTimeout(room.cleanupTimeoutId);
+        room.cleanupTimeoutId = undefined;
+      }
+      log(
+        chalk.blue(
+          `Adding client ${client.id} to room: (app: ${room.app}, version: ${room.version}, name: ${room.name})`,
+        ),
+      );
+      client = Object.assign(client, { room });
       room.addClient(client);
+
+      // Remove the client from their previous room if applicable
+      if (previousRoom) {
+        this.removeClientFromRoom(client, previousRoom);
+      }
+      return Promise.resolve(room);
     } catch (e) {
+      // This function should always return a promise, even if it throws
       return Promise.reject(e.toString());
     }
-
-    // Remove the client from their previous room if applicable
-    if (previousRoom) {
-      this.removeClientFromRoom(client, previousRoom);
-    }
-
-    return Promise.resolve(room);
   }
 
   onData({ client, message }) {
