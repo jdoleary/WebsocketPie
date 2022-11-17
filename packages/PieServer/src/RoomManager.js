@@ -68,7 +68,11 @@ class RoomManager {
       ),
     );
     client = Object.assign(client, { room });
+    try {
     room.addClient(client);
+    } catch (e) {
+      return Promise.reject(e.toString());
+    }
     return Promise.resolve(room);
   }
 
