@@ -61,7 +61,7 @@ function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = 
             roomManager.onData({ client, message });
             break;
           case MessageType.LeaveRoom:
-            roomManager.removeClientFromCurrentRoom(client);
+            roomManager.removeClientFromRoom(client, client.room);
             break;
           case MessageType.GetRooms:
             roomManager.getRooms({ client, roomInfo: message.roomInfo });
@@ -81,7 +81,7 @@ function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = 
     });
     client.on('close', () => {
       log(chalk.blue(`Client ${client.id} disconnected`));
-      roomManager.removeClientFromCurrentRoom(client);
+      roomManager.removeClientFromRoom(client, client.room);
     });
     function resolveClientPromise(func, data) {
       client.send(

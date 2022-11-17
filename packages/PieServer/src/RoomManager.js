@@ -50,9 +50,10 @@ class RoomManager {
     if (!(client && roomInfo)) {
       return Promise.reject('Cannot add client to room, missing "client", and/or "roomInfo"');
     }
-    if (client.room) {
-      this.removeClientFromCurrentRoom(client);
-    }
+    // Cache the clients previous room,
+    // then later in this function if the client successfully joins
+    // the new room, remove the client from their old room
+    const previousRoom = client.room;
     const room = this.getRoom(roomInfo);
     if (!room) {
       return Promise.reject(`Cannot add client to room, unable to find the preexisting room`);
@@ -69,10 +70,16 @@ class RoomManager {
     );
     client = Object.assign(client, { room });
     try {
-    room.addClient(client);
+      room.addClient(client);
     } catch (e) {
       return Promise.reject(e.toString());
     }
+
+    // Remove the client from their previous room if applicable
+    if (previousRoom) {
+      this.removeClientFromRoom(client, previousRoom);
+    }
+
     return Promise.resolve(room);
   }
 
@@ -98,12 +105,11 @@ class RoomManager {
     }
   }
 
-  removeClientFromCurrentRoom(client) {
-    const { room } = client;
+  removeClientFromRoom(client, room) {
     if (!room) {
       return;
     }
-    log(chalk.blue(`Removing client ${client.id} from current room`));
+    log(chalk.blue(`Removing client ${client.id} from room ${room.toString()}`));
     room.removeClient(client);
     // Remove data added while joining room.
     delete client.room;
