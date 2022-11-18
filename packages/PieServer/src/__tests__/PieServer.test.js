@@ -730,8 +730,9 @@ test('Room maxClients', { timeout }, async t => {
   t.deepEqual(
     client2.messages[0],
     {
-      type: MessageType.Err,
-      message: `Room is at capacity and cannot accept more clients due to the room's chosen settings`,
+      type: MessageType.RejectPromise,
+      func: 'JoinRoom',
+      err: `Error: Room is at capacity and cannot accept more clients due to the room's chosen settings`,
     },
     'client2 should not be able to have joined the room due to capacity',
   );
