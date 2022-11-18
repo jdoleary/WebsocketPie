@@ -8,6 +8,7 @@ const test = require('tape');
 const WebSocket = require('ws');
 const { MessageType, DataSubType } = require('../enums');
 const { startServer } = require('../network');
+globalThis.testRunner = true;
 
 const port = process.env.PORT || 7080;
 // For tests that need access to a unique websocketserver
@@ -1032,6 +1033,11 @@ test('Rooms are cleaned up when all clients leave', { timeout }, async t => {
       type: MessageType.LeaveRoom,
     });
     client1.webSocket.send(lr);
+    // Rooms are removed after a grace period so the test has to wait for the room cleanup timeout
+    // to trigger (in tests, the timeout is set to 0)
+    await new Promise((resolve) => {
+      setTimeout(resolve, 10);
+    });
 
     t.comment('client2 should see only their own room now');
     client2.clearMessages();

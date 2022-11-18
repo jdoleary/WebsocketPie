@@ -117,7 +117,7 @@ class RoomManager {
     // If room is empty, cleanup room:
     if (!room.clients.length) {
       // Wait to see if clients rejoin and if the do not, clean up the room.
-      const rejoinGracePeriod = 1000 * 60 * 5;
+      const rejoinGracePeriod = globalThis.testRunner ? 0 : 1000 * 60 * 5;
       log(chalk.blue(`Clean: If no clients rejoin in ${rejoinGracePeriod} millis, will clean up room ${room.toString()}`));
       // Clear previous timeout if it exists
       if (room.cleanupTimeoutId !== undefined) {
