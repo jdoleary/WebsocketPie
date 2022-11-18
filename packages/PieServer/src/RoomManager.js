@@ -51,13 +51,12 @@ class RoomManager {
       if (!(client && roomInfo)) {
         return Promise.reject('Cannot add client to room, missing "client", and/or "roomInfo"');
       }
-      // Cache the clients previous room,
-      // then later in this function if the client successfully joins
-      // the new room, remove the client from their old room
-      const previousRoom = client.room;
+      if (client.room) {
+        return Promise.reject('Client cannot join a new room without first leaving their current room.');
+      }
       const room = this.getRoom(roomInfo);
       if (!room) {
-        return Promise.reject(`Cannot add client to room, unable to find the preexisting room`);
+        return Promise.reject(`Cannot add client to non-existant room.`);
       }
       if (room.cleanupTimeoutId !== undefined) {
         log(chalk.blue(`Cancelling clean up for room ${room.toString()} because a client has rejoined.`));
@@ -71,11 +70,6 @@ class RoomManager {
       );
       client = Object.assign(client, { room });
       room.addClient(client);
-
-      // Remove the client from their previous room if applicable
-      if (previousRoom) {
-        this.removeClientFromRoom(client, previousRoom);
-      }
       return Promise.resolve(room);
     } catch (e) {
       // This function should always return a promise, even if it throws

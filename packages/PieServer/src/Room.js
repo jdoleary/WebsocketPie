@@ -131,7 +131,7 @@ class Room {
   addClient(client) {
     const clientIndex = this.getClientIndex(client);
     if (clientIndex !== -1) {
-      throw new Error('Cannot add client, client is already in the room');
+      throw new Error('Cannot readd client to room; the client is already in the room');
     }
     if (this.maxClients !== undefined && this.clients.length === this.maxClients) {
       throw new Error(`Room is at capacity and cannot accept more clients due to the room's chosen settings`);
