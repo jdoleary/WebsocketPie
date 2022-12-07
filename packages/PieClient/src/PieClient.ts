@@ -96,6 +96,7 @@ export default class PieClient {
   heartbeatTimeout?: ReturnType<typeof setTimeout>;
   // The number of reconnect attempts since successful connection
   reconnectAttempts: number;
+  cancelNextReconnectAttempt: boolean;
 
   constructor() {
     log(`WebSocketPie Client v${version}`);
@@ -122,6 +123,7 @@ export default class PieClient {
         average: NaN,
       },
     };
+    this.cancelNextReconnectAttempt = false;
 
     window.addEventListener('online', () => {
       log('Network online');
@@ -172,6 +174,7 @@ export default class PieClient {
     }, waitForResponseMs);
   }
   async connect(wsUrl: string, useStats: boolean): Promise<void> {
+    this.cancelNextReconnectAttempt = false;
     // Only connect if there is no this.ws object or if the current this.ws socket is CLOSED
     if (this.ws && this.ws.readyState !== this.ws.CLOSED) {
       log(`Disconnecting from current connection at ${this.ws.url} so that new connection to ${wsUrl} can be made...`)
@@ -305,10 +308,19 @@ export default class PieClient {
     }
     updateFalloffMessage(tryReconnectAgainInMillis);
     // Update statusElement every 1/10th second
-    for (let i = 0; i < tryReconnectAgainInMillis / 100; i++) {
+    const updateIncrements = tryReconnectAgainInMillis / 100;
+    for (let i = 0; i < updateIncrements; i++) {
       setTimeout(() => {
-        updateFalloffMessage((tryReconnectAgainInMillis / 100 - i) * 100);
-      }, i * 100)
+        if (i == updateIncrements - 1) {
+          // On last run of the for loop update via the actual state.
+          // This covers the case where a manual disconnect stops the auto reconnect
+          // but this setTimeout for loop is still running so it ensures it will
+          // return to the real state of the pie connection when the loop is done.
+          this._updateDebugInfo();
+        } else {
+          updateFalloffMessage((tryReconnectAgainInMillis / 100 - i) * 100);
+        }
+      }, i * 100);
     }
     this.reconnectTimeoutId = setTimeout(() => {
       if (this.ws && this.ws.url) {
@@ -316,8 +328,10 @@ export default class PieClient {
         const { origin: url } = new URL(this.ws.url)
         this.connect(url, this.useStats).catch(() => {
           log('Failed to reconnect');
-          // Try again to reconnect
-          this.tryReconnect();
+          if (!this.cancelNextReconnectAttempt) {
+            // Try again to reconnect
+            this.tryReconnect();
+          }
         });
       } else {
         logError('Cannot attempt to reconnect, this.ws has no url');
@@ -328,6 +342,11 @@ export default class PieClient {
 
   }
   async disconnect(): Promise<void> {
+    // Stop attempt to auto reconnect if a manual disconnect occurs
+    clearTimeout(this.reconnectTimeoutId);
+    // If disconnect is invoked while a connect() is already in progress this will
+    // prevent it from trying to reconnect again after it fails
+    this.cancelNextReconnectAttempt = true;
     // It is important to leave current room before disconnecting so that
     // currentRoomInfo is cleared
     this.leaveRoom();
