@@ -100,7 +100,20 @@ class Room {
 
   emit(data) {
     if (this.hostApp) {
-      this.hostApp.handleMessage(data);
+      try {
+        this.hostApp.handleMessage(data);
+      } catch (e) {
+        console.log('Caught error from hostApp.handleMessage', data);
+        console.error(e);
+        this.clients.forEach(c =>
+          c.send(
+            JSON.stringify({
+              type: MessageType.Err,
+              message: `hostApp.handleMessage error: ${err.message}`
+            })
+          )
+        );
+      }
     }
     this.clients.forEach(c => c.send(JSON.stringify(data)));
   }
