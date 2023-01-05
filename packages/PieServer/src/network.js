@@ -6,17 +6,26 @@ const log = require('./log');
 const RoomManager = require('./RoomManager');
 const { version } = require('../package.json');
 const { parseQueryString } = require('./util');
+let os;
+try {
+  // Optional dep
+  os = require('os-utils');
+} catch (e) { }
+
 
 function heartbeat() {
   this.isAlive = true;
 }
-
+let roomManager;
+let serverRunningSince = 0;
+let areStatsAllowed = false;
 // makeHostApp: See examples/HostApp/readme.md for explanation about how hostApp works
-function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = null }) {
-  log(`Pie: Running PieServer v${version} with port ${port}`);
+function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = null, allowStats = false }) {
+  log(`Pie: Running PieServer v${version} with port ${port}.  Stats allowed: ${allowStats}`);
+  areStatsAllowed = allowStats;
   // Get the version of the host app so it can be sent to the client on connection
   const hostAppVersion = makeHostAppInstance ? makeHostAppInstance().version : undefined;
-  const roomManager = new RoomManager(makeHostAppInstance);
+  roomManager = new RoomManager(makeHostAppInstance);
   const webSocketServer = new WebSocket.Server({ port });
   webSocketServer.on('connection', (client, req) => {
     client.isAlive = true;
@@ -116,7 +125,40 @@ function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = 
     clearInterval(heartbeatInterval);
   });
   log(`Websocket server is listening on *:${port} and will check client heartbeat every ${heartbeatCheckMillis} milliseconds.`);
+  serverRunningSince = Date.now();
   return webSocketServer;
 }
+async function getStats() {
+  if (!areStatsAllowed) {
+    return { err: 'Stats access not allowed.' }
+  }
+  if (roomManager) {
+    const rooms = roomManager.rooms || [];
+    const clients = rooms.reduce((count, room) => {
+      count += room.clients.length;
+      return count;
+    }, 0)
+    const uptime = Date.now() - serverRunningSince;
 
-module.exports = { startServer };
+    const cpuUsage = await new Promise((resolve) => {
+      if (os) {
+        os.cpuUsage(resolve);
+      } else {
+        resolve(-1);
+      }
+    });
+
+    return {
+      rooms: rooms.map(r => ({ app: r.app, name: r.name, version: r.version })),
+      clients,
+      uptime,
+      cpuUsage
+    }
+  } else {
+    return { err: 'roomManager not yet created.' }
+  }
+
+}
+
+
+module.exports = { startServer, getStats };

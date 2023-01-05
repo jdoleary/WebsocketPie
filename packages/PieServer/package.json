@@ -27,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/jdoleary/WebsocketPie/issues"
   },
-  "homepage": "https://github.com/jdoleary/WebsocketPie#readme"
+  "homepage": "https://github.com/jdoleary/WebsocketPie#readme",
+  "optionalDependencies": {
+    "os-utils": "^0.0.14"
+  }
 }

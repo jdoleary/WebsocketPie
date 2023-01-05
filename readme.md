@@ -173,6 +173,9 @@ me@DESKTOP ~/git/my-project
 C:\Users\me\git\my-project\node_modules\pie-client -> C:\Users\me\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\me\git -> C:\Users\me\git\WebsocketPie\packages\PieClient
 
 ```
+How to link server:
+In packages/PieServer run `npm link`
+In your project run `npm link @websocketpie/server`
 
 ## Dev Ops
 
