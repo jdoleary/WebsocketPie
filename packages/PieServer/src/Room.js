@@ -26,7 +26,7 @@ class Room {
     // If all clients leave a room, the room is marked for clean up and if no clients rejoin by the time
     // the timeout triggers, the room will be cleaned up.
     this.cleanupTimeoutId;
-    this.password = password;
+    this.password = (password === '' || password === null) ? undefined : password;
   }
   toString() {
     return `${this.app};${this.name};${this.version}`
