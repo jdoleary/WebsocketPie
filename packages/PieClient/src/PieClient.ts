@@ -35,6 +35,7 @@ export interface Room {
   maxClients?: number;
   togetherTimeoutMs?: number;
   hidden?: boolean;
+  password?: string;
 }
 export interface OnRoomsArgs {
   type: string;

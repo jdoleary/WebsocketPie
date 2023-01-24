@@ -3,7 +3,7 @@ const log = require('./log');
 const { MessageType } = require('./enums');
 
 class Room {
-  constructor({ app, name = 'default', version, maxClients, togetherTimeoutMs, hidden }, hostApp = undefined) {
+  constructor({ app, name = 'default', version, maxClients, togetherTimeoutMs, hidden, password }, hostApp = undefined) {
     this.hostApp = hostApp;
     if (this.hostApp) {
       // Override hostApp.sendData so that it can sendData to the room
@@ -26,6 +26,7 @@ class Room {
     // If all clients leave a room, the room is marked for clean up and if no clients rejoin by the time
     // the timeout triggers, the room will be cleaned up.
     this.cleanupTimeoutId;
+    this.password = password;
   }
   toString() {
     return `${this.app};${this.name};${this.version}`
@@ -39,6 +40,7 @@ class Room {
   serialize() {
     const { app, name, version, maxClients, togetherTimeoutMs, hidden } = this;
     // Return should match Room interface from PieClient.ts
+    // with the exception of the password which should not be serialized
     return {
       app,
       name,

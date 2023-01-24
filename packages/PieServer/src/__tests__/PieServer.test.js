@@ -7,6 +7,7 @@ the PieServer's API matches what's expected. */
 const test = require('tape');
 const WebSocket = require('ws');
 const { MessageType, DataSubType } = require('../enums');
+const Room = require('../Room');
 const { startServer } = require('../network');
 globalThis.testRunner = true;
 
@@ -1138,6 +1139,138 @@ test('Hidden rooms do not show in the Rooms message', { timeout }, async t => {
     ws.terminate();
   }
   t.end();
+});
+test('Room password', { timeout }, async t => {
+  t.comment('client1 is opening a connection...');
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+
+  t.comment('client1 is hosting a room...');
+  client1.clearMessages();
+  client1.expectMessages(1);
+  const password = 'super_secret';
+  const jr1 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
+    roomInfo: {
+      app: 'Protected Room',
+      version: '1.0.0',
+      name: 'Fort Knox',
+      password
+    },
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
+  t.comment('client2 is opening a connection...');
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+
+  t.comment('client2 trys to join a room but should recieve an error due to missing password...');
+  client2.clearMessages();
+  client2.expectMessages(1);
+  const jr2 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'Protected Room',
+      version: '1.0.0',
+      name: 'Fort Knox',
+    },
+  });
+  client2.webSocket.send(jr2);
+
+  await client2.expectedMessagesReceived;
+  t.deepEqual(
+    client2.messages[0],
+    {
+      type: MessageType.RejectPromise,
+      func: 'JoinRoom',
+      err: `Client attempted to join room with incorrect password.`,
+    },
+    'client2 should not be able to have joined the room due to missing password',
+  );
+  t.comment('client2 trys to join a room but should recieve an error due to wrong password...');
+  client2.clearMessages();
+  client2.expectMessages(1);
+  const jr2b = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'Protected Room',
+      version: '1.0.0',
+      name: 'Fort Knox',
+      password: 'wrong password'
+    },
+  });
+  client2.webSocket.send(jr2b);
+
+  await client2.expectedMessagesReceived;
+  t.deepEqual(
+    client2.messages[0],
+    {
+      type: MessageType.RejectPromise,
+      func: 'JoinRoom',
+      err: `Client attempted to join room with incorrect password.`,
+    },
+    'client2 should not be able to have joined the room due to missing password',
+  );
+  t.comment('client2 trys to join a room with correct password...');
+  client2.clearMessages();
+  client2.expectMessages(1);
+  const jr2c = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'Protected Room',
+      version: '1.0.0',
+      name: 'Fort Knox',
+      password
+    },
+  });
+  client2.webSocket.send(jr2c);
+  await client2.expectedMessagesReceived;
+  t.equal(client2.messages.length, 2, 'client2 should receive a message');
+  t.equal(client2.messages[0].type, MessageType.ClientPresenceChanged, 'client2 should receive a client message');
+  t.equal(
+    client2.messages[1].type,
+    MessageType.ResolvePromise,
+    'client2 should receive notification that the promise is resolved',
+  );
+  t.equal(
+    client2.messages[1].func,
+    MessageType.JoinRoom,
+    'The promise should be notifying that JoinRoom was successful',
+  );
+
+  t.end();
+});
+test('Ensure Room password is not visible', { timeout }, t => {
+  const roomInfo = {
+    app: 'testapp',
+    name: 'testname',
+    version: '1.0.0'
+  };
+  const password = 'secret';
+  const room = new Room({
+    ...roomInfo,
+    password
+  });
+  const serialized = room.serialize();
+  t.equal(
+    serialized.password,
+    undefined,
+    'The password property of the serialized room should be undefined and not shared.'
+  );
+  const description = room.toString();
+  t.equal(
+    description.indexOf(password),
+    -1,
+    'The password should not be visible in room.toString()'
+  );
+  t.end();
+
 });
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', t => {

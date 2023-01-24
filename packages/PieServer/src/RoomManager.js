@@ -58,6 +58,9 @@ class RoomManager {
       if (!room) {
         return Promise.reject(`Cannot add client to non-existant room.`);
       }
+      if (roomInfo.password !== room.password) {
+        return Promise.reject(`Client attempted to join room with incorrect password.`);
+      }
       if (room.cleanupTimeoutId !== undefined) {
         log(chalk.blue(`Cancelling clean up for room ${room.toString()} because a client has rejoined.`));
         clearTimeout(room.cleanupTimeoutId);
