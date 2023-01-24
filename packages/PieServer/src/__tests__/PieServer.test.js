@@ -78,7 +78,7 @@ function delay(ms) {
 
 /* Note: putting setup inside a test ensures a serial execution order. */
 test('Setup', t => {
-  webSocketServer = startServer({ port });
+  webSocketServer = startServer({ port, allowStats: true });
   t.end();
 });
 
@@ -967,7 +967,7 @@ test('Whipsers should not be heard by clients not being whispered to', { timeout
 test('Rooms are cleaned up when all clients leave', { timeout }, async t => {
   // Create a new server so it has no clients or rooms still connected
   const { tempPort, tempUrl } = uniquePortAndUrl();
-  const tempWebSocketServer = startServer({ port: tempPort });
+  const tempWebSocketServer = startServer({ port: tempPort, allowStats: true });
   try {
     t.comment('client1 is opening a connection...');
     const client1 = new TestClient(tempUrl);
@@ -1067,7 +1067,7 @@ test('Rooms are cleaned up when all clients leave', { timeout }, async t => {
 test('Hidden rooms do not show in the Rooms message', { timeout }, async t => {
   const { tempPort, tempUrl } = uniquePortAndUrl();
   // Create a new server so it has no clients or rooms still connected
-  const tempWebSocketServer = startServer({ port: tempPort });
+  const tempWebSocketServer = startServer({ port: tempPort, allowStats: true });
   try {
     t.comment('client1 is opening a connection...');
     const client1 = new TestClient(tempUrl);
@@ -1269,6 +1269,57 @@ test('Ensure Room password is not visible', { timeout }, t => {
     -1,
     'The password should not be visible in room.toString()'
   );
+  t.end();
+
+});
+test('getStats for the entire server', { timeout }, async t => {
+  // Create a new server so it has no clients or rooms still connected
+  const { tempPort, tempUrl } = uniquePortAndUrl();
+  const tempWebSocketServer = startServer({ port: tempPort, allowStats: true });
+  t.comment('client1 is opening a connection...');
+  const client1 = new TestClient(tempUrl);
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+
+  t.comment('client1 is hosting a room...');
+  client1.clearMessages();
+  client1.expectMessages(1);
+  const roomInfo = {
+    app: 'Stats Room',
+    version: '1.0.0',
+    name: 'in the know',
+  };
+  const jr1 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    makeRoomIfNonExistant: true,
+    roomInfo,
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
+
+  t.comment('client1 retrieves the stats of the entire server...');
+  client1.clearMessages();
+  client1.expectMessages(1);
+  const getStatsMessage = JSON.stringify({
+    type: MessageType.GetStats,
+  });
+  client1.webSocket.send(getStatsMessage);
+
+  await client1.expectedMessagesReceived;
+  t.equal(client1.messages[0].type, MessageType.GetStats);
+  t.deepEqual(client1.messages[0].stats.rooms, [
+    { app: 'Stats Room', name: 'in the know', version: '1.0.0', isPasswordProtected: false }
+  ]);
+  t.equal(client1.messages[0].stats.roomsHidden, 0);
+  t.equal(client1.messages[0].stats.clients, 1);
+  t.equal(typeof client1.messages[0].stats.uptime, 'number');
+  t.equal(typeof client1.messages[0].stats.cpuUsage, 'number');
+  tempWebSocketServer.close();
+  for (const ws of tempWebSocketServer.clients) {
+    ws.terminate();
+  }
   t.end();
 
 });

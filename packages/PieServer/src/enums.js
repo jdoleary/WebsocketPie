@@ -12,6 +12,7 @@ const MessageType = {
   JoinRoom: 'JoinRoom',
   LeaveRoom: 'LeaveRoom',
   GetRooms: 'GetRooms',
+  GetStats: 'GetStats',
   // Unique to PieClient
   ConnectInfo: 'ConnectInfo',
 };

@@ -75,6 +75,24 @@ function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = 
           case MessageType.GetRooms:
             roomManager.getRooms({ client, roomInfo: message.roomInfo });
             break;
+          case MessageType.GetStats:
+            getStats().then(stats => {
+              client.send(
+                JSON.stringify({
+                  type: MessageType.GetStats,
+                  stats,
+                }),
+              );
+            }).catch(err => {
+              console.error(err);
+              client.send(
+                JSON.stringify({
+                  type: MessageType.Err,
+                  message: err.message,
+                }),
+              );
+            })
+            break;
           default:
             throw new Error(`WARN: Message not understood: ${JSON.stringify(message, null, 2)}`);
         }
@@ -148,8 +166,14 @@ async function getStats() {
       }
     });
 
+    const hiddenRoomsCount = rooms.filter(r => r.hidden).length;
+
     return {
-      rooms: rooms.map(r => ({ app: r.app, name: r.name, version: r.version })),
+      rooms: rooms
+        // Filter out hidden rooms
+        .filter(r => !r.hidden)
+        .map(r => ({ app: r.app, name: r.name, version: r.version, isPasswordProtected: r.password !== undefined })),
+      roomsHidden: hiddenRoomsCount,
       clients,
       uptime,
       cpuUsage
@@ -161,4 +185,4 @@ async function getStats() {
 }
 
 
-module.exports = { startServer, getStats };
+module.exports = { startServer };
