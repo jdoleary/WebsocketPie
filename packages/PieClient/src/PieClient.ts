@@ -202,19 +202,12 @@ export default class PieClient {
       this.ws.onmessage = event => {
         try {
           const message: any = JSON.parse(event.data);
-          // Disregard messages from self, since they are returned to the self client immediately
-          // to prevent input lag
+          this.handleMessage(message, useStats);
           if (message.fromClient == this.clientId) {
             // Message from self
             // Clear the heartbeatTimeout because this client has recieved 
             // its own message back from the pieServer
             clearTimeout(this.heartbeatTimeout);
-            // Do not pass messages from self to this.handleMessage
-            // because messages from self are handled immediately to reduce
-            // appearance of latency from the server
-          } else {
-            // If the message is not from self, pass it along to this.handleMessage
-            this.handleMessage(message, useStats);
           }
         } catch (e: any) {
           logError(e);
@@ -548,6 +541,16 @@ export default class PieClient {
       };
       if (this.ws !== undefined) {
         this.ws.send(JSON.stringify(message));
+      } else if (this.soloMode) {
+        // In soloMode there is no this.ws so just handle the message immediately as 
+        // if it bounced back from PieServer
+        this.handleMessage({
+          fromClient: this.clientId,
+          time: Date.now(),
+          ...message
+        }, false);
+      } else {
+        logError('Unexpected: Attempted to send data but this.ws is undefined and not in soloMode');
       }
       if (!extras || extras.subType === undefined) {
         // Since this client has just sent a message, queue a heartbeat
@@ -558,13 +561,6 @@ export default class PieClient {
         // where messages with a subType get special handling and may not come back at all
         // or will come back intentionally with a delay
         this.heartbeat();
-        // Handle own message immediately to reduce lag
-        // Only handle own message immediately if there is no subtype.  Otherwise it
-        // would process Whisper or Together messages immediately which it shouldn't.
-        // --
-        // Note: Since clients handle their own data immediately, it won't have
-        // serverAssignedData attached, such as `time`
-        this.handleMessage({ fromClient: this.clientId, ...message }, false);
       }
     } else {
       if (this.onError) {
