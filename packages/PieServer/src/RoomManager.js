@@ -81,8 +81,14 @@ class RoomManager {
   }
 
   onData({ client, message }) {
-    if (!(client && client.room && message)) {
-      throw new Error('Cannot echo to room, missing "client", "client.room", or "message"');
+    if(!client){
+      throw new Error('Cannot echo to room, missing "client"');
+    }
+    if(!client.room){
+      throw new Error('Cannot echo to room, missing "client.room"');
+    }
+    if(!message){
+      throw new Error('Cannot echo to room, missing "client.room"');
     }
     const { room } = client;
     const messageWithAdditionalData = addServerAssignedInfoToMessage({ client, message });
