@@ -230,7 +230,7 @@ export default class PieClient {
         }
         if (this.currentRoomInfo) {
           log("Rejoining room", this.currentRoomInfo)
-          this.joinRoom(this.currentRoomInfo, true)
+          this.joinRoom(this.currentRoomInfo, false)
         }
         // Reset reconnect attempts now that the connection is successfully opened
         this.reconnectAttempts = 0;
