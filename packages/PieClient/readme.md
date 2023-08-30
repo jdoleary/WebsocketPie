@@ -11,14 +11,8 @@ import PieClient from '@websocketpie/client';
 
 const pie = new PieClient();
 pie.onData = x => console.log('onData:', x.payload);
-await pie.connect('ws://localhost:8000');
-await pie.makeRoom({
-      app: 'Some app name',
-      name: 'Rock Paper Sissors Unlimited Room!',
-      version: '0.1',
-      private: true,
-    });
-pie.sendData("hello world");
+await pie.quickConnect('ws://localhost:8000');
+pie.sendData("hello multi-user world");
 ```
 
 ## Extras
