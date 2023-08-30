@@ -174,7 +174,17 @@ export default class PieClient {
       // }
     }, waitForResponseMs);
   }
-  async connect(wsUrl: string, useStats: boolean): Promise<void> {
+  // Used to join a default room so you can connect and start passing
+  // messages right away without having to join a room explicitly
+  async quickConnect(wsUrl: string) {
+    await this.connect(wsUrl, false);
+    await this.makeRoom({
+      name: 'default',
+      app: 'default',
+      version: 'none'
+    });
+  }
+  async connect(wsUrl: string, useStats: boolean = false): Promise<void> {
     this.cancelNextReconnectAttempt = false;
     // Only connect if there is no this.ws object or if the current this.ws socket is CLOSED
     if (this.ws && this.ws.readyState !== this.ws.CLOSED) {
