@@ -6,7 +6,7 @@
 
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue-ghost.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jdoleary/WebsocketPie/tree/master)
 ---
-[WebsocketPie in 3 minutes - Youtube demo](https://www.youtube.com/watch?v=TCjByrkmpNI)
+[WebsocketPie in 3 minutes - Youtube demo](https://youtu.be/q2J9MaeR8b0)
 
 WebsocketPie allows you to make realtime, multi-user applications without writing any server-side code.  Simply, connect clients to a @websocketpie/server instance and the server will act as a hub that echos messages it receives to all connected clients.
 
