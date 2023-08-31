@@ -21,7 +21,7 @@ let serverRunningSince = 0;
 let areStatsAllowed = false;
 // makeHostApp: See examples/HostApp/readme.md for explanation about how hostApp works
 function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = null, allowStats = false }) {
-  log(`Pie: Running PieServer v${version} with port ${port}.  Stats allowed: ${allowStats}`);
+  log(`Running PieServer v${version} with port ${port}.  Stats allowed: ${allowStats}`);
   areStatsAllowed = allowStats;
   // Get the version of the host app so it can be sent to the client on connection
   const hostAppVersion = makeHostAppInstance ? makeHostAppInstance().version : undefined;

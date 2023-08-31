@@ -1,8 +1,8 @@
 function log() {
-  if (process.env.verbose !== 'yes') {
+  if (process.env.quiet === 'yes') {
     return;
   }
-  console.log(...arguments);
+  console.log('PieServer:',...arguments);
 }
 
 module.exports = log;
