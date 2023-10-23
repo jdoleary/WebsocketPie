@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/jdoleary/WebsocketPie#readme",
   "devDependencies": {
+    "bun-types": "^1.0.7",
     "eslint": "8.5.0",
     "husky": "7.0.4",
     "tape": "5.5.2"
