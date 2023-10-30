@@ -2,7 +2,6 @@ import { MessageType } from './enums';
 import { log, logError } from './log';
 import { version } from '../package.json';
 
-console.log('jtest linked')
 const clientSoloModeId = 'solomode_client_id';
 export interface ConnectInfo {
   type: string;
@@ -508,6 +507,11 @@ export default class PieClient {
           log(`${MessageType.JoinRoom} successful with`, currentRoomInfo);
           // Save roomInfo to allow auto rejoining should the server restart
           this.currentRoomInfo = currentRoomInfo;
+          // Readd password since it isn't serialized in @websocketpie/server@1.0.2
+          // This if statement can be safely removed after @websocketpie/server is updated
+          if (this.currentRoomInfo && !this.currentRoomInfo.password && roomInfo.password) {
+            this.currentRoomInfo.password = roomInfo.password
+          }
         } else {
           logError("joinRoom succeeded but currentRoomInfo is maleformed:", currentRoomInfo);
         }
