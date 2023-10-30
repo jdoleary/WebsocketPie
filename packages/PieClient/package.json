@@ -1,7 +1,6 @@
 {
   "name": "@websocketpie/client",
   "version": "1.1.0",
-  "type": "module",
   "description": "A client for connecting to, sending and receiving messages from a WebsocketPie/server instance",
   "main": "./dist/src/PieClient.js",
   "types": "./dist/src/PieClient.d.ts",
@@ -11,7 +10,7 @@
     "update-link": "tsc && npm link"
   },
   "devDependencies": {
-    "typescript": "^4.5.4"
+    "typescript": "^5.2.2"
   },
   "files": [
     "/dist"
