@@ -2,6 +2,7 @@ import { MessageType } from './enums';
 import { log, logError } from './log';
 import { version } from '../package.json';
 
+console.log('jtest linked')
 const clientSoloModeId = 'solomode_client_id';
 export interface ConnectInfo {
   type: string;
@@ -239,8 +240,10 @@ export default class PieClient {
           });
         }
         if (this.currentRoomInfo) {
-          log("Rejoining room", this.currentRoomInfo)
-          this.joinRoom(this.currentRoomInfo, false)
+          log("Rejoining room", this.currentRoomInfo);
+          this.joinRoom(this.currentRoomInfo, false).catch(e => {
+            logError('Failed to rejoin room', e);
+          });
         }
         // Reset reconnect attempts now that the connection is successfully opened
         this.reconnectAttempts = 0;
@@ -460,9 +463,11 @@ export default class PieClient {
         logError(`Above message of type ${message.type} not recognized!`);
     }
   }
+  // Remember to catch the rejected promise if used outside of this library
   makeRoom(roomInfo: Room) {
-    this.joinRoom(roomInfo, true);
+    return this.joinRoom(roomInfo, true);
   }
+  // Remember to catch the rejected promise if used outside of this library
   joinRoom(roomInfo: Room, makeRoomIfNonExistant: boolean = false) {
     if (this.isConnected()) {
       // Cancel previous makeRoom promise if it exists
