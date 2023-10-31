@@ -13,9 +13,6 @@ try {
 } catch (e) { }
 
 
-function heartbeat() {
-  this.isAlive = true;
-}
 let roomManager;
 let serverRunningSince = 0;
 let areStatsAllowed = false;
@@ -38,7 +35,7 @@ function rejectClientPromise(client, func, err) {
   );
 }
 // makeHostApp: See examples/HostApp/readme.md for explanation about how hostApp works
-function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = null, allowStats = false }) {
+function startServer({ port, makeHostAppInstance = null, allowStats = false }) {
   log(`Running @websocketpie/server-bun v${version} with port ${port}.  Stats allowed: ${allowStats}`);
   areStatsAllowed = allowStats;
   // Get the version of the host app so it can be sent to the client on connection
@@ -58,9 +55,6 @@ function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = 
     websocket: {
       async open(client){
         client.isAlive = true;
-        // TODO: fix in bun implementation
-        // client.on('pong', heartbeat);
-
         // Allow user to request a clientId when they join
         // This supports rejoining after a disconnect
         const clientId = client.data && client.data.clientId ? client.data.clientId : uuidv4();
@@ -144,20 +138,7 @@ function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = 
     },
 
   });
-  // const heartbeatInterval = setInterval(function ping() {
-  //   webSocketServer.clients.forEach(function each(client) {
-  //     log('Send ping to clients');
-  //     if (client.isAlive === false) return client.terminate();
-
-  //     client.isAlive = false;
-  //     client.ping();
-  //   });
-  // }, heartbeatCheckMillis);
-
-  // webSocketServer.on('close', function close() {
-  //   clearInterval(heartbeatInterval);
-  // });
-  log(`Websocket server is listening on *:${port} and will check client heartbeat every ${heartbeatCheckMillis} milliseconds.`);
+  log(`Websocket server is listening on *:${port}`);
   serverRunningSince = Date.now();
   webSocketServer.roomManager = roomManager;
   return webSocketServer;
