@@ -1,8 +1,11 @@
+import { v4 as uuidv4 } from 'uuid';
 import { MessageType } from './enums';
 import { log, logError } from './log';
 import { version } from '../package.json';
 
-const clientSoloModeId = 'solomode_client_id';
+// This will be different for every client
+const defaultIdForSolomode = uuidv4();
+
 export interface ConnectInfo {
   type: string;
   connected: boolean;
@@ -108,7 +111,7 @@ export default class PieClient {
       joinRoom: undefined,
     };
     this.useStats = false;
-    this.clientId = '';
+    this.clientId = defaultIdForSolomode;
     // Optionally support a connection status element
     this.statusElement = document.getElementById('websocketpie-connection-status');
     if (this.statusElement) {
@@ -279,7 +282,7 @@ export default class PieClient {
     // Fake serverAssignedData
     this.handleMessage({
       type: MessageType.ServerAssignedData,
-      clientId: clientSoloModeId,
+      clientId: this.clientId,
       serverVersion: `no server - client is in solomode`,
     }, false);
   }
@@ -494,7 +497,7 @@ export default class PieClient {
           // manufactured clientPresenceChanged as if it came from the server
           // because pieClient fakes all server messages when in soloMode
           this.handleMessage({
-            clients: [clientSoloModeId],
+            clients: [this.clientId],
             time: Date.now(),
             type: MessageType.ClientPresenceChanged,
             present: true,

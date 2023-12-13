@@ -56,9 +56,10 @@ function startServer({ port, makeHostAppInstance = null, allowStats = false, roo
         client.isAlive = true;
         // Allow user to request a clientId when they join
         // This supports rejoining after a disconnect
-        const clientId = client.data && client.data.clientId ? client.data.clientId : uuidv4();
+        const requestedClientId = client.data && client.data.clientId;
+        const clientId = requestedClientId || uuidv4();
         client = Object.assign(client, { id: clientId });
-        log(chalk.blue(`Client ${clientId} connected`));
+        log(chalk.blue(`Client ${clientId} connected ${!requestedClientId ? 'with newly generated clientId.' : 'with requested clientId'}`));
         client.send(
           JSON.stringify({
             type: MessageType.ServerAssignedData,

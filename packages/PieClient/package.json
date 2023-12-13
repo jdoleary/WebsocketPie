@@ -9,7 +9,11 @@
     "prepublishOnly": "tsc",
     "update-link": "tsc && npm link"
   },
+  "dependencies": {
+    "uuid": "^8.3.2"
+  },
   "devDependencies": {
+    "@types/uuid": "^9.0.7",
     "typescript": "^5.2.2"
   },
   "files": [
