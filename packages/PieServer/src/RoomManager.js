@@ -12,8 +12,10 @@ function addServerAssignedInfoToMessage({ client, message }) {
   };
 }
 class RoomManager {
-  constructor(makeHostAppInstance) {
+  constructor(makeHostAppInstance, roomCleanupDelay) {
     this.rooms = [];
+    // Number of milliseconds the RoomManager will wait before cleaning up empty rooms
+    this.roomCleanupDelay = roomCleanupDelay || 0;
     this.makeHostAppInstance = makeHostAppInstance;
   }
 
@@ -81,13 +83,13 @@ class RoomManager {
   }
 
   onData({ client, message }) {
-    if(!client){
+    if (!client) {
       throw new Error('Cannot echo to room, missing "client"');
     }
-    if(!client.room){
+    if (!client.room) {
       throw new Error('Cannot echo to room, missing "client.room"');
     }
-    if(!message){
+    if (!message) {
       throw new Error('Cannot echo to room, missing "client.room"');
     }
     const { room } = client;
@@ -120,8 +122,10 @@ class RoomManager {
     // If room is empty, cleanup room:
     if (!room.clients.length) {
       // Wait to see if clients rejoin and if the do not, clean up the room.
-      const rejoinGracePeriod = globalThis.testRunner ? 0 : 1000 * 60 * 5;
-      log(chalk.blue(`Clean: If no clients rejoin in ${rejoinGracePeriod} millis, will clean up room ${room.toString()}`));
+      const rejoinGracePeriod = globalThis.testRunner ? 0 : this.roomCleanupDelay;
+      if (rejoinGracePeriod !== 0) {
+        log(chalk.blue(`Clean: If no clients rejoin in ${rejoinGracePeriod} millis, will clean up room ${room.toString()}`));
+      }
       // Clear previous timeout if it exists
       if (room.cleanupTimeoutId !== undefined) {
         clearTimeout(room.cleanupTimeoutId);
