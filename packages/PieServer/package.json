@@ -1,6 +1,6 @@
 {
   "name": "@websocketpie/server-bun",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "The backend for WebsocketPie.  A client-agnostic websocket server. Uses Bun.sh instead of Node.js",
   "main": "./src/network.js",
   "bin": "./src/index.js",
@@ -15,9 +15,6 @@
     "chalk": "2.4.2",
     "lodash.get": "4.4.2",
     "uuid": "^8.3.2"
-  },
-  "devDependencies": {
-    "ws": "^8.14.2"
   },
   "repository": {
     "type": "git",
