@@ -1,6 +1,6 @@
 {
   "name": "@websocketpie/client",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A client for connecting to, sending and receiving messages from a WebsocketPie/server instance",
   "main": "./dist/src/PieClient.js",
   "types": "./dist/src/PieClient.d.ts",

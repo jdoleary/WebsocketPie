@@ -170,7 +170,7 @@ found 0 vulnerabilities
 C:\Users\me\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\me\git\WebsocketPie\packages\PieClient
 
 me@DESKTOP ~/git/my-project
-\$ npm link pie-client
+\$ npm link @websocketpie/client
 C:\Users\me\git\my-project\node_modules\pie-client -> C:\Users\me\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\me\git -> C:\Users\me\git\WebsocketPie\packages\PieClient
 
 ```
