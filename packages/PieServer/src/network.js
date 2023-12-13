@@ -34,17 +34,17 @@ function rejectClientPromise(client, func, err) {
   );
 }
 // makeHostApp: See examples/HostApp/readme.md for explanation about how hostApp works
-function startServer({ port, makeHostAppInstance = null, allowStats = false }) {
+function startServer({ port, makeHostAppInstance = null, allowStats = false, roomCleanupDelay = 1000 * 60 * 5 }) {
   log(`Running @websocketpie/server-bun v${version} with port ${port}.  Stats allowed: ${allowStats}`);
   areStatsAllowed = allowStats;
   // Get the version of the host app so it can be sent to the client on connection
   const hostAppVersion = makeHostAppInstance ? makeHostAppInstance().version : undefined;
-  roomManager = new RoomManager(makeHostAppInstance);
+  roomManager = new RoomManager(makeHostAppInstance, roomCleanupDelay);
   const webSocketServer = Bun.serve({
     port,
-    fetch(req, server){
+    fetch(req, server) {
       const queryString = parseQueryString(req.url);
-      const success = server.upgrade(req, queryString ? {data:{clientId:queryString.clientId}}: undefined);
+      const success = server.upgrade(req, queryString ? { data: { clientId: queryString.clientId } } : undefined);
       if (success) {
         // Bun automatically returns a 101 Switching Protocols
         // if the upgrade succeeds
@@ -52,13 +52,14 @@ function startServer({ port, makeHostAppInstance = null, allowStats = false }) {
       }
     },
     websocket: {
-      async open(client){
+      async open(client) {
         client.isAlive = true;
         // Allow user to request a clientId when they join
         // This supports rejoining after a disconnect
-        const clientId = client.data && client.data.clientId ? client.data.clientId : uuidv4();
+        const requestedClientId = client.data && client.data.clientId;
+        const clientId = requestedClientId || uuidv4();
         client = Object.assign(client, { id: clientId });
-        log(chalk.blue(`Client ${clientId} connected`));
+        log(chalk.blue(`Client ${clientId} connected ${!requestedClientId ? 'with newly generated clientId.' : 'with requested clientId'}`));
         client.send(
           JSON.stringify({
             type: MessageType.ServerAssignedData,
@@ -70,7 +71,7 @@ function startServer({ port, makeHostAppInstance = null, allowStats = false }) {
           }),
         );
       },
-      async message(client, data){
+      async message(client, data) {
         log(chalk.blue(`Client ${client.id} sent a message`));
         try {
           const message = JSON.parse(data);
@@ -130,7 +131,7 @@ function startServer({ port, makeHostAppInstance = null, allowStats = false }) {
           );
         }
       },
-      async close(client, code, message){
+      async close(client, code, message) {
         log(chalk.blue(`Client ${client.id} disconnected; code ${code}; message ${message}`));
         roomManager.removeClientFromRoom(client, client.room);
       },
