@@ -5,12 +5,6 @@ const log = require('./log');
 const RoomManager = require('./RoomManager');
 const { version } = require('../package.json');
 const { parseQueryString } = require('./util');
-let os;
-try {
-  // Optional dep
-  os = require('os-utils');
-} catch (e) { }
-
 
 let roomManager;
 let serverRunningSince = 0;
@@ -33,6 +27,8 @@ function rejectClientPromise(client, func, err) {
     }),
   );
 }
+// Keep stats on how many clients have connected to this server
+let lifeTimeClients = 0;
 // makeHostApp: See examples/HostApp/readme.md for explanation about how hostApp works
 function startServer({ port, makeHostAppInstance = null, allowStats = false, roomCleanupDelay = 1000 * 60 * 5 }) {
   log(`Running @websocketpie/server-bun v${version} with port ${port}.  Stats allowed: ${allowStats}`);
@@ -53,6 +49,7 @@ function startServer({ port, makeHostAppInstance = null, allowStats = false, roo
     },
     websocket: {
       async open(client) {
+        lifeTimeClients++;
         client.isAlive = true;
         // Allow user to request a clientId when they join
         // This supports rejoining after a disconnect
@@ -155,25 +152,16 @@ async function getStats() {
     }, 0)
     const uptime = Date.now() - serverRunningSince;
 
-    const cpuUsage = await new Promise((resolve) => {
-      if (os) {
-        os.cpuUsage(resolve);
-      } else {
-        resolve(-1);
-      }
-    });
-
     const hiddenRoomsCount = rooms.filter(r => r.hidden).length;
 
     return {
       rooms: rooms
         // Filter out hidden rooms
         .filter(r => !r.hidden)
-        .map(r => ({ app: r.app, name: r.name, version: r.version, isPasswordProtected: r.password !== undefined })),
+        .map(r => ({ app: r.app, name: r.name, version: r.version, isPasswordProtected: r.password !== undefined, clients: r.clients.length })),
       roomsHidden: hiddenRoomsCount,
-      clients,
+      lifeTimeClients,
       uptime,
-      cpuUsage
     }
   } else {
     return { err: 'roomManager not yet created.' }
