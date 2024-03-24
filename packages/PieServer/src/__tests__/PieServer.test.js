@@ -383,13 +383,13 @@ test('Sending messages within a room', async done => {
 
   await client1.expectedMessagesReceived;
   expect(client1.messages[0].type).toEqual(MessageType.Data); //'client1 should receive a data message'
-  expect(client1.messages[0].payload).toEqual( payload); // 'client1 should receive the right payload'
+  expect(client1.messages[0].payload).toEqual(payload); // 'client1 should receive the right payload'
   expect(client1.messages[0].fromClient).toEqual(client1Id); //'client1 should see who sent the message'
   expect(client1.messages[0].time).not.toEqual(undefined);//'client1 should receive a timestamp');
 
   await client2.expectedMessagesReceived;
   expect(client2.messages[0].type).toEqual(MessageType.Data); //'client2 should receive a data message'
-  expect(client2.messages[0].payload).toEqual( payload); // 'client2 should receive the right payload'
+  expect(client2.messages[0].payload).toEqual(payload); // 'client2 should receive the right payload'
   expect(client2.messages[0].fromClient).toEqual(client1Id); //'client2 should see who sent the message'
   expect(client2.messages[0].time).not.toEqual(undefined);//'client2 should receive a timestamp');
 
@@ -624,10 +624,10 @@ test('getRooms should return an array of rooms with room info', async done => {
   expect(clientSmith.messages[0].type).toEqual(MessageType.Rooms); //'clientSmith should receive a rooms message'
   expect(
     clientSmith.messages[0]).toEqual(
-    {
-      type: MessageType.Rooms,
-      rooms: [realWorld1, realWorld2],
-    });// "clientSmith should see only the rooms in  'The Real World' with a version string starting with 1.0",
+      {
+        type: MessageType.Rooms,
+        rooms: [realWorld1, realWorld2],
+      });// "clientSmith should see only the rooms in  'The Real World' with a version string starting with 1.0",
 
   // 'clientSmith sends getRooms message with specific version string'
   clientSmith.clearMessages();
@@ -642,10 +642,10 @@ test('getRooms should return an array of rooms with room info', async done => {
   expect(clientSmith.messages[0].type).toEqual(MessageType.Rooms); //'clientSmith should receive a rooms message'
   expect(
     clientSmith.messages[0]).toEqual(
-    {
-      type: MessageType.Rooms,
-      rooms: [realWorld1],
-    });// "clientSmith should see only the one room in  'The Real World' that matches the name, app, and version",
+      {
+        type: MessageType.Rooms,
+        rooms: [realWorld1],
+      });// "clientSmith should see only the one room in  'The Real World' that matches the name, app, and version",
   done();
 });
 
@@ -694,11 +694,11 @@ test('Room maxClients', async done => {
   await client2.expectedMessagesReceived;
   expect(
     client2.messages[0]).toEqual(
-    {
-      type: MessageType.RejectPromise,
-      func: 'JoinRoom',
-      err: `Error: Room is at capacity and cannot accept more clients due to the room's chosen settings`,
-    });// 'client2 should not be able to have joined the room due to capacity',
+      {
+        type: MessageType.RejectPromise,
+        func: 'JoinRoom',
+        err: `Error: Room is at capacity and cannot accept more clients due to the room's chosen settings`,
+      });// 'client2 should not be able to have joined the room due to capacity',
   done();
 });
 test('Together messages send all at once', async done => {
@@ -770,8 +770,8 @@ test('Together messages send all at once', async done => {
   client2.webSocket.send(d2);
 
   await client1.expectedMessagesReceived;
-  expect(client1.messages[0].payload).toEqual( { test1: 'value1' }); // 'Now client1 should receive the message'
-  expect(client1.messages[1].payload).toEqual( { test2: 'value2' }); // 'Now client1 should receive the message'
+  expect(client1.messages[0].payload).toEqual({ test1: 'value1' }); // 'Now client1 should receive the message'
+  expect(client1.messages[1].payload).toEqual({ test2: 'value2' }); // 'Now client1 should receive the message'
   expect(client1.messages[0].time).toEqual(client1.messages[1].time); //'Since the messages were sent together the times should be the same.'
 
   done();
@@ -908,7 +908,7 @@ test('Whipsers should not be heard by clients not being whispered to', async don
   });
   client1.webSocket.send(d1);
   await client2.expectedMessagesReceived;
-  expect(client2.messages[0].payload).toEqual( { test1: 'whisper' }); // 'Expect client 2 to have recieved whisper'
+  expect(client2.messages[0].payload).toEqual({ test1: 'whisper' }); // 'Expect client 2 to have recieved whisper'
   // 'give client 3 a moment to not receive whisper...'
   await delay(wsTransmissionDelay);
   expect(client3.messages.length).toEqual(0); //'client3 should not have received a message'
@@ -974,10 +974,10 @@ test('Rooms are cleaned up when all clients leave', async done => {
     expect(client2.messages[0].type).toEqual(MessageType.Rooms); //'client2 should receive a rooms message'
     expect(
       client2.messages[0]).toEqual(
-      {
-        type: MessageType.Rooms,
-        rooms: [room1, room2],
-      });// 'client2 should see both rooms',
+        {
+          type: MessageType.Rooms,
+          rooms: [room1, room2],
+        });// 'client2 should see both rooms',
     // 'client1 should leave their room, causing it to be cleaned up'
     const lr = JSON.stringify({
       type: MessageType.LeaveRoom,
@@ -997,10 +997,10 @@ test('Rooms are cleaned up when all clients leave', async done => {
     expect(client2.messages[0].type).toEqual(MessageType.Rooms); //'client2 should receive a rooms message'
     expect(
       client2.messages[0]).toEqual(
-      {
-        type: MessageType.Rooms,
-        rooms: [room2],
-      });// 'client2 should see only their own room now',
+        {
+          type: MessageType.Rooms,
+          rooms: [room2],
+        });// 'client2 should see only their own room now',
   } catch (e) {
     console.error(e);
   }
@@ -1068,10 +1068,10 @@ test('Hidden rooms do not show in the Rooms message', async done => {
     expect(client2.messages[0].type).toEqual(MessageType.Rooms); //'client2 should receive a rooms message'
     expect(
       client2.messages[0]).toEqual(
-      {
-        type: MessageType.Rooms,
-        rooms: [room2],
-      });// 'client2 should ONLY see the non-hidden rooms',
+        {
+          type: MessageType.Rooms,
+          rooms: [room2],
+        });// 'client2 should ONLY see the non-hidden rooms',
   } catch (e) {
     console.error(e);
   }
@@ -1124,11 +1124,11 @@ test('Room password', async done => {
   await client2.expectedMessagesReceived;
   expect(
     client2.messages[0]).toEqual(
-    {
-      type: MessageType.RejectPromise,
-      func: 'JoinRoom',
-      err: `Client attempted to join room with incorrect password.`,
-    });// 'client2 should not be able to have joined the room due to missing password',
+      {
+        type: MessageType.RejectPromise,
+        func: 'JoinRoom',
+        err: `Client attempted to join room with incorrect password.`,
+      });// 'client2 should not be able to have joined the room due to missing password',
   // 'client2 trys to join a room but should recieve an error due to wrong password...'
   client2.clearMessages();
   client2.expectMessages(1);
@@ -1228,17 +1228,114 @@ test('getStats for the entire server', async done => {
   client1.webSocket.send(getStatsMessage);
 
   await client1.expectedMessagesReceived;
-  expect(client1.messages[0].type).toEqual( MessageType.GetStats);
+  expect(client1.messages[0].type).toEqual(MessageType.GetStats);
   expect(client1.messages[0].stats.rooms).toEqual([
     { app: 'Stats Room', name: 'in the know', version: '1.0.0', isPasswordProtected: false }
   ]);
-  expect(client1.messages[0].stats.roomsHidden).toEqual( 0);
-  expect(client1.messages[0].stats.clients).toEqual( 1);
-  expect(typeof client1.messages[0].stats.uptime).toEqual( 'number');
-  expect(typeof client1.messages[0].stats.cpuUsage).toEqual( 'number');
+  expect(client1.messages[0].stats.roomsHidden).toEqual(0);
+  expect(client1.messages[0].stats.clients).toEqual(1);
+  expect(typeof client1.messages[0].stats.uptime).toEqual('number');
+  expect(typeof client1.messages[0].stats.cpuUsage).toEqual('number');
   closeServer(tempWebSocketServer);
   done();
 
+});
+test('handleMessage can optionally transform data before sending to clients', async done => {
+  class HostApp {
+    isHostApp = true;
+    // HostApp should have the Spellmasons version to ensure the clients and server are running the same version
+    version = 'v1.0.0';
+    soloMode = true;
+    constructor() {
+    }
+    onData(data) {
+    }
+    cleanup() {
+    }
+    // The host will receive all data that is send from a client
+    // to the @websocketpie/server
+    handleMessage(message) {
+      return {
+        ...message,
+        transformed: true
+      }
+    }
+  }
+  // Create a new server so it has no clients or rooms still connected
+  const { tempPort, tempUrl } = uniquePortAndUrl();
+  const tempWebSocketServer = startServer({
+    port: tempPort, allowStats: true, makeHostAppInstance: () => {
+      return new HostApp();
+    }
+  });
+  // 'client1 is opening a connection...'
+  const client1 = new TestClient();
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+  const client1Id = client1.messages[0].clientId;
+
+  // 'client1 is hosting a room...'
+  client1.expectMessages(1);
+  const jr1 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'Spiderman',
+      version: '1.0.0',
+      name: 'New York',
+    },
+    makeRoomIfNonExistant: true,
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
+  // 'client2 is opening a connection...'
+  const client2 = new TestClient();
+  client2.expectMessages(1);
+  await client2.connect();
+  await client2.expectedMessagesReceived;
+
+  // 'ws2 is joining a room...'
+  client2.expectMessages(1);
+  const jr2 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'Spiderman',
+      version: '1.0.0',
+      name: 'New York',
+    },
+  });
+  client2.webSocket.send(jr2);
+  await client2.expectedMessagesReceived;
+
+  // 'client1 is sending a message to their room...'
+  client1.clearMessages();
+  client2.clearMessages();
+  const payload = {
+    test: 'value',
+  };
+  const d1 = JSON.stringify({
+    type: MessageType.Data,
+    payload,
+  });
+  client1.webSocket.send(d1);
+
+  await client1.expectedMessagesReceived;
+  expect(client1.messages[0].type).toEqual(MessageType.Data); //'client1 should receive a data message'
+  expect(client1.messages[0].payload).toEqual(payload); // 'client1 should receive the right payload'
+  expect(client1.messages[0].fromClient).toEqual(client1Id); //'client1 should see who sent the message'
+  // This is the crux of this test, the message should be transformed
+  expect(client1.messages[0].transformed).toEqual(true);
+
+  await client2.expectedMessagesReceived;
+  expect(client2.messages[0].type).toEqual(MessageType.Data); //'client2 should receive a data message'
+  expect(client2.messages[0].payload).toEqual(payload); // 'client2 should receive the right payload'
+  expect(client2.messages[0].fromClient).toEqual(client1Id); //'client2 should see who sent the message'
+  // This is the crux of this test, the message should be transformed
+  expect(client2.messages[0].transformed).toEqual(true);
+
+  closeServer(tempWebSocketServer);
+  done();
 });
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', done => {
@@ -1246,9 +1343,9 @@ test('Teardown', done => {
   done();
 });
 
-function closeServer(wsServer){
+function closeServer(wsServer) {
   for (const room of wsServer.roomManager.rooms) {
-    for(const client of room.clients){
+    for (const client of room.clients) {
       client.terminate();
     }
   }

@@ -103,7 +103,10 @@ class Room {
   emit(data) {
     if (this.hostApp) {
       try {
-        this.hostApp.handleMessage(data);
+        const transformedData = this.hostApp.handleMessage(data);
+        if (transformedData) {
+          data = transformedData;
+        }
       } catch (e) {
         console.log('Caught error from hostApp.handleMessage', data);
         console.error(e);
