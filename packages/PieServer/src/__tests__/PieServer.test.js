@@ -1221,103 +1221,80 @@ test('getStats for the entire server', async done => {
   done();
 
 });
-// test('handleMessage can optionally transform data before sending to clients', async done => {
-//   class HostApp {
-//     isHostApp = true;
-//     // HostApp should have the Spellmasons version to ensure the clients and server are running the same version
-//     version = 'v1.0.0';
-//     soloMode = true;
-//     constructor() {
-//     }
-//     onData(data) {
-//     }
-//     cleanup() {
-//     }
-//     // The host will receive all data that is send from a client
-//     // to the @websocketpie/server
-//     handleMessage(message) {
-//       return {
-//         ...message,
-//         transformed: true
-//       }
-//     }
-//   }
-//   // Create a new server so it has no clients or rooms still connected
-//   const { tempPort, tempUrl } = uniquePortAndUrl();
-//   const tempWebSocketServer = startServer({
-//     port: tempPort, allowStats: true, makeHostAppInstance: () => {
-//       return new HostApp();
-//     }
-//   });
-//   // 'client1 is opening a connection...'
-//   const client1 = new TestClient();
-//   client1.expectMessages(1);
-//   await client1.connect();
-//   await client1.expectedMessagesReceived;
-//   const client1Id = client1.messages[0].clientId;
+test('handleMessage can optionally transform data before sending to clients', async done => {
+  class HostApp {
+    isHostApp = true;
+    // HostApp should have the Spellmasons version to ensure the clients and server are running the same version
+    version = 'v1.0.0';
+    soloMode = true;
+    constructor() {
+    }
+    onData(data) {
+    }
+    cleanup() {
+    }
+    // The host will receive all data that is send from a client
+    // to the @websocketpie/server
+    handleMessage(message) {
+      return {
+        ...message,
+        transformed: true
+      }
+    }
+  }
+  // Create a new server so it has no clients or rooms still connected
+  const { tempPort, tempUrl } = uniquePortAndUrl();
+  const tempWebSocketServer = startServer({
+    port: tempPort, allowStats: true,
+    makeHostAppInstance: () => {
+      return new HostApp();
+    }
+  });
+  // 'client1 is opening a connection...'
+  const client1 = new TestClient(tempUrl);
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+  const client1Id = client1.messages[0].clientId;
 
-//   // 'client1 is hosting a room...'
-//   client1.expectMessages(1);
-//   const jr1 = JSON.stringify({
-//     type: MessageType.JoinRoom,
-//     roomInfo: {
-//       app: 'Spiderman',
-//       version: '1.0.0',
-//       name: 'New York',
-//     },
-//     makeRoomIfNonExistant: true,
-//   });
-//   client1.webSocket.send(jr1);
-//   await client1.expectedMessagesReceived;
+  // 'client1 is hosting a room...'
+  client1.expectMessages(1);
+  const jr1 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'Spiderman',
+      version: '1.0.0',
+      name: 'New York',
+    },
+    makeRoomIfNonExistant: true,
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
 
-//   // 'client2 is opening a connection...'
-//   const client2 = new TestClient();
-//   client2.expectMessages(1);
-//   await client2.connect();
-//   await client2.expectedMessagesReceived;
 
-//   // 'ws2 is joining a room...'
-//   client2.expectMessages(1);
-//   const jr2 = JSON.stringify({
-//     type: MessageType.JoinRoom,
-//     roomInfo: {
-//       app: 'Spiderman',
-//       version: '1.0.0',
-//       name: 'New York',
-//     },
-//   });
-//   client2.webSocket.send(jr2);
-//   await client2.expectedMessagesReceived;
+  // 'client1 is sending a message to their room...'
+  client1.expectMessages(1);
+  client1.clearMessages();
+  const payload = {
+    test: 'value',
+  };
+  const d1 = JSON.stringify({
+    type: MessageType.Data,
+    payload,
+  });
+  client1.webSocket.send(d1);
 
-//   // 'client1 is sending a message to their room...'
-//   client1.clearMessages();
-//   client2.clearMessages();
-//   const payload = {
-//     test: 'value',
-//   };
-//   const d1 = JSON.stringify({
-//     type: MessageType.Data,
-//     payload,
-//   });
-//   client1.webSocket.send(d1);
+  await client1.expectedMessagesReceived;
+  console.log('jtest', client1.messages)
+  expect(client1.messages[0].type).toEqual(MessageType.Data); //'client1 should receive a data message'
+  expect(client1.messages[0].payload).toEqual(payload); // 'client1 should receive the right payload'
+  expect(client1.messages[0].fromClient).toEqual(client1Id); //'client1 should see who sent the message'
+  // This is the crux of this test, the message should be transformed
+  expect(client1.messages[0].transformed).toEqual(true);
 
-//   await client1.expectedMessagesReceived;
-//   expect(client1.messages[0].type).toEqual(MessageType.Data); //'client1 should receive a data message'
-//   expect(client1.messages[0].payload).toEqual(payload); // 'client1 should receive the right payload'
-//   expect(client1.messages[0].fromClient).toEqual(client1Id); //'client1 should see who sent the message'
-//   // This is the crux of this test, the message should be transformed
-//   expect(client1.messages[0].transformed).toEqual(true);
-
-//   await client2.expectedMessagesReceived;
-//   expect(client2.messages[0].type).toEqual(MessageType.Data); //'client2 should receive a data message'
-//   expect(client2.messages[0].payload).toEqual(payload); // 'client2 should receive the right payload'
-//   expect(client2.messages[0].fromClient).toEqual(client1Id); //'client2 should see who sent the message'
-//   // This is the crux of this test, the message should be transformed
-//   expect(client2.messages[0].transformed).toEqual(true);
-
-//   closeServer(tempWebSocketServer);
-//   done();
-// });
+  closeServer(tempWebSocketServer);
+  done();
+});
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', done => {
   closeServer(webSocketServer);
