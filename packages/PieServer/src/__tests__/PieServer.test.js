@@ -1285,7 +1285,6 @@ test('handleMessage can optionally transform data before sending to clients', as
   client1.webSocket.send(d1);
 
   await client1.expectedMessagesReceived;
-  console.log('jtest', client1.messages)
   expect(client1.messages[0].type).toEqual(MessageType.Data); //'client1 should receive a data message'
   expect(client1.messages[0].payload).toEqual(payload); // 'client1 should receive the right payload'
   expect(client1.messages[0].fromClient).toEqual(client1Id); //'client1 should see who sent the message'
