@@ -1,13 +1,13 @@
-FROM node:16.14.2
+FROM oven/bun 
 
 WORKDIR /app
 
 COPY ./packages/PieServer/package*.json /app/
 
-RUN npm install
+RUN bun install
 
 COPY ./packages/PieServer/ /app/
 
 EXPOSE 8080
 
-ENTRYPOINT [ "npm", "start"]
+ENTRYPOINT [ "bun", "run", "./src/index.js"]

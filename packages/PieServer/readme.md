@@ -1,19 +1,12 @@
 ![NPM: @websocketpie/server](https://img.shields.io/npm/v/@websocketpie/server?color=brightgreen)
 ## Running the server
-- via npx
-  - `npx @websocketpie/server`
-- via node.js
+- via bunx
+  - `bunx @websocketpie/server-bun`
+- via bun.sh
   - `git clone https://github.com/jdoleary/WebsocketPie.git`
   - `cd packages/PieServer`
-  - `npm install`
-  - `npm start`
-- via docker
-  - Get or build the image:
-    - `docker pull jordanoleary/websocketpie-server` or `docker build -f ./packages/PieServer/Dockerfile -t jordanoleary/websocketpie-server .`
-  - Run the image
-    - `docker container run -d -p 8080:8080/tcp --restart on-failure jordanoleary/websocketpie-server`
-- via DigitalOcean
-  - [Launch a @websocketpie/server instance on DigitalOcean App Platform](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jdoleary/WebsocketPie/tree/master)
+  - `bun install`
+  - `bun start`
 
 ## Files
 

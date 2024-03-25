@@ -38,9 +38,7 @@ class Room {
   }
 
   serialize() {
-    const { app, name, version, maxClients, togetherTimeoutMs, hidden } = this;
-    // Return should match Room interface from PieClient.ts
-    // with the exception of the password which should not be serialized
+    const { app, name, version, maxClients, togetherTimeoutMs, hidden, password } = this;
     return {
       app,
       name,
@@ -48,6 +46,8 @@ class Room {
       maxClients,
       togetherTimeoutMs,
       hidden,
+      // Take Note: password is returned when serialized
+      password
     };
   }
 
@@ -103,7 +103,10 @@ class Room {
   emit(data) {
     if (this.hostApp) {
       try {
-        this.hostApp.handleMessage(data);
+        const transformedData = this.hostApp.handleMessage(data);
+        if (transformedData) {
+          data = transformedData;
+        }
       } catch (e) {
         console.log('Caught error from hostApp.handleMessage', data);
         console.error(e);

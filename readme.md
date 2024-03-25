@@ -154,7 +154,8 @@ to send a message and then sends them all at once
 ## Developing with an unpublished pie-client
 
 1. Navigate to packages/PieClient and run `npm run update-link`
-2. Navigate to your client application and run `npm link pie-client`
+(If you client is using vite, you may first have to run `rm -rf node_modules/.vite` or else it wont link)
+2. Navigate to your client application and run `npm link @websocketpie/client`
 
 ```
 
@@ -169,7 +170,7 @@ found 0 vulnerabilities
 C:\Users\me\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\me\git\WebsocketPie\packages\PieClient
 
 me@DESKTOP ~/git/my-project
-\$ npm link pie-client
+\$ npm link @websocketpie/client
 C:\Users\me\git\my-project\node_modules\pie-client -> C:\Users\me\AppData\Roaming\npm\node_modules\pie-client -> C:\Users\me\git -> C:\Users\me\git\WebsocketPie\packages\PieClient
 
 ```

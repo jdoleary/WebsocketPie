@@ -1,8 +1,11 @@
+import { v4 as uuidv4 } from 'uuid';
 import { MessageType } from './enums';
 import { log, logError } from './log';
 import { version } from '../package.json';
 
-const clientSoloModeId = 'solomode_client_id';
+// This will be different for every client
+const defaultIdForSolomode = uuidv4();
+
 export interface ConnectInfo {
   type: string;
   connected: boolean;
@@ -108,7 +111,7 @@ export default class PieClient {
       joinRoom: undefined,
     };
     this.useStats = false;
-    this.clientId = '';
+    this.clientId = defaultIdForSolomode;
     // Optionally support a connection status element
     this.statusElement = document.getElementById('websocketpie-connection-status');
     if (this.statusElement) {
@@ -239,8 +242,10 @@ export default class PieClient {
           });
         }
         if (this.currentRoomInfo) {
-          log("Rejoining room", this.currentRoomInfo)
-          this.joinRoom(this.currentRoomInfo, false)
+          log("Rejoining room", this.currentRoomInfo);
+          this.joinRoom(this.currentRoomInfo, false).catch(e => {
+            logError('Failed to rejoin room', e);
+          });
         }
         // Reset reconnect attempts now that the connection is successfully opened
         this.reconnectAttempts = 0;
@@ -277,7 +282,7 @@ export default class PieClient {
     // Fake serverAssignedData
     this.handleMessage({
       type: MessageType.ServerAssignedData,
-      clientId: clientSoloModeId,
+      clientId: this.clientId,
       serverVersion: `no server - client is in solomode`,
     }, false);
   }
@@ -460,9 +465,11 @@ export default class PieClient {
         logError(`Above message of type ${message.type} not recognized!`);
     }
   }
+  // Remember to catch the rejected promise if used outside of this library
   makeRoom(roomInfo: Room) {
-    this.joinRoom(roomInfo, true);
+    return this.joinRoom(roomInfo, true);
   }
+  // Remember to catch the rejected promise if used outside of this library
   joinRoom(roomInfo: Room, makeRoomIfNonExistant: boolean = false) {
     if (this.isConnected()) {
       // Cancel previous makeRoom promise if it exists
@@ -490,7 +497,7 @@ export default class PieClient {
           // manufactured clientPresenceChanged as if it came from the server
           // because pieClient fakes all server messages when in soloMode
           this.handleMessage({
-            clients: [clientSoloModeId],
+            clients: [this.clientId],
             time: Date.now(),
             type: MessageType.ClientPresenceChanged,
             present: true,
@@ -503,6 +510,11 @@ export default class PieClient {
           log(`${MessageType.JoinRoom} successful with`, currentRoomInfo);
           // Save roomInfo to allow auto rejoining should the server restart
           this.currentRoomInfo = currentRoomInfo;
+          // Readd password since it isn't serialized in @websocketpie/server@1.0.2
+          // This if statement can be safely removed after @websocketpie/server is updated
+          if (this.currentRoomInfo && !this.currentRoomInfo.password && roomInfo.password) {
+            this.currentRoomInfo.password = roomInfo.password
+          }
         } else {
           logError("joinRoom succeeded but currentRoomInfo is maleformed:", currentRoomInfo);
         }

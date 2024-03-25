@@ -1,18 +1,21 @@
 {
-  "name": "@websocketpie/server",
-  "version": "1.0.0",
-  "description": "The backend for WebsocketPie.  A client-agnostic websocket server.",
+  "name": "@websocketpie/server-bun",
+  "version": "1.1.1",
+  "description": "The backend for WebsocketPie.  A client-agnostic websocket server. Uses Bun.sh instead of Node.js",
   "main": "./src/network.js",
   "bin": "./src/index.js",
   "scripts": {
-    "start": "node ./src/index.js",
-    "start:debug": "node --inspect-brk ./src/index.js"
+    "start": "bun ./src/index.js",
+    "test": "quiet=true bun test"
+  },
+  "engines": {
+    "node": "unsupported",
+    "bun": ">=1.0.7"
   },
   "dependencies": {
     "chalk": "2.4.2",
     "lodash.get": "4.4.2",
-    "uuid": "^8.3.2",
-    "ws": "^8.5.0"
+    "uuid": "^8.3.2"
   },
   "repository": {
     "type": "git",
@@ -27,8 +30,5 @@
   "bugs": {
     "url": "https://github.com/jdoleary/WebsocketPie/issues"
   },
-  "homepage": "https://github.com/jdoleary/WebsocketPie#readme",
-  "optionalDependencies": {
-    "os-utils": "^0.0.14"
-  }
+  "homepage": "https://github.com/jdoleary/WebsocketPie#readme"
 }

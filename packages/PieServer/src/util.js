@@ -25,8 +25,8 @@ function fuzzyMatchRooms(rooms, roomInfo) {
 }
 
 function parseQueryString(url) {
-  return url
-    .split(/\/?\?/)
+  return [...url
+    .split(/\/?\?/).slice(1)]
     .join('')
     .split('&')
     .reduce((ob, pair) => {
