@@ -7,7 +7,24 @@ class Room {
     this.hostApp = hostApp;
     if (this.hostApp) {
       // Override hostApp.sendData so that it can sendData to the room
-      this.hostApp.sendData = payload => this.emit({ type: MessageType.Data, payload });
+      this.hostApp.sendData = payload => {
+        const message = { type: MessageType.Data, payload };
+        // Allow hostApp to send messages on behalf of any client,
+        // this is so that the host app can asyncronously transform a
+        // message to add data (like sync state)
+        if (payload.asFromClient) {
+          message.fromClient = payload.asFromClient;
+          delete message.payload.asFromClient;
+        }
+        // A flag, only processed when sent by the hostApp's PieClient
+        // that prevents the host app from handleMessage'ing it's own
+        // message
+        if (payload.skipHostAppHandler) {
+          message.skipHostAppHandler = payload.skipHostAppHandler;
+          delete message.payload.skipHostAppHandler;
+        }
+        this.emit(message);
+      }
     }
     this.app = app;
     this.clients = [];
@@ -101,11 +118,15 @@ class Room {
   }
 
   emit(data) {
-    if (this.hostApp) {
+    if (this.hostApp && !data.skipHostAppHandler) {
       try {
         const transformedData = this.hostApp.handleMessage(data);
         if (transformedData) {
           data = transformedData;
+          // Allow hostapp to prevent messages from being echoed to all clients
+          if (transformedData.doNotEcho) {
+            return;
+          }
         }
       } catch (e) {
         console.log('Caught error from hostApp.handleMessage', data);

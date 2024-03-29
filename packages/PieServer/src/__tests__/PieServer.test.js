@@ -1294,6 +1294,91 @@ test('handleMessage can optionally transform data before sending to clients', as
   closeServer(tempWebSocketServer);
   done();
 });
+test('host app can prevent messages from being echoed to clients', async done => {
+  class HostApp {
+    isHostApp = true;
+    // HostApp should have the Spellmasons version to ensure the clients and server are running the same version
+    version = 'v1.0.0';
+    soloMode = true;
+    constructor() {
+    }
+    onData(data) {
+    }
+    cleanup() {
+    }
+    // The host will receive all data that is send from a client
+    // to the @websocketpie/server
+    handleMessage(message) {
+      if (message.testIgnore) {
+        return {
+          doNotEcho: true
+        }
+      }
+      return message;
+    }
+  }
+  // Create a new server so it has no clients or rooms still connected
+  const { tempPort, tempUrl } = uniquePortAndUrl();
+  const tempWebSocketServer = startServer({
+    port: tempPort, allowStats: true,
+    makeHostAppInstance: () => {
+      return new HostApp();
+    }
+  });
+  // 'client1 is opening a connection...'
+  const client1 = new TestClient(tempUrl);
+  client1.expectMessages(1);
+  await client1.connect();
+  await client1.expectedMessagesReceived;
+  const client1Id = client1.messages[0].clientId;
+
+  // 'client1 is hosting a room...'
+  client1.expectMessages(1);
+  const jr1 = JSON.stringify({
+    type: MessageType.JoinRoom,
+    roomInfo: {
+      app: 'Spiderman',
+      version: '1.0.0',
+      name: 'New York',
+    },
+    makeRoomIfNonExistant: true,
+  });
+  client1.webSocket.send(jr1);
+  await client1.expectedMessagesReceived;
+
+
+  // 'client1 is sending a message to their room...'
+  client1.expectMessages(1);
+  client1.clearMessages();
+  // Send the ignored message
+  const payload = {
+    testIgnore: true,
+    test: 'value',
+  };
+  const d1 = JSON.stringify({
+    type: MessageType.Data,
+    payload,
+  });
+  client1.webSocket.send(d1);
+
+  const payload2 = {
+    test: 'value',
+  };
+  const d2 = JSON.stringify({
+    type: MessageType.Data,
+    payload2,
+  });
+  client1.webSocket.send(d2);
+  await client1.expectedMessagesReceived;
+  // Assert that the first message is skipped and the second message is the only one recieved.
+  expect(client1.messages[0].type).toEqual(MessageType.Data); //'client1 should receive a data message'
+  expect(client1.messages[0].payload).toEqual(payload2); // 'client1 should receive the right payload'
+  expect(client1.messages[0].fromClient).toEqual(client1Id); //'client1 should see who sent the message'
+
+  closeServer(tempWebSocketServer);
+  done();
+});
+
 /* Note: putting teardown inside a test ensures a serial execution order. */
 test('Teardown', done => {
   closeServer(webSocketServer);
