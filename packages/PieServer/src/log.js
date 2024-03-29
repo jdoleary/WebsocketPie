@@ -1,8 +1,9 @@
+const { name } = require("../package.json");
 function log() {
   if (process.env.quiet === 'yes') {
     return;
   }
-  console.log('@websocketpie/server-bun:',...arguments);
+  console.log(name, ...arguments);
 }
 
 module.exports = log;
