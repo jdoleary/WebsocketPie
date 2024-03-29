@@ -2,12 +2,23 @@ const chalk = require('chalk');
 const log = require('./log');
 const { MessageType } = require('./enums');
 
+console.log('npm link test')
 class Room {
   constructor({ app, name = 'default', version, maxClients, togetherTimeoutMs, hidden, password }, hostApp = undefined) {
     this.hostApp = hostApp;
     if (this.hostApp) {
       // Override hostApp.sendData so that it can sendData to the room
-      this.hostApp.sendData = payload => this.emit({ type: MessageType.Data, payload });
+      this.hostApp.sendData = payload => {
+        let fromClient = 'hostApp';
+        // Allow hostApp to send messages on behalf of any client,
+        // this is so that the host app can asyncronously transform a
+        // message to add data (like sync state)
+        if (payload.asFromClient) {
+          fromClient = payload.asFromClient;
+          delete payload.asFromClient;
+        }
+        this.emit({ type: MessageType.Data, payload, fromClient });
+      }
     }
     this.app = app;
     this.clients = [];
@@ -106,6 +117,10 @@ class Room {
         const transformedData = this.hostApp.handleMessage(data);
         if (transformedData) {
           data = transformedData;
+          // Allow hostapp to prevent messages from being echoed to all clients
+          if (transformedData.doNotEcho) {
+            return;
+          }
         }
       } catch (e) {
         console.log('Caught error from hostApp.handleMessage', data);
