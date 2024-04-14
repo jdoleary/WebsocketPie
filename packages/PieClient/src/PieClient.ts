@@ -282,7 +282,7 @@ export default class PieClient {
     // Fake serverAssignedData
     this.handleMessage({
       type: MessageType.ServerAssignedData,
-      clientId: this.clientId,
+      clientId: this.clientId || defaultIdForSolomode,
       serverVersion: `no server - client is in solomode`,
     }, false);
   }
