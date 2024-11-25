@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const { startServer } = require('./network');
 
 const port = process.env.PORT || 8080;
