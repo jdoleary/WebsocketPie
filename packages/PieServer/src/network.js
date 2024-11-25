@@ -127,8 +127,11 @@ function startServer({ port, heartbeatCheckMillis = 5000, makeHostAppInstance = 
   const heartbeatInterval = setInterval(function ping() {
     webSocketServer.clients.forEach(function each(client) {
       log('Send ping to clients');
-      if (client.isAlive === false) return client.terminate();
-
+      try {
+        if (client.isAlive === false) return client.terminate();
+      } catch (e) {
+        console.debug('Failed to terminate unalive client', e)
+      }
       client.isAlive = false;
       client.ping();
     });
