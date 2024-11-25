@@ -1,6 +1,6 @@
 {
   "name": "@websocketpie/server",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "The backend for WebsocketPie.  A client-agnostic websocket server.",
   "main": "./src/network.js",
   "bin": "src/index.js",
