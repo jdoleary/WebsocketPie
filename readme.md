@@ -1,8 +1,9 @@
 ![Websocket Pie Logo](logo.png)
 
-![PieServer Docker Image](https://img.shields.io/docker/v/jdoleary1991/websocket-pie?label=Docker&color=brightgreen)
-![NPM: @websocketpie/server](https://img.shields.io/npm/v/@websocketpie/server?color=brightgreen&label=npm%3A%20%40websocketpie%2Fserver)
-![NPM: @websocketpie/client](https://img.shields.io/npm/v/@websocketpie/client?color=brightgreen&label=npm%3A%20%40websocketpie%2Fclient)
+[![PieServer Docker Image](https://img.shields.io/docker/v/jordanoleary/websocketpie-server?label=Docker&color=brightgreen)](https://hub.docker.com/repository/docker/jordanoleary/websocketpie-server/general)
+[![NPM: @websocketpie/server](https://img.shields.io/npm/v/@websocketpie/server?color=brightgreen&label=npm%3A%20%40websocketpie%2Fserver)](https://www.npmjs.com/package/@websocketpie/server)
+[![NPM: @websocketpie/server-bun](https://img.shields.io/npm/v/@websocketpie/server-bun?color=brightgreen&label=npm%3A%20%40websocketpie%2Fserver-bun)](https://www.npmjs.com/package/@websocketpie/server-bun)
+[![NPM: @websocketpie/client](https://img.shields.io/npm/v/@websocketpie/client?color=brightgreen&label=npm%3A%20%40websocketpie%2Fclient)](https://www.npmjs.com/package/@websocketpie/client)
 
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue-ghost.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jdoleary/WebsocketPie/tree/master)
 ---
