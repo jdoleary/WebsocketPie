@@ -1,5 +1,6 @@
 ![Websocket Pie Logo](logo.png)
 
+![Status: Production Ready](https://img.shields.io/badge/Status-Production_Ready-blue)
 [![PieServer Docker Image](https://img.shields.io/docker/v/jordanoleary/websocketpie-server?label=Docker&color=brightgreen)](https://hub.docker.com/repository/docker/jordanoleary/websocketpie-server/general)
 [![NPM: @websocketpie/server](https://img.shields.io/npm/v/@websocketpie/server?color=brightgreen&label=npm%3A%20%40websocketpie%2Fserver)](https://www.npmjs.com/package/@websocketpie/server)
 [![NPM: @websocketpie/server-bun](https://img.shields.io/npm/v/@websocketpie/server-bun?color=brightgreen&label=npm%3A%20%40websocketpie%2Fserver-bun)](https://www.npmjs.com/package/@websocketpie/server-bun)
@@ -7,14 +8,43 @@
 
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue-ghost.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jdoleary/WebsocketPie/tree/master)
 ---
+## Websockets... easy as pie!
+WebsocketPie fascilitates realtime communication between clients without requiring any custom server-side code.  Simply, connect clients to a @websocketpie/server instance and the server will act as a hub that echos messages it receives from any one client to all connected clients.
+
+[Youtube demo - Making a todoapp multi-user in 3 minutes](https://youtu.be/q2J9MaeR8b0)
+
+WebsocketPie is used as the production backend for the multiplayer videogame [Spellmasons](https://store.steampowered.com/app/1618380/Spellmasons/)
+
 ## Quick Start
-Run the server with node: `npx @websocketpie/server@latest`
-Run the server with bun (faster): `bunx @websocketpie/server-bun@latest`
-[WebsocketPie in 3 minutes - Youtube demo](https://youtu.be/q2J9MaeR8b0)
 
-WebsocketPie allows you to make realtime, multi-user applications without writing any server-side code.  Simply, connect clients to a @websocketpie/server instance and the server will act as a hub that echos messages it receives to all connected clients.
+1. Start the websocketpie server
 
+    Run the server with node.js: `npx @websocketpie/server@latest`
 
+    or run the server with bun: `bunx @websocketpie/server-bun@latest`
+
+2. Connect websocketpie clients to the server
+```js
+import PieClient from "@websocketpie/client";
+// ...
+let pie;
+async function connect(){
+  pie = new PieClient();
+  await pie.quickConnect('ws://localhost:8080');
+  // Simply print out data that is recieved:
+  pie.onData = console.log
+}
+// ...
+connect().then(() => {
+  // After connecting, send a message every second to other clients
+  setInterval(() => {
+    pie.sendData({hello: 'world'});
+  }, 1000);
+});
+```
+Then connect multiple clients and watch them sent messages to each other
+
+## Packages
 **@websocketpie/server** is a client-agnostic web socket server. It fascilitates lobbies/rooms for connecting players who are using a client of the same name and version. When messages are sent from client (a browser) to server, it echos the message to all other clients in the room. In this way, the server doesn't care about the content of the message and can fascilitate multiple unique experiences simultaneously.
 
 **@websocketpie/client** provides simple functions for consuming the @websocketpie/server's api to let you hit the ground running!
